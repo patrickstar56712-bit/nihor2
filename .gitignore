@@ -1,0 +1,5 @@
+# secrets: the database token stays on this computer and in Vercel's Environment Variables
+.env
+.env.*
+node_modules/
+.vercel/

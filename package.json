@@ -1,0 +1,8 @@
+{
+  "name": "nihor2-tracker",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@libsql/client": "^0.15.0"
+  }
+}
