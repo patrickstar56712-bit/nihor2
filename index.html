@@ -7,6 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
+<meta name="site-updated" content="2026-10-30T17:59:42Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -101,6 +102,9 @@ main.enter .card{animation:fadeUp .55s calc(.16s + var(--i,0) * .07s) var(--ease
 .hero h1{font-size:clamp(40px,10vw,72px);background:linear-gradient(90deg,var(--ink) 0%,var(--gold) 30%,var(--jade) 50%,var(--gold) 70%,var(--ink) 100%);background-size:300% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 10s linear infinite}
 main.enter .hero h1{animation:fadeUp .6s var(--ease) both,shine 10s linear infinite}
 .hero p{color:var(--mute);font-size:18px;max-width:560px;margin:8px 0 0}
+.hrow{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px}
+#lastUp{font-size:12px;font-weight:600;color:var(--mute);letter-spacing:.02em}
+#lastUp b{font-weight:700;color:var(--ink)}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:20px}
 .card{position:relative;overflow:hidden;display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 40px 16px 16px;color:var(--ink);text-decoration:none;transition:transform .3s var(--ease),border-color .25s,box-shadow .3s,background-color .35s}
 .card::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--gold) 16%,transparent),transparent 70%)}
@@ -760,11 +764,12 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 .chg button,.csr button{padding:4px 10px;font-size:13px;font-weight:700;border-radius:8px;background:color-mix(in srgb,var(--ink) 7%,transparent)}
 .chg button:hover,.csr button:hover{border-color:var(--gold);color:var(--gold)}
 .chg button[aria-pressed=true],.csr button[aria-pressed=true]{background:color-mix(in srgb,var(--gold) 22%,transparent);border-color:var(--gold);color:var(--gold)}
-.chsk{flex:1;min-width:240px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-height:52px}
+.chsk{flex:1;min-width:240px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;min-height:52px}
 .chsk .muted{margin:0}
-.skt{display:flex;flex-direction:column;align-items:center;gap:4px;width:86px;padding:8px 4px;border-radius:10px;background:color-mix(in srgb,var(--ink) 5%,transparent);animation:rowIn .3s calc(var(--i,0) * .03s) var(--ease) both}
+/* every skill box is the same size: room for the icon and two lines of name */
+.skt{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;width:86px;height:82px;padding:8px 4px;border-radius:10px;background:color-mix(in srgb,var(--ink) 5%,transparent);animation:rowIn .3s calc(var(--i,0) * .03s) var(--ease) both}
 .skt .ic{width:32px;height:32px;max-width:none;margin:0;object-fit:contain}
-.skt span{font-size:11px;font-weight:600;line-height:1.2;text-align:center}
+.skt span{flex:1;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;align-content:center;font-size:11px;font-weight:600;line-height:1.2;text-align:center}
 .skt:hover{border-color:var(--gold)}
 .skt[aria-pressed=true]{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 16%,transparent);color:var(--gold);box-shadow:0 6px 18px -10px var(--gold)}
 .chcol{display:flex;flex-direction:column;gap:8px}
@@ -910,7 +915,7 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 <div class="content">
 
 <main id="v-home">
-  <section class="hero"><h1>Nihor</h1></section>
+  <section class="hero"><div class="hrow"><h1>Nihor</h1><small id="lastUp" hidden></small></div></section>
   <div class="cards">
     <a class="card" href="#/tools/loot" style="--i:0"><b>Loot Tracker</b><span>Upload a log file, see drop values and hourly income.</span></a>
     <a class="card" href="#/upgrade" style="--i:1"><b>Upgrade Cost</b><span>Yang and material cost of +0 to +9 upgrades.</span></a>
@@ -1256,7 +1261,15 @@ const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch
    Opened as a file, or with the database down, the site keeps working from this browser's data. */
 const API=/^https?:$/.test(location.protocol)?"/api/data":"";
 const UPG=c=>c==="weapons"?"upgW":"upgW_"+c;
-let ADK=String(ld("admKey","")),dbOn=false,dbErr="",dbTm=0,toTm=0;
+let ADK=String(ld("admKey","")),dbOn=false,dbErr="",dbTm=0,toTm=0,dbUpd="";
+/* main page "Last updated": the later of the site's own commit time and the last Control Panel save */
+function drawLastUp(){
+  const m=document.querySelector('meta[name="site-updated"]'),t=[m&&m.content,dbUpd].map(s=>Date.parse(s||"")).filter(n=>n>0);
+  const el=$("lastUp");el.hidden=!t.length;if(!t.length)return;
+  const d=new Date(Math.max(...t));
+  el.innerHTML="Last updated · <b>"+d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})+"</b> "+d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+  el.title=d.toString();
+}
 /* the server's own reason for a failed call, e.g. a setting missing in Vercel */
 const why=async r=>{try{return (await r.json()).error||"HTTP "+r.status}catch(e){return "HTTP "+r.status}};
 const dbQ=new Set();
@@ -1290,7 +1303,7 @@ function dbApply(d){
 async function dbLoad(note){
   if(API)try{
     const r=await fetch(API,{cache:"no-store"});if(!r.ok)throw await why(r);
-    const d=await r.json();dbOn=true;dbErr="";
+    const d=await r.json();dbOn=true;dbErr="";dbUpd=d.updated||"";drawLastUp();
     if(!d.empty)dbApply(d);
     if(note)dbNote(d.empty?"The database is empty.":"Loaded from the database.");
   }catch(e){dbOn=false;dbErr=typeof e==="string"?e:"no answer";if(note)dbNote("Database not reachable · "+dbErr,true)}
@@ -1310,7 +1323,7 @@ async function dbPush(parts){
     const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json","x-admin-key":ADK},body:JSON.stringify(body)});
     if(r.status===401){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out. Changes are only in this browser.",true);return}
     if(!r.ok)throw await why(r);
-    dbOn=true;dbErr="";dbNote("Saved to the database.");
+    dbOn=true;dbErr="";dbUpd=new Date().toISOString();drawLastUp();dbNote("Saved to the database.");
   }catch(e){parts.forEach(p=>dbQ.add(p));dbNote("NOT saved to the database ("+(typeof e==="string"?e:"no answer")+") · kept in this browser, will retry on the next save.",true)}
   drawDb();
 }
@@ -2680,7 +2693,7 @@ addEventListener("resize",fitR);
 /* ---------- init ---------- */
 $("bs").setAttribute("aria-pressed",short);
 $("bs").textContent="kk format: "+(short?"On":"Off");
-applyTh();applyAc();rebuild();draw();applyBar();route();dbLoad();
+applyTh();applyAc();rebuild();draw();applyBar();route();drawLastUp();dbLoad();
 </script>
 </body>
 </html>

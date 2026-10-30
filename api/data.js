@@ -25,14 +25,15 @@ function isAdmin(req) {
 
 /* ---------- read ---------- */
 async function readAll() {
-  const [items, steps, mats, stats, lv, smats, chars] = await client().batch([
+  const [items, steps, mats, stats, lv, smats, chars, meta] = await client().batch([
     "SELECT id, category, name, image, craft_yang FROM items ORDER BY id",
     "SELECT item_id, step, yang FROM item_steps",
     "SELECT item_id, step, material, count FROM item_materials ORDER BY item_id, position, step",
     "SELECT item_id, stat, level, value FROM item_stats ORDER BY item_id, position, level",
     "SELECT level, yang FROM skill_levels",
     "SELECT level, material, count FROM skill_materials ORDER BY position, level",
-    "SELECT character, grp, skill FROM character_skills ORDER BY character, grp, position"
+    "SELECT character, grp, skill FROM character_skills ORDER BY character, grp, position",
+    "SELECT value FROM meta WHERE key = 'updated'"
   ], "read");
 
   const byId = new Map(), out = Object.fromEntries(CATS.map(c => [c, []]));
@@ -68,7 +69,7 @@ async function readAll() {
   for (const r of chars.rows) (ch[r.character + "/" + r.grp] ??= []).push(r.skill);
 
   const empty = !items.rows.length && !lv.rows.length && !smats.rows.length && !chars.rows.length;
-  return { empty, items: out, skills: sk, chars: ch };
+  return { empty, updated: meta.rows[0]?.value || null, items: out, skills: sk, chars: ch };
 }
 
 /* ---------- write: each part replaces what the database holds for it ---------- */
@@ -149,6 +150,7 @@ export default async function handler(req, res) {
     if (b.skills) st.push(...skillStmts(b.skills));
     if (b.chars) st.push(...charStmts(b.chars));
     if (!st.length) return res.status(400).json({ error: "Nothing to save" });
+    st.push("INSERT OR REPLACE INTO meta (key, value) VALUES ('updated', strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))");
     await client().batch(st, "write");
     return res.status(200).json({ ok: true, statements: st.length });
   } catch (e) {

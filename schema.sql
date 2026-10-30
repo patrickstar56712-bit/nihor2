@@ -67,3 +67,9 @@ CREATE TABLE IF NOT EXISTS character_skills (
 );
 
 CREATE INDEX IF NOT EXISTS items_by_category ON items(category);
+
+-- Small key/value facts; 'updated' = when the Control Panel last saved anything (main page "Last updated")
+CREATE TABLE IF NOT EXISTS meta (
+  key    TEXT PRIMARY KEY,
+  value  TEXT NOT NULL
+);
