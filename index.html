@@ -1252,16 +1252,18 @@ const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch
    Opened as a file, or with the database down, the site keeps working from this browser's data. */
 const API=/^https?:$/.test(location.protocol)?"/api/data":"";
 const UPG=c=>c==="weapons"?"upgW":"upgW_"+c;
-let ADK=String(ld("admKey","")),dbOn=false,dbTm=0,toTm=0;
+let ADK=String(ld("admKey","")),dbOn=false,dbErr="",dbTm=0,toTm=0;
+/* the server's own reason for a failed call, e.g. a setting missing in Vercel */
+const why=async r=>{try{return (await r.json()).error||"HTTP "+r.status}catch(e){return "HTTP "+r.status}};
 const dbQ=new Set();
 function dbNote(t,err){
   $("dbMsg").textContent=t;$("dbMsg").className=err?"err":"";
   const o=$("dbToast");o.textContent=t;o.className="dbt"+(err?" err":"");o.hidden=false;
-  clearTimeout(toTm);toTm=setTimeout(()=>{o.hidden=true},2600);
+  clearTimeout(toTm);toTm=setTimeout(()=>{o.hidden=true},err?8000:2600);
 }
 function drawDb(){
   const st=$("dbSt");
-  st.textContent=!API?"Opened as a file: the database is only used on the website.":!dbOn?"Database not reachable · using this browser's data."
+  st.textContent=!API?"Opened as a file: the database is only used on the website.":!dbOn?"Database not reachable · using this browser's data."+(dbErr?" ("+dbErr+")":"")
     :ADK?"Connected · logged in, Control Panel changes are saved for everyone.":"Connected · log in to save Control Panel changes for everyone.";
   st.className=!API?"muted":dbOn?"ok":"err";
   $("dbIn").hidden=!API||!!ADK;$("dbAd").hidden=!API||!ADK;
@@ -1283,11 +1285,11 @@ function dbApply(d){
 }
 async function dbLoad(note){
   if(API)try{
-    const r=await fetch(API,{cache:"no-store"});if(!r.ok)throw r.status;
-    const d=await r.json();dbOn=true;
+    const r=await fetch(API,{cache:"no-store"});if(!r.ok)throw await why(r);
+    const d=await r.json();dbOn=true;dbErr="";
     if(!d.empty)dbApply(d);
     if(note)dbNote(d.empty?"The database is empty.":"Loaded from the database.");
-  }catch(e){dbOn=false;if(note)dbNote("Database not reachable.",true)}
+  }catch(e){dbOn=false;dbErr=typeof e==="string"?e:"no answer";if(note)dbNote("Database not reachable · "+dbErr,true)}
   drawDb();
 }
 /* parts: an upgrade category, "skills" or "chars" */
@@ -1303,9 +1305,9 @@ async function dbPush(parts){
   try{
     const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json","x-admin-key":ADK},body:JSON.stringify(body)});
     if(r.status===401){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out. Changes are only in this browser.",true);return}
-    if(!r.ok)throw r.status;
-    dbOn=true;dbNote("Saved to the database.");
-  }catch(e){parts.forEach(p=>dbQ.add(p));dbNote("Could not reach the database · kept in this browser, will retry on the next save.",true)}
+    if(!r.ok)throw await why(r);
+    dbOn=true;dbErr="";dbNote("Saved to the database.");
+  }catch(e){parts.forEach(p=>dbQ.add(p));dbNote("NOT saved to the database ("+(typeof e==="string"?e:"no answer")+") · kept in this browser, will retry on the next save.",true)}
   drawDb();
 }
 $("dbIn").onsubmit=async e=>{
@@ -1313,7 +1315,7 @@ $("dbIn").onsubmit=async e=>{
   try{
     const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json","x-admin-key":k},body:'{"check":true}'});
     if(r.ok){ADK=k;sv("admKey",k);$("dbPw").value="";dbOn=true;dbNote("Logged in.")}
-    else dbNote(r.status===401?"Wrong password.":"Server error ("+r.status+").",true);
+    else dbNote(r.status===401?"Wrong password.":"Login failed · "+await why(r),true);
   }catch(x){dbNote("Database not reachable.",true)}
   drawDb();
 };

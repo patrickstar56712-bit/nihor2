@@ -134,12 +134,16 @@ function charStmts(ch) {
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
+  /* settings missing in Vercel -> say which, so the Control Panel can show it */
+  const miss = ["TURSO_DATABASE_URL", "TURSO_AUTH_TOKEN"].filter(k => !process.env[k]);
+  if (miss.length) return res.status(500).json({ error: "Missing in Vercel Environment Variables: " + miss.join(", ") });
   try {
     if (req.method === "GET") return res.status(200).json(await readAll());
     if (req.method !== "POST") return res.status(405).json({ error: "GET or POST" });
+    if (!process.env.ADMIN_PASSWORD) return res.status(500).json({ error: "Missing in Vercel Environment Variables: ADMIN_PASSWORD" });
     if (!isAdmin(req)) return res.status(401).json({ error: "Wrong admin password" });
     const b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
-    if (b.check) return res.status(200).json({ ok: true });
+    if (b.check) { await client().execute("SELECT 1 FROM items LIMIT 1"); return res.status(200).json({ ok: true }) }   // login also proves the database answers
     const st = [];
     for (const c of CATS) if (b.items && Array.isArray(b.items[c])) st.push(...itemStmts(c, b.items[c]));
     if (b.skills) st.push(...skillStmts(b.skills));
@@ -149,6 +153,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, statements: st.length });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ error: "Database error" });
+    return res.status(500).json({ error: "Database error: " + String(e?.message || e).slice(0, 200) });
   }
 }
