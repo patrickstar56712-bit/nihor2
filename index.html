@@ -2137,7 +2137,7 @@ function drawCh(){
   const sk=has?(CSK[c+"/"+g]||[]):[];
   $("chSk").innerHTML=!has?`<p class="muted">Pick a character and a skill group to see its skills.</p>`
     :sk.length?sk.map((n,i)=>`<button class="skt" data-s="${esc(n)}" aria-pressed="${chSel.s.includes(n)}" title="${esc(skBase(n))}" style="--i:${i}">${img(skGP(n))}<span>${esc(skBase(n))}</span></button>`).join("")
-    :`<p class="muted">No skills added for ${esc(chOf(c)[1])} · ${esc(gLbl(c,g))} yet. Add them in <a href="#/admin/skills">Control Panel → Skill Booster</a>.</p>`;
+    :`<p class="muted">No skills added for ${esc(chOf(c)[1])} · ${esc(gLbl(c,g))} yet.</p>`;
 }
 /* anim: true only when the page opens; clicks redraw without replaying the entry animations */
 function drawSk(anim){
@@ -2182,7 +2182,7 @@ function drawSkMats(hint){
   chSkills().forEach((t,ti)=>{const g=skRg(t);if(!g)return;
     const r=skSt(g),{r:m}=skSum(r[0],r[1],t);
     out.push(skHead(t,`<span class="sksub">Total <b id="sks${ti}">0</b></span>`));
-    out.push(!m.length?`<p class="muted">No materials for these levels. Add them in <a href="#/admin/skills">Control Panel → Skill Booster</a>.</p>`:`<div class="skmg">`+m.map(([n,c])=>{const en=esc(n),p=MP[n]||0,bk=t&&(n===t||n===skGP(t));
+    out.push(!m.length?`<p class="muted">No materials for these levels yet.</p>`:`<div class="skmg">`+m.map(([n,c])=>{const en=esc(n),p=MP[n]||0,bk=t&&(n===t||n===skGP(t));
       return `<div class="skm${bk?" skbk":""}" data-q="${c}" style="--i:${Math.min(k++,20)}" title="${en}"><span class="mpic">${img(n)}<i>${en.charAt(0).toUpperCase()}</i><b>${f(c)}</b></span>`+
         `<span class="mnn">${bk?(n===t?"M-G":"G-P")+" Skill Book":en}</span><label class="skpi"><input data-pn="${en}" value="${p?fp(p):""}" placeholder="Unit price" inputmode="decimal" aria-label="${en} unit price"><em>Yang</em></label><span class="ut">${fv(p*c)}</span></div>`}).join("")+`</div>`);
   });
@@ -2540,8 +2540,14 @@ const V={"":"home",tools:"tools","tools/loot":"loot",upgrade:"upgrade","upgrade/
   admin:"admin","admin/items":"items","admin/upgrade":"cpup","admin/skills":"cpsk"};
 const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"]]],
   ["admin","Control Panel",[["admin/items","Items"],["admin/upgrade","Upgrade Cost"],["admin/skills","Skill Booster"]]]];
+/* the Control Panel is hidden: it opens only on the /31/admin link (vercel.json serves the page there)
+   or when the page is opened as a local file; elsewhere its pages fall back to the main page */
+const ADMP="/31/admin",ADM=location.protocol==="file:"||location.pathname.replace(/\/+$/,"")===ADMP;
+const isCp=k=>k==="admin"||k.startsWith("admin/")||k==="tools/items";
 function cur(){
-  const k=location.hash.replace(/^#\/?/,"").replace(/\/$/,"");
+  let k=location.hash.replace(/^#\/?/,"").replace(/\/$/,"");
+  if(!ADM&&isCp(k))k="";
+  if(ADM&&!location.hash&&location.protocol!=="file:")k="admin";   // the bare /31/admin link opens the panel; "#/" is the main page
   return{v:Object.prototype.hasOwnProperty.call(V,k)?V[k]:"home",k};
 }
 function applySb(){
@@ -2595,10 +2601,10 @@ function renderNav(){
     `<nav aria-label="Menu">`+a("",NI.home+"<span>Main Page</span>","si")+
     GROUPS.filter(g=>g[0]!=="admin").map(grp).join("")+
     a("skills",NI.skills+"<span>Skill Booster</span>","si")+
-    GROUPS.filter(g=>g[0]==="admin").map(grp).join("")+
+    GROUPS.filter(g=>g[0]==="admin"&&ADM).map(grp).join("")+
     `</nav>`;
   /* top bar: each heading opens its pages on hover / keyboard focus */
-  $("topNav").innerHTML=[["tools","Tools"],["upgrade","Upgrade Cost"],["skills","Skill Booster"],["admin","Control Panel"]].map(([g,l])=>{
+  $("topNav").innerHTML=[["tools","Tools"],["upgrade","Upgrade Cost"],["skills","Skill Booster"],...ADM?[["admin","Control Panel"]]:[]].map(([g,l])=>{
     const kids=(GROUPS.find(x=>x[0]===g)||[])[2]||[];
     return `<div class="tn${tnShut===g?" shut":""}" data-g="${g}"><a href="#/${g}"${k===g||k.startsWith(g+"/")?' aria-current="page"':""}>${NI[g]}<span>${l}</span>${kids.length?'<i aria-hidden="true">⌄</i>':""}</a>`+
       (kids.length?`<div class="tdd"><div>${kids.map(([kk,kl])=>`<a href="#/${kk}"${kk===k?' aria-current="page"':""}>${kl}</a>`).join("")}</div></div>`:"")+`</div>`}).join("");
