@@ -1332,8 +1332,8 @@ $("dbUp").onclick=()=>{
 let P=ld("lootPrices",{});                       // unit prices
 let pins=new Set(ld("lootPins",[]));              // pinned items
 let short=ld("lootShort",1)!==0;                  // kk format
-let TH=ld("lootTheme","");                        // theme (no picker any more: a saved dark theme is kept, "light" falls back to the default)
-if(TH==="light")TH="";
+let TH=ld("lootTheme","black");                   // theme (no picker any more): black for everyone, a saved grey is kept
+if(TH!=="grey")TH="black";
 let SO=new Set(ld("sideOpen",[]));                // open sidebar groups
 const isM=()=>matchMedia("(max-width:760px)").matches;
 const RM=matchMedia("(prefers-reduced-motion:reduce)");
