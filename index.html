@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- on the website pages live at real paths (/upgrade/weapons), so relative files load from the site root -->
+<script>if(location.protocol!=="file:")document.write('<base href="/">')</script>
 <link rel="icon" type="image/png" href="logo.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -2544,15 +2546,38 @@ const V={"":"home",tools:"tools","tools/loot":"loot",upgrade:"upgrade","upgrade/
   admin:"admin","admin/items":"items","admin/upgrade":"cpup","admin/skills":"cpsk"};
 const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"]]],
   ["admin","Control Panel",[["admin/items","Items"],["admin/upgrade","Upgrade Cost"],["admin/skills","Skill Booster"]]]];
-/* the Control Panel is hidden: it opens only on the /31/admin link (vercel.json serves the page there)
-   or when the page is opened as a local file; elsewhere its pages fall back to the main page */
-const ADMP="/31/admin",ADM=location.protocol==="file:"||location.pathname.replace(/\/+$/,"")===ADMP;
+/* addresses: on the website every page has a real path (/upgrade/weapons; vercel.json serves index.html
+   for all of them), opened as a file the #/ addresses are used.
+   The Control Panel is hidden: its pages live under /31/admin and open nowhere else; once opened,
+   its menu stays in this tab's sidebar. A local file shows it too. */
+const HIST=location.protocol!=="file:",CPB="31/";
 const isCp=k=>k==="admin"||k.startsWith("admin/")||k==="tools/items";
+const href=k=>HIST?"/"+(isCp(k)?CPB:"")+k:"#/"+k;
+const onCp=()=>!HIST||/^\/31\/admin(\/|$)/.test(location.pathname);
+let ADM=onCp()||(()=>{try{return sessionStorage.getItem("cp")==="1"}catch(e){return false}})();
 function cur(){
-  let k=location.hash.replace(/^#\/?/,"").replace(/\/$/,"");
-  if(!ADM&&isCp(k))k="";
-  if(ADM&&!location.hash&&location.protocol!=="file:")k="admin";   // the bare /31/admin link opens the panel; "#/" is the main page
+  let k;
+  if(HIST){
+    const p=location.pathname.replace(/^\/+|\/+$/g,"");
+    k=onCp()?p.slice(CPB.length):isCp(p)?"":p;
+  }else k=location.hash.replace(/^#\/?/,"").replace(/\/$/,"");
   return{v:Object.prototype.hasOwnProperty.call(V,k)?V[k]:"home",k};
+}
+if(HIST){
+  /* old #/ links (bookmarks, shared links) move to the real path; a Control Panel one only on /31/admin */
+  const fromHash=()=>{if(/^#\//.test(location.hash)){const k=location.hash.slice(2).replace(/\/$/,"");history.replaceState(null,"",isCp(k)&&!onCp()?"/":href(k))}};
+  fromHash();addEventListener("hashchange",()=>{fromHash();route()});
+  document.querySelectorAll('a[href^="#/"]').forEach(a=>a.setAttribute("href",href(a.getAttribute("href").slice(2).replace(/\/$/,""))));
+  /* links inside the site change the page without reloading it */
+  document.addEventListener("click",e=>{
+    const a=e.target.closest&&e.target.closest("a[href]");
+    if(!a||e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||a.target||a.origin!==location.origin)return;
+    if(a.pathname.startsWith("/api/")||/\.\w+$/.test(a.pathname))return;   // files and the API load normally
+    e.preventDefault();
+    if(a.pathname!==location.pathname)history.pushState(null,"",a.pathname);
+    route();
+  });
+  addEventListener("popstate",route);
 }
 function applySb(){
   const tb=BAR==="top";
@@ -2597,7 +2622,7 @@ const NI={home:nIco('<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 
   admin:nIco('<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>')};
 function renderNav(){
   const k=cur().k;
-  const a=(key,label,cls)=>`<a class="${cls}" href="#/${key}"${key===k?' aria-current="page"':""}>${label}</a>`;
+  const a=(key,label,cls)=>`<a class="${cls}" href="${href(key)}"${key===k?' aria-current="page"':""}>${label}</a>`;
   const grp=([g,l,kids])=>{const open=SO.has(g);
     return `<div class="sg"><div class="sr">${a(g,NI[g]+`<span>${l}</span>`,"si")}<button class="chev" data-t="${g}" aria-expanded="${open}" aria-label="Show or hide ${l} pages">›</button></div>`+
       `<div class="sk"${open?"":" hidden"}>${kids.map(([k,kl])=>a(k,kl,"ski")).join("")}</div></div>`};
@@ -2610,11 +2635,12 @@ function renderNav(){
   /* top bar: each heading opens its pages on hover / keyboard focus */
   $("topNav").innerHTML=[["tools","Tools"],["upgrade","Upgrade Cost"],["skills","Skill Booster"],...ADM?[["admin","Control Panel"]]:[]].map(([g,l])=>{
     const kids=(GROUPS.find(x=>x[0]===g)||[])[2]||[];
-    return `<div class="tn${tnShut===g?" shut":""}" data-g="${g}"><a href="#/${g}"${k===g||k.startsWith(g+"/")?' aria-current="page"':""}>${NI[g]}<span>${l}</span>${kids.length?'<i aria-hidden="true">⌄</i>':""}</a>`+
-      (kids.length?`<div class="tdd"><div>${kids.map(([kk,kl])=>`<a href="#/${kk}"${kk===k?' aria-current="page"':""}>${kl}</a>`).join("")}</div></div>`:"")+`</div>`}).join("");
+    return `<div class="tn${tnShut===g?" shut":""}" data-g="${g}"><a href="${href(g)}"${k===g||k.startsWith(g+"/")?' aria-current="page"':""}>${NI[g]}<span>${l}</span>${kids.length?'<i aria-hidden="true">⌄</i>':""}</a>`+
+      (kids.length?`<div class="tdd"><div>${kids.map(([kk,kl])=>`<a href="${href(kk)}"${kk===k?' aria-current="page"':""}>${kl}</a>`).join("")}</div></div>`:"")+`</div>`}).join("");
 }
 let lastV="";
 function route(){
+  if(HIST&&onCp()){ADM=true;try{sessionStorage.setItem("cp","1")}catch(e){}}
   const c=cur();
   document.querySelectorAll("main[id^=v-]").forEach(m=>{
     const on=m.id==="v-"+c.v;m.hidden=!on;m.classList.remove("enter");
@@ -2648,7 +2674,7 @@ $("side").addEventListener("click",e=>{
 });
 $("showSb").onclick=()=>toggleSb(false);
 $("bd").onclick=()=>toggleSb(true);
-addEventListener("hashchange",route);
+if(!HIST)addEventListener("hashchange",route);
 addEventListener("resize",fitR);
 
 /* ---------- init ---------- */
