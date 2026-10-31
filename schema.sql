@@ -92,6 +92,9 @@ CREATE TABLE IF NOT EXISTS visitors (
   PRIMARY KEY (id, day)
 );
 
+-- An item's kind as set in Control Panel -> Items (Weapon, Earring ...); k = the item's picture key (api/screen.js makes it on first use)
+CREATE TABLE IF NOT EXISTS item_types (k TEXT PRIMARY KEY, t TEXT NOT NULL);
+
 -- Screen Tracker (api/screen.js makes these on first use).
 -- Inventory slots a visitor's screenshot had but no item picture matched; sig = rough colour summary, so the same item raises seen
 CREATE TABLE IF NOT EXISTS screen_missing (

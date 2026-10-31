@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-10-31T22:25:22Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-10-31T22:44:05Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -139,7 +139,12 @@ main.enter .hero h1{animation:fadeUp .6s var(--ease) both,shine 10s linear infin
 #msg{color:var(--jade);margin:8px 0 0;font-size:14px;animation:fadeUp .3s var(--ease)}
 #msg:empty{display:none}
 .pio{margin-left:auto;display:flex;gap:8px;align-items:center}
-.bar .pio>*{padding:4px 10px;font-size:13px;font-weight:600;color:var(--ink);line-height:1.4}
+.bar .pio>*{padding:3px 10px;font-size:13px;font-weight:600;color:var(--ink)}
+#up .bar{flex-wrap:nowrap}
+#up .lt,.pio{white-space:nowrap}
+#fname{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:820px){#up .lt small{display:none}}
+@media (max-width:600px){#up .bar{flex-wrap:wrap}}
 .seg{display:inline-flex}
 .seg button{border-radius:0;margin-left:-1px}
 .seg button:active{transform:none}
@@ -453,6 +458,15 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 .itm .cp{padding:2px 6px;font-size:11px;color:var(--mute);word-break:break-all;border-style:dashed}
 .itm .cp:hover{color:var(--gold)}
 .its{font-size:11px;color:var(--mute)}
+.itadd{padding:10px 14px;margin-bottom:12px}
+.itadd .bar{margin:0;gap:10px}
+#itAn{flex:0 1 240px}
+.itapv{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:8px;background:var(--soft)}
+.itapv:empty{display:none}
+.itapv img{max-width:32px;max-height:32px}
+button.itg-t{background:none;border:1px dashed transparent;border-radius:6px;padding:1px 6px;cursor:pointer}
+button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
+.itg-s{font-size:11px;padding:2px 4px;max-width:100%}
 .itg-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--gold)}
 .itm.ok .its{color:var(--jade)}.itm.miss .its{color:var(--red)}
 /* admin: a missing picture's box is an upload button */
@@ -1247,6 +1261,16 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
     <button id="itRe">Check again</button>
     <span id="itCnt" class="muted"></span>
   </div>
+  <section class="add itadd" id="itAdd" hidden>
+    <div class="bar">
+      <span class="lt">Add a picture<small>saved on the website, every visitor sees it</small></span>
+      <input id="itAn" list="itAl" placeholder="Item name" aria-label="Item name" autocomplete="off"><datalist id="itAl"></datalist>
+      <select id="itAt" aria-label="Kind"></select>
+      <label class="fbtn" for="itAf" tabindex="0" id="itAfL">Choose Picture</label><input id="itAf" type="file" accept="image/*" hidden>
+      <span class="itapv" id="itApv"></span>
+      <button id="itAs">Save</button>
+    </div>
+  </section>
   <div class="itg" id="itg"></div>
 </main>
 
@@ -1602,7 +1626,7 @@ const isM=()=>matchMedia("(max-width:760px)").matches;
 const RM=matchMedia("(prefers-reduced-motion:reduce)");
 let sbHide=isM()?true:ld("sbHide",false);
 let X=null;                                       // the one loaded log file (not persisted)
-let mode="all",sk=false,pr=false,SK="v",SD=-1;   // sk: skill books are listed only while "Skill books" is on (a starred one always)
+let mode="all",sk=false,pr=false,SK="v",SD=-1;   // sk: "Skill books" on lists only skill books; off hides them (a starred one stays)
 const AGAP=5;   // drop minutes up to 5 min apart belong to the same farming session
 let EV=[],KN=new Set(),T0=0,T1=0,H=0,SUP=[],JORT=[];
 let calm=false; // true while typing / editing prices so the table doesn't re-animate on every keystroke
@@ -1770,7 +1794,7 @@ function draw(){
     (gName?`<div class="cbox g"${si()}>${img("greater portal")}<span>Greater Portal</span><b>${f((m[gName]||[0,0])[1])}</b></div>`:"")+
     (SUP.length?`<div class="cbox s"${si()}>${img("super elite")}<span>Super Elite</span><b>${f(se)}</b></div>`:"")+
     ch.map(([l,c,n])=>`<div class="cbox o"${si()}>${img(n)}<span>${l}</span><b>${f(c)}</b></div>`).join("")+
-    (JORT.length?`<div class="cbox j"${si()}>${img("jewel of retribution")}<span>Jewel of Retribution</span><b>${f(jr)}</b></div>`:"")+
+    (JORT.length?`<div class="cbox j"${si()}>${img("tower sigil")}<span>Tower Sigil Stages</span><b>${f(jr)}</b></div>`:"")+
     (eName?`<div class="cbox e"${si()}>${img("elite portal")}<span>Elite Portal</span><b>${f((m[eName]||[0,0])[1])}</b></div>`:"");
   if($("ctList").dataset.h!==ctHtml){$("ctList").dataset.h=ctHtml;$("ctList").innerHTML=ctHtml}
 
@@ -1780,7 +1804,7 @@ function draw(){
   const t=$("q").value.trim().toLowerCase();
   $("sort").value=SK;
   document.querySelectorAll("th.s").forEach(h=>h.setAttribute("aria-sort",h.dataset.s===SK?(SD>0?"ascending":"descending"):"none"));
-  const r=Object.entries(m).filter(([n,v])=>n!=="Yang"&&(v[0]>0||pins.has(n))&&(!t||n.toLowerCase().includes(t))&&(sk||pins.has(n)||!isSk(n))&&(!pr||price(n)>0));
+  const r=Object.entries(m).filter(([n,v])=>n!=="Yang"&&(v[0]>0||pins.has(n))&&(!t||n.toLowerCase().includes(t))&&(sk?isSk(n):pins.has(n)||!isSk(n))&&(!pr||price(n)>0));
   const key=(n,v)=>SK==="n"?n:SK==="q"?v[0]:SK==="e"?v[1]:SK==="u"?price(n):v[0]*price(n);
   r.sort((a,b)=>{
     const pd=pinCmp(a[0],b[0]);if(pd)return pd;
@@ -1853,7 +1877,7 @@ $("b2").onclick=()=>{pr=!pr;$("b2").setAttribute("aria-pressed",pr);draw()};
 /* ---------- log files (one or more at a time, read together, never saved) ---------- */
 const RX=/^\[(\d\d)\/(\d\d)\/(\d\d)\] \[(\d\d):(\d\d):(\d\d)\]: You receive (\d+) (.+?)\.\s*$/;
 async function loadFile(fs){
-  fs=[...(fs instanceof Blob?[fs]:fs||[])];if(!fs.length)return;
+  fs=fs?fs.length===undefined?[fs]:[...fs]:[];if(!fs.length)return;   // one file or a list of them
   /* several files: their loot lines are merged in time order, so a drop split over two files stays one */
   const key=l=>{const m=RX.exec(l.trim());return m?Date.UTC(2000+ +m[3],+m[2]-1,+m[1],+m[4],+m[5],+m[6]):null},ln=[];
   for(const f of fs)for(const l of (await f.text()).split(/\r?\n/)){const k=key(l);if(k!==null)ln.push([k,l])}
@@ -3174,6 +3198,13 @@ $("scaBody").addEventListener("click",e=>{
 
 /* ---------- tools: items (which item pictures exist in png/) ---------- */
 let itF="all";
+/* the kinds an item can be given in Items; ITY: item key -> kind, set by the admins (database) */
+const KINDS=["Loot","Material","Weapon","Armour","Helmet","Shield","Shoes","Jewellery","Necklace","Earring","Bracelet","Skill Book","Character","Chest","Pet","Mount","Costume","Other"];
+let ITY=ld("itTypes",{});
+async function itTypes(){
+  if(!SCAPI)return;
+  try{const r=await fetch(SCAPI,{cache:"no-store"});if(r.ok){const j=await r.json();ITY=j.types||{};sv("itTypes",ITY);setPics(j.icons||[])}}catch(e){}
+}
 function itemNames(){
   const s=new Map(),add=(n,g="Material")=>{n=String(n||"").trim();const k=slug(n);if(k&&!/^yang$/i.test(n)&&!s.has(k))s.set(k,[n,g])};
   for(const c in CATS){
@@ -3205,12 +3236,17 @@ function itFilter(){
 let picListP=null;
 const picList=()=>picListP??=fetch("png/icons.json").then(r=>r.json()).catch(()=>{picListP=null;return[]});
 async function drawItems(){
+  const adm=!!(SCAPI&&ADK);$("itAdd").hidden=!adm;
+  await itTypes();
   const t=Date.now(),list=itemNames(),have=new Set(list.map(x=>x[0]));
   /* pictures no item on the site uses yet are listed too, under their catalog or file name */
   for(const[n,fl]of await picList()){const k=fl.replace(/\.\w+$/,"");if(!have.has(k)){have.add(k);list.push([k,n||k,"Picture only"])}}
   for(const[k,[n]]of Object.entries(PICS))if(!have.has(k)){have.add(k);list.push([k,n,"Picture only"])}
+  list.forEach(x=>{if(ITY[x[0]])x[2]=ITY[x[0]]});
   list.sort((a,b)=>a[1].localeCompare(b[1]));
-  $("itg").innerHTML=list.map(([k,n,g],i)=>`<div class="itm" style="--i:${Math.min(i,40)}" data-k="${k}" data-nm="${esc(n)}" data-n="${esc((n+" "+g).toLowerCase())}"><div class="itp">${esc(n[0].toUpperCase())}</div><b>${esc(n)}</b><small class="itg-t">${esc(g)}</small><button class="cp" title="Copy file name">${k}.png</button><small class="its">Checking…</small></div>`).join("")
+  $("itAl").innerHTML=list.map(x=>`<option value="${esc(x[1])}">`).join("");
+  if(!$("itAt").options.length)$("itAt").innerHTML=KINDS.map(k=>`<option>${k}</option>`).join("");
+  $("itg").innerHTML=list.map(([k,n,g],i)=>`<div class="itm" style="--i:${Math.min(i,40)}" data-k="${k}" data-nm="${esc(n)}" data-n="${esc((n+" "+g).toLowerCase())}"><div class="itp">${esc(n[0].toUpperCase())}</div><b>${esc(n)}</b>${adm?`<button class="itg-t" title="Click to set what this item is">${esc(g)}</button>`:`<small class="itg-t">${esc(g)}</small>`}<button class="cp" title="Copy file name">${k}.png</button><small class="its">Checking…</small></div>`).join("")
     ||`<p class="muted">No items yet.</p>`;
   itFilter();
   $("itg").querySelectorAll(".itm").forEach(e=>probe(e.dataset.k,t,x=>{
@@ -3246,7 +3282,46 @@ function itUpload(card){
   inp.click();
 }
 $("itg").addEventListener("keydown",e=>{const p=e.target.closest(".itm.adm .itp");if(p&&(e.key==="Enter"||e.key===" ")){e.preventDefault();itUpload(p.closest(".itm"))}});
+/* the kind under a picture: click it, pick one from the list; saved in the database */
+async function itKind(card,t){
+  const k=card.dataset.k,old=ITY[k];ITY[k]=t;sv("itTypes",ITY);
+  try{
+    const r=await fetch(SCAPI,{method:"POST",headers:{"content-type":"application/json","x-admin-key":ADK},body:JSON.stringify({type:{k,t}})});
+    if(r.status===401){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out.",true);drawItems();return}
+    if(!r.ok)throw await why(r);
+  }catch(x){if(old)ITY[k]=old;else delete ITY[k];sv("itTypes",ITY);dbNote("Kind NOT saved ("+(typeof x==="string"?x:"no answer")+").",true);drawItems();return}
+  dbNote(`${card.dataset.nm} is now: ${t}.`);
+}
+function itKindPick(b){
+  const card=b.closest(".itm"),cur=b.textContent,s=document.createElement("select");s.className="itg-s";s.setAttribute("aria-label","Kind of "+card.dataset.nm);
+  s.innerHTML=[...new Set([cur,...KINDS])].map(k=>`<option${k===cur?" selected":""}>${esc(k)}</option>`).join("");
+  b.replaceWith(s);s.focus();try{s.showPicker()}catch(e){}
+  let done=false;const end=()=>{if(done)return;done=true;const v=s.value;b.textContent=v;s.replaceWith(b);
+    card.dataset.n=(card.dataset.nm+" "+v).toLowerCase();if(v!==cur)itKind(card,v);b.focus()};
+  s.onchange=end;s.onblur=end;s.onkeydown=e=>{if(e.key==="Escape"){s.value=cur;end()}};
+}
+/* Add a picture: any name (a known item or a new one), its kind, a picture file */
+let itAU="";
+$("itAf").onchange=async()=>{const fl=$("itAf").files[0];$("itAf").value="";if(!fl)return;itAU=await scFit(fl)||"";
+  $("itApv").innerHTML=itAU?`<img src="${itAU}" alt="">`:"";if(!itAU)dbNote("That picture could not be opened.",true)};
+$("itAfL").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("itAf").click()}};
+$("itAn").addEventListener("change",()=>{const k=slug($("itAn").value),c=$("itg").querySelector(`.itm[data-k="${k}"] .itg-t`);if(c&&KINDS.includes(c.textContent))$("itAt").value=c.textContent});
+$("itAs").onclick=async()=>{
+  const n=$("itAn").value.trim().replace(/\s+/g," "),k=slug(n),t=$("itAt").value;
+  if(!k){dbNote("Write the item's name first.",true);return $("itAn").focus()}
+  if(!itAU){dbNote("Choose a picture first.",true);return $("itAfL").focus()}
+  try{
+    const r=await fetch(SCAPI,{method:"POST",headers:{"content-type":"application/json","x-admin-key":ADK},body:JSON.stringify({save:{name:n,image:itAU},type:{k,t}})});
+    if(r.status===401){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out.",true);drawItems();return}
+    if(!r.ok)throw await why(r);
+  }catch(x){dbNote("Picture NOT saved ("+(typeof x==="string"?x:"no answer")+").",true);return}
+  PICS[k]=[n,itAU];sv("pics",PICS);ITY[k]=t;sv("itTypes",ITY);scRefP=null;
+  $("itAn").value="";$("itApv").innerHTML="";itAU="";
+  dbNote(`Saved the picture of ${n} · every visitor sees it now.`);
+  await drawItems();const c=$("itg").querySelector(`.itm[data-k="${k}"]`);if(c)c.scrollIntoView({block:"center",behavior:RM.matches?"auto":"smooth"});
+};
 $("itg").addEventListener("click",e=>{
+  const kb=e.target.closest("button.itg-t");if(kb){itKindPick(kb);return}
   const up=e.target.closest(".itm.adm .itp");if(up){itUpload(up.closest(".itm"));return}
   const b=e.target.closest(".cp");if(!b)return;
   const s=b.textContent,done=()=>{b.textContent="Copied!";setTimeout(()=>{b.textContent=s},900)};
