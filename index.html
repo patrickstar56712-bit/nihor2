@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-10-31T10:35:57Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-10-31T10:56:01Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -939,6 +939,26 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 .scac .edf{margin-top:0;align-items:center}
 .scac .edf .fbtn{padding:5px 10px}
 .scac [data-rm],.scac [data-ri]{margin-left:auto}
+/* item name search: a list under the box, picture + name, "Items" when the item is in Control Panel -> Items */
+.scdd{position:relative}
+.cpsc .dlc:focus-within,.scac:focus-within{position:relative;z-index:5}   /* the open list stays above the next card and section */
+.scdd input{width:100%}
+.scdd ul{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:30;max-height:244px;overflow-y:auto;overscroll-behavior:contain;margin:0;padding:4px;list-style:none;
+  background:var(--panel);border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line));border-radius:10px;box-shadow:0 18px 40px -16px rgba(0,0,0,.6);
+  scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--gold) 50%,transparent) transparent;transform-origin:top center;animation:ddIn .2s var(--ease)}
+.scdd ul::-webkit-scrollbar{width:6px}
+.scdd ul::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--gold) 50%,transparent);border-radius:6px}
+.scdd li{display:flex;align-items:center;gap:8px;padding:5px 7px;border-radius:7px;cursor:pointer;font-size:13px}
+.scdd li:hover,.scdd li.act{background:var(--hl)}
+.scdd li img,.scdd li i{flex:none;width:24px;height:24px;object-fit:contain}
+.scdd li i{display:grid;place-items:center;border-radius:6px;font-style:normal;font-weight:800;font-size:12px;color:var(--mute);background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.scdd li span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scdd li em{flex:none;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--jade);border:1px solid color-mix(in srgb,var(--jade) 50%,transparent);border-radius:5px;padding:1px 5px}
+.scdd li.none{cursor:default;color:var(--mute)}
+.scdd li.none:hover{background:none}
+.scsg{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:12px;color:var(--mute)}
+.scsg button{display:inline-flex;align-items:center;gap:5px;max-width:100%;padding:2px 8px 2px 3px;font-size:12px;border-radius:7px}
+.scsg .ic{width:20px;height:20px;max-width:none;margin:0;object-fit:contain}
 .dlc h2 .scax{margin-left:auto;padding:3px 10px;font-size:12px}
 .scax.armed{border-color:var(--red);color:var(--red)}
 .cpsc .dlc+.dlc{margin-top:12px}
@@ -2747,18 +2767,42 @@ function scCount(d,W,H,cx,cy){
   }
   return[+s||1,[num[0].x0-1,num[0].y0-1,num[num.length-1].x1+1,num[0].y0+5]];
 }
-/* how far a slot is from a reference icon drawn over an empty slot (0 = same); the count's box is left out */
-function scDiff(cell,ic,box){
+/* pixels left out of the comparison: the count's box, plus any white count-like pixel in the lower part and its outline,
+   so a count that was not read whole does not spoil the match */
+function scMask(cell,box){
+  const m=new Uint8Array(1024);
+  if(box)for(let y=Math.max(0,box[1]);y<=Math.min(31,box[3]);y++)for(let x=Math.max(0,box[0]);x<=Math.min(31,box[2]);x++)m[y*32+x]=1;
+  for(let y=18;y<32;y++)for(let x=0;x<32;x++){const i=(y*32+x)*4;
+    if(cell[i+3]&&Math.min(cell[i],cell[i+1],cell[i+2])>=190)for(let v=y-1;v<=y+1;v++)for(let u=x-1;u<=x+1;u++)if(u>=0&&u<32&&v<32)m[v*32+u]=1}
+  return m;
+}
+/* how far a slot is from a reference icon drawn over an empty slot (0 = same); the icon may sit ox/oy pixels off,
+   st>1 looks at every st-th pixel only (a quick first try) */
+function scDiff(cell,ic,m,ox=0,oy=0,st=1){
   let e=0,n=0;
-  for(let p=0;p<1024;p++){
-    const i=p*4;if(cell[i+3]===0)continue;
-    if(box){const x=p&31,y=p>>5;if(x>=box[0]&&x<=box[2]&&y>=box[1]&&y<=box[3])continue}
-    const a=ic?ic[i+3]/255:0,f=SC_FR[p]*(1-a);
-    const r=a?ic[i]*a+f:f,g=a?ic[i+1]*a+f:f,b=a?ic[i+2]*a+f:f;
+  for(let p=0;p<1024;p+=st){
+    const i=p*4;if(cell[i+3]===0||m[p])continue;
+    const u=(p&31)-ox,v=(p>>5)-oy,j=(v*32+u)*4,a=ic&&u>=0&&v>=0&&u<32&&v<32?ic[j+3]/255:0,f=SC_FR[p]*(1-a);
+    const r=a?ic[j]*a+f:f,g=a?ic[j+1]*a+f:f,b=a?ic[j+2]*a+f:f;
     e+=Math.min(Math.abs(cell[i]-r)+Math.abs(cell[i+1]-g)+Math.abs(cell[i+2]-b),150);n++;
   }
-  return n>300?e/n:999;
+  return n*st>300?e/n:999;
 }
+/* best matching names for a slot, closest first: [[name, distance], ...]. A reference that is not a plain 32x32 icon
+   comes in several sizes and is tried a few pixels around; the closest few are tried around once more */
+function scBest(cell,m,refs,top=3){
+  const r=new Map(),put=(n,e)=>{if(!(r.get(n)<=e))r.set(n,e)};
+  const around=(px,d,st)=>{let b=999,bo=[0,0];for(let oy=-d;oy<=d;oy++)for(let ox=-d;ox<=d;ox++){const e=scDiff(cell,px,m,ox,oy,st);if(e<b){b=e;bo=[ox,oy]}}return bo};
+  for(const[n,vs]of refs)for(const[px,odd]of vs){
+    if(!odd){put(n,scDiff(cell,px,m));continue}
+    const[ox,oy]=around(px,3,3);put(n,scDiff(cell,px,m,ox,oy));
+  }
+  const s=[...r].sort((a,b)=>a[1]-b[1]);
+  for(const[n]of s.slice(0,6))for(const[px]of refs.get(n)){const[ox,oy]=around(px,2,2);put(n,scDiff(cell,px,m,ox,oy))}
+  return[...r].sort((a,b)=>a[1]-b[1]).slice(0,top);
+}
+/* a slot counts as that item when it is close, or fairly close and clearly closer than any other item */
+const scOk=(s,empty)=>!!s[0]&&s[0][1]<empty*.6&&(s[0][1]<45||(s[0][1]<65&&(!s[1]||s[0][1]<s[1][1]*.75)));
 function scCell(d,W,H,cx,cy){
   const o=new Uint8ClampedArray(4096);
   for(let y=0;y<32;y++)for(let x=0;x<32;x++){const X=cx+x,Y=cy+y;if(X<0||Y<0||X>=W||Y>=H)continue;const i=(Y*W+X)*4,j=(y*32+x)*4;o[j]=d[i];o[j+1]=d[i+1];o[j+2]=d[i+2];o[j+3]=255}
@@ -2786,7 +2830,17 @@ function scSig(cell){
 }
 const scURL=px=>{const c=document.createElement("canvas");c.width=c.height=32;c.getContext("2d").putImageData(new ImageData(new Uint8ClampedArray(px),32,32),0,0);return c.toDataURL("image/png")};
 const scImgLd=src=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src});
-const scPx=im=>{const c=document.createElement("canvas");c.width=c.height=32;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(im,0,0,32,32);return x.getImageData(0,0,32,32).data};
+const scPx=(im,w=32,h=32)=>{const c=document.createElement("canvas");c.width=c.height=32;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(im,Math.round((32-w)/2),Math.round((32-h)/2),w,h);return x.getImageData(0,0,32,32).data};
+/* a reference picture as 32x32 pixels: [[pixels, odd]]. Game icons are 32x32; another size is a trimmed or enlarged
+   copy, so it is tried fitted into 32, a bit smaller, and at its own size when it is small */
+function scVars(im){
+  const w=im.naturalWidth||im.width,h=im.naturalHeight||im.height;
+  if(w===32&&h===32)return[[scPx(im),false]];
+  const k=Math.min(32/w,32/h),out=[];
+  for(const z of [1,.875,.75])out.push([scPx(im,Math.round(w*k*z),Math.round(h*k*z)),true]);
+  if(w<32&&h<32)out.push([scPx(im,w,h),true]);
+  return out;
+}
 
 const SCAPI=API?"/api/screen":"";
 let SC=ld("scLast",null);if(!SC||!Array.isArray(SC.items)||!Array.isArray(SC.unk))SC={name:"",items:[],unk:[]};
@@ -2802,10 +2856,10 @@ function scRefs(){
     for(const[n,fl]of list){const nm=names.get(fl.replace(/\.\w+$/,""))||n;if(nm)src.push(["png/"+fl,nm])}
     for(const c of Object.keys(CATS))for(const w of ld(UPG(c),[])||[])if(w&&w.n&&w.im)src.push([w.im,w.n]);
     for(const d of db)src.push([d.image,d.name]);
-    const out=[];
+    const out=new Map();   // name -> [[pixels, odd]]
     await Promise.all(src.map(async([src,n])=>{
-      const im=await scImgLd(src);if(!im)return;try{out.push([n,scPx(im)])}catch(e){}}));
-    if(!out.length)scRefP=null;   // try again on the next upload
+      const im=await scImgLd(src);if(!im)return;try{const v=scVars(im);out.set(n,[...(out.get(n)||[]),...v])}catch(e){}}));
+    if(!out.size)scRefP=null;   // try again on the next upload
     return out;
   })();
 }
@@ -2814,17 +2868,16 @@ async function scFiles(fl){
   if(!fl.length){$("scMsg").textContent="Pick a picture file (PNG or JPG).";return}
   $("scMsg").textContent="Reading…";
   const refs=await scRefs();
-  if(!refs.length){$("scMsg").textContent="The item pictures could not be loaded. The Screen Tracker works on the website.";return}
+  if(!refs.size){$("scMsg").textContent="The item pictures could not be loaded. The Screen Tracker works on the website.";return}
   await new Promise(r=>setTimeout(r,30));   // lets "Reading…" show
   const items=new Map(),unk=new Map(),miss=[],prev=[];let read=0;
   for(const x of fl){
     const url=URL.createObjectURL(x),im=await scImgLd(url);if(!im)continue;
     const r=scScan(im),box=[];
     for(const[cx,cy]of r?r.cells:[]){
-      const cell=scCell(r.d,r.W,r.H,cx,cy),[q,db]=scCount(r.d,r.W,r.H,cx,cy),empty=scDiff(cell,null,db);
+      const cell=scCell(r.d,r.W,r.H,cx,cy),[q,db]=scCount(r.d,r.W,r.H,cx,cy),m=scMask(cell,db),empty=scDiff(cell,null,m);
       if(empty<25)continue;
-      let best=999,bn="";for(const[n,ic]of refs){const e=scDiff(cell,ic,db);if(e<best){best=e;bn=n}}
-      const ok=best<45&&best<empty*.6;read++;
+      const s=scBest(cell,m,refs),ok=scOk(s,empty),bn=ok?s[0][0]:"";read++;
       box.push([cx*r.s,cy*r.s,32*r.s,ok]);
       if(ok){items.set(bn,(items.get(bn)||0)+q);continue}
       const sig=scSig(cell),u=unk.get(sig);
@@ -2900,9 +2953,8 @@ let scaNames=null;
 /* a saved slot picture: the empty slot's background and the count are made see-through */
 async function scClean(src){
   const im=await scImgLd(src);if(!im)return "";
-  const d=new Uint8ClampedArray(scPx(im)),[,box]=scCount(d,32,32,0,0);
-  for(let p=0;p<1024;p++){const i=p*4,x=p&31,y=p>>5;
-    if((box&&x>=box[0]&&x<=box[2]&&y>=box[1]&&y<=box[3])||Math.abs(scLum(d,i)-SC_FR[p])<10)d[i+3]=0}
+  const d=new Uint8ClampedArray(scPx(im)),[,box]=scCount(d,32,32,0,0),m=scMask(d,box);
+  for(let p=0;p<1024;p++)if(m[p]||Math.abs(scLum(d,p*4)-SC_FR[p])<10)d[p*4+3]=0;
   return scURL(d);
 }
 /* an uploaded picture, fitted into 32x32 */
@@ -2928,21 +2980,59 @@ async function drawScA(){
   catch(e){b.innerHTML=`<p class="err">Could not load the Screen Tracker pictures (${esc(typeof e==="string"?e:"no answer")}).</p>`;return}
   if(setPics(s.icons)&&s.missing)scRefP=null;
   if(!s.missing){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out.",true);drawScA();return}   // the key was not accepted
-  if(!scaNames)try{scaNames=Object.keys(await (await fetch("nihor-icons.json")).json())}catch(e){scaNames=[]}
-  const names=[...new Set([...scaNames,...itemNames().map(x=>x[1])])].sort((a,c)=>a.localeCompare(c));
+  scaO=await scaOpts();
   const day=t=>new Date(String(t).replace(" ","T")+"Z").toLocaleDateString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
   const M=s.missing,I=s.icons;
-  b.innerHTML=`<datalist id="scaDl">${names.map(n=>`<option value="${esc(n)}">`).join("")}</datalist>`+
-    `<section class="dlc"><h2>Missing Images <small>${M.length}</small>${M.length?`<button class="scax" id="scaClr">Clear all</button>`:""}</h2>`+
+  b.innerHTML=`<section class="dlc"><h2>Missing Images <small>${M.length}</small>${M.length?`<button class="scax" id="scaClr">Clear all</button>`:""}</h2>`+
     (M.length?`<div class="scag">`+M.map((m,i)=>`<form class="scac" data-id="${m.id}" style="--i:${Math.min(i,20)}"><div class="pix"><img src="${m.image}" alt="Slot from a screenshot"><div><b>Not recognized</b><small>Seen ${f(m.seen)}× · ${day(m.last)}</small></div></div>`+
-      `<input name="n" list="scaDl" placeholder="Item name" aria-label="Item name" maxlength="80" autocomplete="off" required>`+
+      `<div class="scdd"><input name="n" placeholder="Search item name" aria-label="Item name" maxlength="80" autocomplete="off" required role="combobox" aria-expanded="false" aria-autocomplete="list"><ul role="listbox" hidden></ul></div>`+
+      `<div class="scsg" hidden></div>`+
       `<div class="edf"><label class="fbtn" tabindex="0">Upload picture<input type="file" accept="image/*" hidden></label><button class="primary">Save</button><button type="button" data-rm="${m.id}" title="Remove" aria-label="Remove">✕</button></div></form>`).join("")+`</div>`
       :`<p class="muted">Nothing missing: every item in the uploaded screenshots was recognized.</p>`)+
     `</section><section class="dlc"><h2>Added Pictures <small>${I.length}</small></h2>`+
     (I.length?`<div class="scag">`+I.map((c,i)=>`<div class="scac ok" style="--i:${Math.min(i,20)}"><div class="pix"><img src="${c.image}" alt=""><div><b title="${esc(c.name)}">${esc(c.name)}</b><small>Recognized in screenshots</small></div><button type="button" data-ri="${c.id}" title="Remove" aria-label="Remove ${esc(c.name)}">✕</button></div></div>`).join("")+`</div>`
       :`<p class="muted">No pictures added yet.</p>`)+`</section>`;
+  /* the closest pictures the site already has, one card after the other */
+  const refs=await scRefs();
+  for(const fm of b.querySelectorAll("form.scac")){
+    await new Promise(r=>setTimeout(r,0));if(!fm.isConnected)return;
+    const im=await scImgLd(fm.querySelector(".pix img").src);if(!im)continue;
+    const cell=scPx(im),[,box]=scCount(cell,32,32,0,0),sg=fm.querySelector(".scsg"),s=scBest(cell,scMask(cell,box),refs).filter(x=>x[1]<90);
+    if(!s.length)continue;
+    sg.innerHTML=`<span>Closest in Items:</span>`+s.map(([n])=>`<button type="button" data-pick="${esc(n)}" title="Use this name">${img(n)}${esc(n)}</button>`).join("");sg.hidden=false;
+  }
 }
+/* names to pick from: everything in Items (with its picture when it has one), then the catalog's other names */
+let scaO=[];
+async function scaOpts(){
+  const files=new Map((await picList()).map(([n,fl])=>[fl.replace(/\.\w+$/,""),[n,fl]]));
+  if(!scaNames)try{scaNames=Object.keys(await (await fetch("nihor-icons.json")).json())}catch(e){scaNames=[]}
+  const o=new Map(),pic=k=>files.has(k)?"png/"+files.get(k)[1]:PICS[k]?PICS[k][1]:"";
+  const add=(n,it)=>{const k=slug(n);if(!k)return;const x=o.get(k);if(x){x.it||=it;return}o.set(k,{n,src:pic(k),it})};
+  for(const[,n]of itemNames())add(n,true);
+  for(const[k,[n]]of files)add(n||k,true);
+  for(const[n]of Object.values(PICS))add(n,true);
+  for(const n of scaNames)add(n,false);
+  return[...o.values()].sort((a,c)=>a.n.localeCompare(c.n));
+}
+function scaList(inp,open){
+  const ul=inp.nextElementSibling;inp.setAttribute("aria-expanded",String(open));
+  if(!open){ul.hidden=true;return}
+  const q=inp.value.trim().toLowerCase(),st=o=>o.n.toLowerCase().startsWith(q)?0:1;
+  const l=scaO.filter(o=>!q||o.n.toLowerCase().includes(q)).sort((a,c)=>q?st(a)-st(c):0).slice(0,60);
+  ul.innerHTML=l.map(o=>`<li role="option" data-v="${esc(o.n)}">${o.src?`<img src="${o.src}" alt="">`:`<i>${esc(o.n[0].toUpperCase())}</i>`}<span>${esc(o.n)}</span>${o.it?`<em title="In Control Panel → Items">Items</em>`:""}</li>`).join("")
+    ||`<li class="none">No item with that name · it is saved as written</li>`;
+  ul.hidden=false;ul.scrollTop=0;
+}
+const scaPick=(inp,v)=>{inp.value=v;scaList(inp,false)};
 $("scaRe").onclick=drawScA;
+$("scaBody").addEventListener("input",e=>{if(e.target.name==="n")scaList(e.target,true)});
+$("scaBody").addEventListener("focusin",e=>{if(e.target.name==="n")scaList(e.target,true)});
+$("scaBody").addEventListener("focusout",e=>{if(e.target.name==="n")scaList(e.target,false)});
+$("scaBody").addEventListener("mousedown",e=>{
+  const li=e.target.closest(".scdd li");if(!li)return;
+  e.preventDefault();if(li.dataset.v)scaPick(li.closest(".scdd").querySelector("input"),li.dataset.v);
+});
 $("scaBody").addEventListener("change",async e=>{
   const i=e.target;if(i.type!=="file"||!i.files[0])return;
   const u=await scFit(i.files[0]),pic=i.closest(".scac").querySelector(".pix img");i.value="";
@@ -2951,14 +3041,25 @@ $("scaBody").addEventListener("change",async e=>{
   /* with a name already written the picture is saved right away */
   const fm=pic.closest("form");if(fm.elements.n.value.trim())fm.requestSubmit();else{fm.elements.n.focus();dbNote("Picture ready · write the item's name and press Save.")}
 });
-$("scaBody").addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches("label.fbtn")){e.preventDefault();e.target.querySelector("input").click()}});
+$("scaBody").addEventListener("keydown",e=>{
+  const t=e.target;
+  if((e.key==="Enter"||e.key===" ")&&t.matches("label.fbtn")){e.preventDefault();t.querySelector("input").click();return}
+  if(t.name!=="n")return;
+  const ul=t.nextElementSibling,li=[...ul.querySelectorAll("li[data-v]")],a=ul.querySelector(".act"),i=li.indexOf(a);
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){
+    e.preventDefault();if(ul.hidden){scaList(t,true);return}if(!li.length)return;
+    a&&a.classList.remove("act");const n=li[(i+(e.key==="ArrowDown"?1:-1)+li.length)%li.length];n.classList.add("act");n.scrollIntoView({block:"nearest"});
+  }else if(e.key==="Enter"&&!ul.hidden&&a){e.preventDefault();scaPick(t,a.dataset.v)}
+  else if(e.key==="Escape")scaList(t,false);
+});
 $("scaBody").addEventListener("submit",async e=>{
   e.preventDefault();const fm=e.target,pic=fm.querySelector(".pix img"),name=fm.elements.n.value.trim();if(!name)return;
   const image=pic.dataset.up?pic.src:await scClean(pic.src);
   scaPost({save:{name,image,miss:+fm.dataset.id}},`Saved: ${name} is recognized from now on.`);
 });
 $("scaBody").addEventListener("click",e=>{
-  const rm=e.target.closest("[data-rm]"),ri=e.target.closest("[data-ri]"),cl=e.target.closest("#scaClr");
+  const rm=e.target.closest("[data-rm]"),ri=e.target.closest("[data-ri]"),cl=e.target.closest("#scaClr"),pk=e.target.closest("[data-pick]");
+  if(pk){const i=pk.closest("form").elements.n;scaPick(i,pk.dataset.pick);i.focus();scaList(i,false)}
   if(rm)scaPost({del:[+rm.dataset.rm]},"Removed.");
   if(ri)scaPost({delIcon:+ri.dataset.ri},"Picture removed.");
   if(cl){
