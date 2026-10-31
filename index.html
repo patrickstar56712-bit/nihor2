@@ -3035,7 +3035,7 @@ function drawSc(){
   $("scPv").innerHTML=scPrev.map(p=>`<div style="width:${Math.min(p.w*2,1100)}px"><img src="${p.url}" alt="Uploaded screenshot" style="width:100%">`+
     p.box.map(([x,y,s,ok])=>`<i class="${ok?"":"no"}" style="left:${x/p.w*100}%;top:${y/p.h*100}%;width:${s/p.w*100}%;height:${s/p.h*100}%"></i>`).join("")+`</div>`).join("");
   $("scSum").hidden=!scPrev.length;   // the values only beside an uploaded picture
- $("scAcc").hidden=!has&&!SCD.length;
+  $("scAcc").hidden=!has&&!SCD.length;
   if($("scAcc").hidden){$("scMats").innerHTML="";return}
   $("scAcc").open=true;
   const it=SC.items.slice().sort((a,b)=>(P[b[0]]||0)*b[1]-(P[a[0]]||0)*a[1]||a[0].localeCompare(b[0]));let k=0;
