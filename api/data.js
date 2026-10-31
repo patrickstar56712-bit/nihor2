@@ -3,25 +3,14 @@
    POST /api/data  -> header "x-admin-key: <ADMIN_PASSWORD>", body with any of
                       { check: true } | { items: { weapons: [...], ... } } | { skills: {...} } | { chars: {...} }
    Item, skill and character shapes are the ones index.html keeps in localStorage. */
-import { createClient } from "@libsql/client/web";
-import { createHash, timingSafeEqual } from "node:crypto";
+import { client, isAdmin, missing } from "./_db.js";
 
 const CATS = ["weapons", "jewellery", "armour", "helmets", "shields"];
 const CHARS = { warrior: ["body", "mental"], sura: ["wasu", "masu"], ninja: ["dagger", "archer"], shaman: ["dragon", "heal"] };
 const LV = 9, SKN = 30;
 
-let db;
-const client = () => db ??= createClient({ url: process.env.TURSO_DATABASE_URL, authToken: process.env.TURSO_AUTH_TOKEN });
-
 const txt = (v, max = 120) => String(v ?? "").trim().slice(0, max);
 const int = v => Math.max(0, Math.min(Math.round(+v || 0), 1e15));
-
-function isAdmin(req) {
-  const want = process.env.ADMIN_PASSWORD, got = req.headers["x-admin-key"];
-  if (!want || typeof got !== "string" || !got) return false;
-  const h = s => createHash("sha256").update(s).digest();
-  return timingSafeEqual(h(got), h(want));
-}
 
 /* ---------- read ---------- */
 async function readAll() {
@@ -136,7 +125,7 @@ function charStmts(ch) {
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   /* settings missing in Vercel -> say which, so the Control Panel can show it */
-  const miss = ["TURSO_DATABASE_URL", "TURSO_AUTH_TOKEN"].filter(k => !process.env[k]);
+  const miss = missing();
   if (miss.length) return res.status(500).json({ error: "Missing in Vercel Environment Variables: " + miss.join(", ") });
   try {
     if (req.method === "GET") return res.status(200).json(await readAll());

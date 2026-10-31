@@ -73,3 +73,21 @@ CREATE TABLE IF NOT EXISTS meta (
   key    TEXT PRIMARY KEY,
   value  TEXT NOT NULL
 );
+
+-- Statistics (Control Panel -> Statistics). Days are Turkey time (UTC+3).
+-- kind: 'visit' (one per browser session), 'view' (key = page), 'upload' / 'lines' (key = loot or dloot).
+-- Only counts are kept: no file contents, no IP addresses.
+CREATE TABLE IF NOT EXISTS stats_daily (
+  day    TEXT    NOT NULL,                   -- YYYY-MM-DD
+  kind   TEXT    NOT NULL,
+  key    TEXT    NOT NULL DEFAULT '',
+  count  INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (day, kind, key)
+);
+
+-- One row per browser per day it visited; the id is a random value the browser keeps
+CREATE TABLE IF NOT EXISTS visitors (
+  id   TEXT NOT NULL,
+  day  TEXT NOT NULL,
+  PRIMARY KEY (id, day)
+);

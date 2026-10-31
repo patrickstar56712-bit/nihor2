@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-10-30T18:02:02Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-10-31T00:30:42Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -587,6 +587,41 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 .dbt{position:fixed;left:50%;bottom:22px;z-index:60;transform:translateX(-50%);padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;
   background:color-mix(in srgb,var(--bg) 92%,transparent);border:1px solid var(--jade);color:var(--ink);box-shadow:0 10px 30px rgba(0,0,0,.4)}
 .dbt.err{border-color:var(--red)}
+/* control panel: statistics */
+.stg{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:14px 0}
+.stt{display:flex;flex-direction:column;gap:2px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--panel)}
+.stt small{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
+.stt b{font-size:30px;line-height:1.15;color:var(--ink)}
+.stt span{font-size:12px;color:var(--mute)}
+.stc h2,.st2 h2{margin:0 0 12px;font-size:17px}
+.stch{position:relative;display:grid;grid-template-columns:auto 1fr;grid-template-rows:180px auto;column-gap:8px}
+.sty{display:flex;flex-direction:column;justify-content:space-between;font-size:11px;color:var(--mute);text-align:right;font-variant-numeric:tabular-nums}
+.stbars{display:flex;align-items:flex-end;gap:2px;border-bottom:1px solid var(--line);
+  background:linear-gradient(var(--line),var(--line)) 0 0/100% 1px no-repeat,linear-gradient(color-mix(in srgb,var(--line) 60%,transparent),color-mix(in srgb,var(--line) 60%,transparent)) 0 50%/100% 1px no-repeat}
+.stb{flex:1;height:100%;display:flex;align-items:flex-end;cursor:default;outline:none}
+.stb i{display:block;width:100%;min-height:0;border-radius:4px 4px 0 0;background:color-mix(in srgb,var(--gold) 70%,transparent);transition:background-color .15s}
+.stb.now i{background:var(--gold)}
+.stb:hover i,.stb:focus-visible i{background:var(--jade)}
+.stx{grid-column:2;display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--mute)}
+.sttip{position:absolute;top:-8px;z-index:5;display:grid;gap:2px;min-width:170px;padding:9px 12px;border-radius:10px;font-size:12px;pointer-events:none;
+  background:color-mix(in srgb,var(--bg) 94%,transparent);border:1px solid var(--line);box-shadow:0 10px 26px rgba(0,0,0,.4)}
+.sttip b{font-size:13px;margin-bottom:2px}
+.sttip span{display:flex;justify-content:space-between;gap:14px;color:var(--mute)}
+.sttip em{font-style:normal;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.stdt{margin-top:12px}
+.stdt summary{cursor:pointer;font-size:13px;color:var(--mute)}
+.stdt table{width:100%;margin-top:8px;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.stdt th,.stdt td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right}
+.stdt th:first-child,.stdt td:first-child{text-align:left}
+.st2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:14px}
+.stls{display:grid;gap:8px}
+.stpr{display:grid;grid-template-columns:minmax(110px,170px) 1fr auto;align-items:center;gap:10px;font-size:14px}
+.stpr i{height:10px;border-radius:0 4px 4px 0;background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.stpr em{display:block;height:100%;border-radius:0 4px 4px 0;background:var(--gold)}
+.stpr b,.stu b{font-variant-numeric:tabular-nums}
+.stu{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:2px 10px;padding:10px 12px;border-radius:10px;border:1px solid var(--line)}
+.stu b{font-size:22px;text-align:right}
+.stu small{grid-column:1/-1;font-size:12px;color:var(--mute)}
 .bseg button{display:flex;align-items:center;justify-content:center;text-align:center}
 .zseg{grid-template-columns:repeat(5,1fr)}.zseg button{padding:6px 0;font-variant-numeric:tabular-nums}
 #setP h3 small{text-transform:none;letter-spacing:0;font-weight:500}
@@ -1010,6 +1045,12 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
   </div>
 </main>
 
+<main id="v-cpst" hidden>
+  <p class="crumb"><a href="#/admin">← Control Panel</a></p>
+  <div class="lth"><h1>Statistics</h1><button class="flb" id="stRe">Refresh</button></div>
+  <p class="sub">Counts only: no file contents and no IP addresses are kept. Days follow Turkey time. Visits from a browser logged in as admin are not counted.</p>
+  <div id="stBody"></div>
+</main>
 <main id="v-admin" hidden>
   <p class="crumb"><a href="#/">← Main Page</a></p>
   <h1>Control Panel</h1><p class="sub">Manage what the other pages show.</p>
@@ -1020,7 +1061,7 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
     <div id="dbAd" class="dbf" hidden><button id="dbUp" class="primary">Upload this browser's data</button><button id="dbRe">Reload from database</button><button id="dbOut">Log out</button></div>
     <output id="dbMsg" aria-live="polite"></output>
   </section>
-  <div class="cards"><a class="card" href="#/admin/items" style="--i:0"><b>Items</b><span>Every item on the site and whether it has a picture.</span></a><a class="card" href="#/admin/upgrade" style="--i:1"><b>Upgrade Cost</b><span>Add, rename and delete items, fill their materials from text.</span></a><a class="card" href="#/admin/skills" style="--i:2"><b>Skill Booster</b><span>Character skill groups and the skill level cost list.</span></a></div>
+  <div class="cards"><a class="card" href="#/admin/items" style="--i:0"><b>Items</b><span>Every item on the site and whether it has a picture.</span></a><a class="card" href="#/admin/upgrade" style="--i:1"><b>Upgrade Cost</b><span>Add, rename and delete items, fill their materials from text.</span></a><a class="card" href="#/admin/skills" style="--i:2"><b>Skill Booster</b><span>Character skill groups and the skill level cost list.</span></a><a class="card" href="#/admin/stats" style="--i:3"><b>Statistics</b><span>Visits, unique visitors, most opened pages and uploaded tracker files.</span></a></div>
 </main>
 
 <main id="v-cpup" hidden>
@@ -1347,6 +1388,70 @@ $("dbUp").onclick=()=>{
   dbPush([...Object.keys(CATS),"skills","chars"]);
 };
 
+/* ---------- statistics: counts only (visits, pages, uploaded files), read in Control Panel -> Statistics ----------
+   A browser logged in as admin, or the Control Panel tab, is never counted. */
+const STATS=API?"/api/stats":"";
+let statK=null;   // last page sent, so a redraw of the same page is not counted twice
+function statHit(o){
+  if(!STATS||ADK||ADM||navigator.webdriver)return;
+  try{fetch(STATS,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(o),keepalive:true}).catch(()=>{})}catch(e){}
+}
+function vid(){   // random id this browser keeps, for counting unique visitors
+  let v=ld("vid","");
+  if(!/^[0-9a-f-]{36}$/.test(v)){v=crypto.randomUUID?crypto.randomUUID():"10000000-1000-4000-8000-100000000000".replace(/[018]/g,c=>(c^Math.random()*16>>c/4).toString(16));sv("vid",v)}
+  return v;
+}
+function statView(c){
+  const p=c.v==="weapons"?c.k.split("/")[1]:c.v;
+  if(isCp(c.k)||p===statK)return;
+  statK=p;
+  let first=false;try{first=!sessionStorage.getItem("sv");sessionStorage.setItem("sv","1")}catch(e){}
+  statHit({v:vid(),visit:first,view:p});
+}
+const PNAME={home:"Main Page",tools:"Tools",loot:"Loot Tracker",dloot:"Loot Tracker (Detailed)",upgrade:"Upgrade Cost",weapons:"Weapons",
+  jewellery:"Jewellery",armour:"Armour",helmets:"Helmets",shields:"Shields",skills:"Skill Booster"};
+const stDay=d=>new Date(d+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short",timeZone:"UTC"});
+async function drawStats(){
+  const b=$("stBody");
+  if(!STATS){b.innerHTML=`<p class="muted">Statistics are collected on the website only.</p>`;return}
+  if(!ADK){b.innerHTML=`<p class="muted">Log in with the admin password on the <a href="${href("admin")}">Control Panel</a> page to see the statistics.</p>`;return}
+  b.innerHTML=`<p class="muted">Loading…</p>`;
+  let s;
+  try{const r=await fetch(STATS,{headers:{"x-admin-key":ADK},cache:"no-store"});if(!r.ok)throw await why(r);s=await r.json()}
+  catch(e){b.innerHTML=`<p class="err">Could not load the statistics (${esc(typeof e==="string"?e:"no answer")}).</p>`;return}
+  /* the last 30 days, days without visits included */
+  const by=Object.fromEntries(s.days.map(d=>[d.day,d])),days=[];
+  for(let i=29;i>=0;i--){const t=new Date(s.today+"T12:00:00Z");t.setUTCDate(t.getUTCDate()-i);const k=t.toISOString().slice(0,10);days.push(by[k]||{day:k,visits:0,unique:0,views:0,uploads:0})}
+  const td=days[29],max=Math.max(1,...days.map(d=>d.visits)),pmax=Math.max(1,...s.pages.map(p=>p.views)),T=s.totals;
+  const tile=(l,v,sub)=>`<div class="stt"><small>${l}</small><b>${f(v)}</b>${sub?`<span>${sub}</span>`:""}</div>`;
+  const up=k=>s.uploads[k]||{files:0,lines:0};
+  b.innerHTML=
+    `<div class="stg">`+tile("Visits today",td.visits,`${f(td.unique)} unique visitor${td.unique===1?"":"s"}`)+tile("Total visits",T.visits)+
+      tile("Unique visitors",T.unique,"all time")+tile("Page views",T.views,`${f(td.views)} today`)+tile("Files uploaded",T.uploads,`${f(td.uploads)} today`)+`</div>`+
+    `<section class="panel stc"><h2>Visits · last 30 days</h2><div class="stch" id="stCh" style="--max:${max}">`+
+      `<div class="sty"><span>${f(max)}</span><span>${f(Math.round(max/2))}</span><span>0</span></div><div class="stbars">`+
+      days.map((d,i)=>`<div class="stb${i===29?" now":""}" data-i="${i}" tabindex="0" aria-label="${stDay(d.day)}: ${d.visits} visits, ${d.unique} unique visitors"><i style="height:${d.visits/max*100}%"></i></div>`).join("")+
+      `</div><div class="stx"><span>${stDay(days[0].day)}</span><span>${stDay(days[15].day)}</span><span>Today</span></div><div class="sttip" id="stTip" hidden></div></div>`+
+      `<details class="stdt"><summary>Show as table</summary><table><thead><tr><th>Day</th><th>Visits</th><th>Unique</th><th>Page views</th><th>Files</th></tr></thead><tbody>`+
+      days.slice().reverse().map(d=>`<tr><td>${stDay(d.day)}</td><td>${f(d.visits)}</td><td>${f(d.unique)}</td><td>${f(d.views)}</td><td>${f(d.uploads)}</td></tr>`).join("")+`</tbody></table></details></section>`+
+    `<div class="st2"><section class="panel"><h2>Most opened pages</h2>`+
+      (s.pages.length?`<div class="stls">`+s.pages.map(p=>`<div class="stpr"><span>${esc(PNAME[p.page]||p.page)}</span><i><em style="width:${p.views/pmax*100}%"></em></i><b>${f(p.views)}</b></div>`).join("")+`</div>`:`<p class="muted">No page views yet.</p>`)+
+    `</section><section class="panel"><h2>Uploaded tracker files</h2><div class="stls">`+
+      [["loot","Loot Tracker"],["dloot","Loot Tracker (Detailed)"]].map(([k,l])=>`<div class="stu"><span>${l}</span><b>${f(up(k).files)}</b><small>file${up(k).files===1?"":"s"} · ${f(up(k).lines)} loot lines</small></div>`).join("")+
+    `</div></section></div>`;
+  /* hover / focus tooltip for a day */
+  const tip=$("stTip"),ch=$("stCh");
+  const show=el=>{const d=days[+el.dataset.i];
+    tip.innerHTML=`<b>${stDay(d.day)}${+el.dataset.i===29?" · today":""}</b><span>Visits <em>${f(d.visits)}</em></span><span>Unique visitors <em>${f(d.unique)}</em></span><span>Page views <em>${f(d.views)}</em></span><span>Files uploaded <em>${f(d.uploads)}</em></span>`;
+    tip.hidden=false;const r=el.getBoundingClientRect(),c=ch.getBoundingClientRect();
+    tip.style.left=Math.min(Math.max(r.left-c.left+r.width/2-tip.offsetWidth/2,0),c.width-tip.offsetWidth)+"px";};
+  ch.addEventListener("pointerover",e=>{const el=e.target.closest(".stb");if(el)show(el)});
+  ch.addEventListener("focusin",e=>{const el=e.target.closest(".stb");if(el)show(el)});
+  ch.addEventListener("pointerleave",()=>{tip.hidden=true});
+  ch.addEventListener("focusout",()=>{tip.hidden=true});
+}
+$("stRe").onclick=drawStats;
+
 /* ---------- state ---------- */
 let P=ld("lootPrices",{});                       // unit prices
 let pins=new Set(ld("lootPins",[]));              // pinned items
@@ -1631,6 +1736,7 @@ async function loadFile(fl){
   $("pick").value="";$("dPick").value="";
   if(!c){$("msg").textContent=$("dMsg").textContent=fl.name+": no readable loot lines found.";return}
   X={name:fl.name,from,to,items,rows:Object.values(mp),sup};
+  statHit({up:lastV==="dloot"?"dloot":"loot",n:c});   // only the count: the file itself never leaves this browser
   $("msg").textContent=$("dMsg").textContent="";
   dlParse(txt,fl.name);
   rebuild();draw();drawDl();
@@ -2556,9 +2662,9 @@ document.addEventListener("pointermove",e=>{
 
 /* ---------- sidebar & routing ---------- */
 const V={"":"home",tools:"tools","tools/loot":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons",skills:"skills","tools/items":"items","tools/dloot":"dloot","upgrade/skills":"skills",
-  admin:"admin","admin/items":"items","admin/upgrade":"cpup","admin/skills":"cpsk"};
+  admin:"admin","admin/items":"items","admin/upgrade":"cpup","admin/skills":"cpsk","admin/stats":"cpst"};
 const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"]]],
-  ["admin","Control Panel",[["admin/items","Items"],["admin/upgrade","Upgrade Cost"],["admin/skills","Skill Booster"]]]];
+  ["admin","Control Panel",[["admin/items","Items"],["admin/upgrade","Upgrade Cost"],["admin/skills","Skill Booster"],["admin/stats","Statistics"]]]];
 /* addresses: on the website every page has a real path (/upgrade/weapons; vercel.json serves index.html
    for all of them), opened as a file the #/ addresses are used.
    The Control Panel is hidden: its pages live under /31/admin and open nowhere else; once opened,
@@ -2672,6 +2778,8 @@ function route(){
   if(c.v==="items")drawItems();
   if(c.v==="cpup"){cuRen=-1;loadCat(cuCat);drawCpU()}
   if(c.v==="cpsk")drawCpS();
+  if(c.v==="cpst")drawStats();
+  statView(c);
   if(c.v==="dloot"){if(lastV!=="dloot")$("dlBack").hidden=lastV!=="loot";drawDl()}   // Go Back only when opened from the Loot Tracker
   lastV=c.v;
   renderNav();fitR();window.scrollTo({top:0,behavior:"instant"});
