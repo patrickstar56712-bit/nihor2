@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-10-31T10:56:01Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-10-31T17:29:27Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -138,6 +138,8 @@ main.enter .hero h1{animation:fadeUp .6s var(--ease) both,shine 10s linear infin
 #clr{padding:4px 10px;font-size:13px;animation:pop .3s var(--ease)}
 #msg{color:var(--jade);margin:8px 0 0;font-size:14px;animation:fadeUp .3s var(--ease)}
 #msg:empty{display:none}
+.pio{margin-left:auto;display:flex;gap:8px;align-items:center}
+.bar .pio>*{padding:4px 10px;font-size:13px;font-weight:600;color:var(--ink);line-height:1.4}
 .seg{display:inline-flex}
 .seg button{border-radius:0;margin-left:-1px}
 .seg button:active{transform:none}
@@ -447,6 +449,10 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 .its{font-size:11px;color:var(--mute)}
 .itg-t{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--gold)}
 .itm.ok .its{color:var(--jade)}.itm.miss .its{color:var(--red)}
+/* admin: a missing picture's box is an upload button */
+.itm.adm .itp{position:relative;cursor:pointer;border:1px dashed color-mix(in srgb,var(--gold) 50%,var(--line));transition:border-color .2s,color .2s,background-color .2s}
+.itm.adm .itp::after{content:"+";position:absolute;right:3px;bottom:0;font-size:15px;line-height:1;color:var(--gold)}
+.itm.adm .itp:hover,.itm.adm .itp:focus-visible{border-color:var(--gold);color:var(--gold);background:var(--hl)}
 #itQ{flex:0 0 180px}
 #itCnt{font-size:13px}
 /* tools: detailed loot tracker */
@@ -1225,8 +1231,10 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
       <label class="fbtn" for="pick" id="selBtn" tabindex="0">Select File</label>
       <span id="fname">No file was selected</span>
       <button id="clr" hidden>Clear</button>
+      <span class="pio"><button id="pExp" title="Save your unit prices to a file you can send to others">Export Prices</button><label class="fbtn" for="pImp" id="pImpL" tabindex="0" title="Load unit prices from an exported file">Import Prices</label></span>
     </div>
     <input id="pick" type="file" accept=".txt,.log,text/plain" hidden>
+    <input id="pImp" type="file" accept=".json,application/json,.txt,text/plain" hidden>
     <p id="msg" role="status"></p>
   </section>
 
@@ -1555,7 +1563,8 @@ $("stRe").onclick=drawStats;
 
 /* ---------- state ---------- */
 let P=ld("lootPrices",{});                       // unit prices
-let pins=new Set(ld("lootPins",[]));              // pinned items
+let pins=new Set(ld("lootPins",[]));              // pinned items, the latest last
+const pinCmp=(a,b)=>{const l=[...pins];return pins.has(b)-pins.has(a)||l.indexOf(b)-l.indexOf(a)};   // pinned first, the latest pin on top
 let short=ld("lootShort",1)!==0;                  // kk format
 let TH=ld("lootTheme","black");                   // theme (no picker any more): black for everyone, a saved grey is kept
 if(TH!=="grey")TH="black";
@@ -1564,7 +1573,7 @@ const isM=()=>matchMedia("(max-width:760px)").matches;
 const RM=matchMedia("(prefers-reduced-motion:reduce)");
 let sbHide=isM()?true:ld("sbHide",false);
 let X=null;                                       // the one loaded log file (not persisted)
-let mode="all",sk=false,pr=false,SK="v",SD=-1;
+let mode="all",sk=false,pr=false,SK="v",SD=-1;   // sk: skill books are listed only while "Skill books" is on (a starred one always)
 const AGAP=5;   // drop minutes up to 5 min apart belong to the same farming session
 let EV=[],KN=new Set(),T0=0,T1=0,H=0,SUP=[];
 let calm=false; // true while typing / editing prices so the table doesn't re-animate on every keystroke
@@ -1740,10 +1749,10 @@ function draw(){
   const t=$("q").value.trim().toLowerCase();
   $("sort").value=SK;
   document.querySelectorAll("th.s").forEach(h=>h.setAttribute("aria-sort",h.dataset.s===SK?(SD>0?"ascending":"descending"):"none"));
-  const r=Object.entries(m).filter(([n,v])=>n!=="Yang"&&(v[0]>0||pins.has(n))&&(!t||n.toLowerCase().includes(t))&&(!sk||isSk(n))&&(!pr||price(n)>0));
+  const r=Object.entries(m).filter(([n,v])=>n!=="Yang"&&(v[0]>0||pins.has(n))&&(!t||n.toLowerCase().includes(t))&&(sk||pins.has(n)||!isSk(n))&&(!pr||price(n)>0));
   const key=(n,v)=>SK==="n"?n:SK==="q"?v[0]:SK==="e"?v[1]:SK==="u"?price(n):v[0]*price(n);
   r.sort((a,b)=>{
-    const pd=pins.has(b[0])-pins.has(a[0]);if(pd)return pd;
+    const pd=pinCmp(a[0],b[0]);if(pd)return pd;
     const x=key(a[0],a[1]),y=key(b[0],b[1]);
     const c=SK==="n"?x.localeCompare(y):x-y;
     return c?c*SD:b[1][0]-a[1][0];
@@ -1768,7 +1777,7 @@ $("rows").addEventListener("click",e=>{
   const n=b.dataset.p;pins.has(n)?pins.delete(n):pins.add(n);
   sv("lootPins",[...pins]);calm=true;draw();
   const nb=[...$("rows").querySelectorAll(".pb")].find(x=>x.dataset.p===n);
-  if(nb){nb.classList.add("just");nb.focus({preventScroll:true})}
+  if(nb){nb.classList.add("just");nb.focus({preventScroll:true});nb.closest("tr").scrollIntoView({block:"nearest",behavior:RM.matches?"auto":"smooth"})}   // the row moved: follow it
 });
 $("seg").onclick=e=>{
   const m=e.target.dataset.m;if(!m)return;
@@ -1857,6 +1866,25 @@ const keepDrop=(n,q,ok)=>n!=="Yang"||(ok&&q<=YMAX);   // trades / lone Yang are 
 $("pick").onchange=()=>loadFile($("pick").files[0]);
 $("clr").onclick=()=>{X=null;DL=null;$("msg").textContent=$("dMsg").textContent="";rebuild();draw();drawDl()};
 $("selBtn").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("pick").click()}};
+/* unit prices to and from a file, to share them with others; an imported price replaces the same item's own */
+$("pExp").onclick=()=>{
+  const n=Object.keys(P).length;
+  if(!n){$("msg").textContent="No unit prices to export yet: write some in the table first.";return}
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([JSON.stringify({nihorPrices:1,prices:P},null,1)],{type:"application/json"}));
+  a.download=`nihor-prices-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1e3);
+  $("msg").textContent=`Exported ${n} unit price${n===1?"":"s"}.`;
+};
+$("pImp").onchange=async()=>{
+  const fl=$("pImp").files[0];$("pImp").value="";if(!fl)return;
+  let o;try{o=JSON.parse(await fl.text());if(o&&o.prices)o=o.prices}catch(e){o=null}
+  const l=o&&typeof o==="object"?Object.entries(o).filter(([k,v])=>String(k).trim()&&+v>0):[];
+  if(!l.length){$("msg").textContent=fl.name+": no prices found. Pick a file made with Export Prices.";return}
+  for(const[k,v]of l)P[String(k).trim().slice(0,80)]=+v;
+  sv("lootPrices",P);calm=true;draw();drawDl();
+  $("msg").textContent=`Imported ${l.length} unit price${l.length===1?"":"s"} from ${fl.name}.`;
+};
+$("pImpL").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("pImp").click()}};
 /* drag & drop a log file onto the upload box */
 (()=>{
   const z=$("up");let n=0;
@@ -2625,7 +2653,7 @@ function drawDl(){
   if(dlSel.size){td=new Map();for(const r of runs)if(dlSel.has(r.k))r.it.forEach((q,n)=>td.set(n,(td.get(n)||0)+q))}
   const dlb=k=>k==="e"?"Elite Portal":k==="g"?"Greater Portal":k.replace(/^c:/,"");
   $("dlTf").innerHTML=[...dlSel].map(k=>`<span class="dlf">${esc(dlb(k))}<button data-dk="${esc(k)}" aria-label="Remove ${esc(dlb(k))} from Top Drops">✕</button></span>`).join("");
-  const top=[...td].sort((a,b)=>(pins.has(b[0])-pins.has(a[0]))||(b[1]*price(b[0])-a[1]*price(a[0]))||(b[1]-a[1]));
+  const top=[...td].sort((a,b)=>pinCmp(a[0],b[0])||(b[1]*price(b[0])-a[1]*price(a[0]))||(b[1]-a[1]));
   $("dlTop").innerHTML=top.map(([n,q],i)=>{const en=esc(n),p=price(n),pn=pins.has(n);
     return `<tr class="${pn?"pin":""}" style="--i:${Math.min(i,20)}"><td class="n"><button class="pb" data-p="${en}" aria-pressed="${pn}" aria-label="Pin ${en}">★</button>${img(n)}${en}</td><td>${f(q)}</td><td><input data-n="${en}" value="${p?fp(p):""}" placeholder="0" inputmode="decimal" aria-label="${en} unit price"></td><td class="v">${p?fv(q*p):"–"}</td></tr>`}).join("")||empty(none);
   /* last dungeons */
@@ -2704,6 +2732,8 @@ $("dlTop").addEventListener("click",e=>{
   const b=e.target.closest(".pb");if(!b)return;
   const n=b.dataset.p;pins.has(n)?pins.delete(n):pins.add(n);
   sv("lootPins",[...pins]);drawDl();draw();
+  const nb=[...$("dlTop").querySelectorAll(".pb")].find(x=>x.dataset.p===n);
+  if(nb){nb.focus({preventScroll:true});nb.closest("tr").scrollIntoView({block:"nearest",behavior:RM.matches?"auto":"smooth"})}
 });
 
 /* ---------- tools: Screen Tracker (reads item icons and counts from an inventory screenshot) ---------- */
@@ -3106,7 +3136,7 @@ async function drawItems(){
   for(const[n,fl]of await picList()){const k=fl.replace(/\.\w+$/,"");if(!have.has(k)){have.add(k);list.push([k,n||k,"Picture only"])}}
   for(const[k,[n]]of Object.entries(PICS))if(!have.has(k)){have.add(k);list.push([k,n,"Picture only"])}
   list.sort((a,b)=>a[1].localeCompare(b[1]));
-  $("itg").innerHTML=list.map(([k,n,g],i)=>`<div class="itm" style="--i:${Math.min(i,40)}" data-k="${k}" data-n="${esc((n+" "+g).toLowerCase())}"><div class="itp">${esc(n[0].toUpperCase())}</div><b>${esc(n)}</b><small class="itg-t">${esc(g)}</small><button class="cp" title="Copy file name">${k}.png</button><small class="its">Checking…</small></div>`).join("")
+  $("itg").innerHTML=list.map(([k,n,g],i)=>`<div class="itm" style="--i:${Math.min(i,40)}" data-k="${k}" data-nm="${esc(n)}" data-n="${esc((n+" "+g).toLowerCase())}"><div class="itp">${esc(n[0].toUpperCase())}</div><b>${esc(n)}</b><small class="itg-t">${esc(g)}</small><button class="cp" title="Copy file name">${k}.png</button><small class="its">Checking…</small></div>`).join("")
     ||`<p class="muted">No items yet.</p>`;
   itFilter();
   $("itg").querySelectorAll(".itm").forEach(e=>probe(e.dataset.k,t,x=>{
@@ -3114,14 +3144,36 @@ async function drawItems(){
     e.classList.add(x||db?"ok":"miss");
     if(x){e.querySelector(".itp").innerHTML=`<img src="png/${e.dataset.k}.${x}?t=${t}" alt="">`;e.querySelector(".cp").textContent=`${e.dataset.k}.${x}`}
     else if(db)e.querySelector(".itp").innerHTML=`<img src="${db[1]}" alt="">`;
-    e.querySelector(".its").textContent=x?"Has picture":db?"Picture from Control Panel":"Missing picture";
+    const up=!x&&!db&&SCAPI&&ADK;e.classList.toggle("adm",!!up);if(up){const p=e.querySelector(".itp");p.title="Upload a picture";p.tabIndex=0;p.setAttribute("role","button")}
+    e.querySelector(".its").textContent=x?"Has picture":db?"Picture from Control Panel":up?"Missing picture · click the box to upload":"Missing picture";
     itFilter();
   }));
 }
 $("itSeg").onclick=e=>{const b=e.target.closest("[data-v]");if(b){itF=b.dataset.v;itFilter()}};
 $("itQ").addEventListener("input",itFilter);
 $("itRe").onclick=drawItems;
+/* a missing picture uploaded on its card: kept in the database (like Control Panel -> Screen Tracker), so every visitor sees it */
+function itUpload(card){
+  const inp=document.createElement("input");inp.type="file";inp.accept="image/*";
+  inp.onchange=async()=>{
+    const fl=inp.files[0];if(!fl)return;
+    const u=await scFit(fl),n=card.dataset.nm,k=card.dataset.k;
+    if(!u){dbNote("That picture could not be opened.",true);return}
+    try{
+      const r=await fetch(SCAPI,{method:"POST",headers:{"content-type":"application/json","x-admin-key":ADK},body:JSON.stringify({save:{name:n,image:u}})});
+      if(r.status===401){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out.",true);drawItems();return}
+      if(!r.ok)throw await why(r);
+    }catch(x){dbNote("Picture NOT saved ("+(typeof x==="string"?x:"no answer")+").",true);return}
+    PICS[k]=[n,u];sv("pics",PICS);scRefP=null;
+    card.classList.remove("miss","adm");card.classList.add("ok");card.querySelector(".itp").innerHTML=`<img src="${u}" alt="">`;card.querySelector(".itp").title="";
+    card.querySelector(".its").textContent="Picture from Control Panel";itFilter();
+    dbNote(`Saved the picture of ${n} · every visitor sees it now.`);
+  };
+  inp.click();
+}
+$("itg").addEventListener("keydown",e=>{const p=e.target.closest(".itm.adm .itp");if(p&&(e.key==="Enter"||e.key===" ")){e.preventDefault();itUpload(p.closest(".itm"))}});
 $("itg").addEventListener("click",e=>{
+  const up=e.target.closest(".itm.adm .itp");if(up){itUpload(up.closest(".itm"));return}
   const b=e.target.closest(".cp");if(!b)return;
   const s=b.textContent,done=()=>{b.textContent="Copied!";setTimeout(()=>{b.textContent=s},900)};
   try{navigator.clipboard.writeText(s).then(done,()=>{})}catch(x){}
