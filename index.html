@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-10-31T20:07:19Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-10-31T20:10:39Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -153,12 +153,17 @@ main.enter .hero h1{animation:fadeUp .6s var(--ease) both,shine 10s linear infin
 .cbox:hover{transform:translateY(-2px);box-shadow:0 6px 16px -6px rgba(0,0,0,.35)}
 .cbox span{font-size:11px;font-weight:600}
 .ic{height:18px;width:auto;max-width:28px;object-fit:contain;vertical-align:middle;margin-right:6px}
+.beta{font-style:normal;font-size:.55em;font-weight:800;letter-spacing:.06em;text-transform:uppercase;vertical-align:middle;margin-left:.5em;padding:.15em .5em;border-radius:999px;border:1px solid var(--gold);color:var(--gold);line-height:1}
+.ski .beta,.tdd .beta{font-size:9.5px}
 .cbox .ic{align-self:center;margin-right:0}
 .cbox b{font-size:15px;font-weight:800}
-.cbox.g{background:#f2c230;color:#1b1500;border:1px solid #d9a916}
-.cbox.s{background:#7b2fbe;color:#fff;border:1px solid #5d1f94}
-.cbox.e{background:#fff;color:#1b2430;border:1px solid #cfcfcf}
-.cbox.j{background:#b3123a;color:#fff;border:1px solid #870c2a}
+/* every content box: dark inside, its own colour on the ring and the count */
+.cbox{--c:#a3acb9;background:#161b23;color:#eef0f3;border:2px solid var(--c);box-shadow:inset 0 0 10px -4px var(--c)}
+.cbox b{color:var(--c)}
+.cbox.g{--c:#f2c230}
+.cbox.s{--c:#e04fc4}
+.cbox.e{--c:#d7dbe0}
+.cbox.j{--c:#ef3b5f}
 .sum{display:grid;grid-template-columns:1fr 1fr 1fr 1.5fr;gap:9px;margin-bottom:15px}
 @media (max-width:640px){.sum{grid-template-columns:1fr 1fr}}
 .sum>div{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 11px;min-width:0;transition:transform .25s var(--ease),border-color .25s,box-shadow .25s,background-color .35s}
@@ -188,7 +193,7 @@ main.enter .hero h1{animation:fadeUp .6s var(--ease) both,shine 10s linear infin
 #clrAll.hold i{width:100%;transition:width 2s linear}
 #clrAll.hold span{color:#fff}
 #clrAll.done{border-color:var(--gold);animation:bump .5s var(--ease)}
-.cbox.o{background:var(--hl);color:var(--ink);border:1px solid var(--gold)}
+.cbox.o{--c:#9d5cf0}
 th.s{cursor:pointer;user-select:none;transition:color .2s}
 th.s:hover{color:var(--gold)}
 th.s[aria-sort=ascending]::after{content:" ▲";font-size:9px}
@@ -1026,12 +1031,12 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 
 <main id="v-tools" hidden>
   <h1>Tools</h1><p class="sub">Pick a tool.</p>
-  <div class="cards"><a class="card" href="#/tools/loot" style="--i:0"><b>Loot Tracker</b><span>Drop list, values and hourly income from your log file.</span></a><a class="card" href="#/tools/dloot" style="--i:1"><b>Loot Tracker (Detailed)</b><span>Dungeon runs, Super Elites, goals and forecasts from your log file.</span></a><a class="card" href="#/tools/screen" style="--i:2"><b>Screen Tracker</b><span>Upload an inventory screenshot, see the items, their counts and value.</span></a></div>
+  <div class="cards"><a class="card" href="#/tools/loot" style="--i:0"><b>Loot Tracker</b><span>Drop list, values and hourly income from your log file.</span></a><a class="card" href="#/tools/dloot" style="--i:1"><b>Loot Tracker (Detailed)</b><span>Dungeon runs, Super Elites, goals and forecasts from your log file.</span></a><a class="card" href="#/tools/screen" style="--i:2"><b>Screen Tracker<em class="beta">Beta</em></b><span>Upload an inventory screenshot, see the items, their counts and value.</span></a></div>
 </main>
 
 <main id="v-screen" hidden>
   <p class="crumb"><a href="#/tools">← Tools</a></p>
-  <h1>Screen Tracker</h1>
+  <h1>Screen Tracker<em class="beta">Beta</em></h1>
   <p class="sub">Upload a screenshot of your inventory: the items and their counts are read from the picture. A picture cropped to the item slots reads best.</p>
   <section class="add" id="scUp">
     <div class="bar">
@@ -3273,12 +3278,13 @@ const NI={home:nIco('<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 
   upgrade:nIco('<path d="M12 19V5M5 12l7-7 7 7"/>'),
   skills:nIco('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M12 7v6M9 10h6"/>'),
   admin:nIco('<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>')};
+const BETA=new Set(["tools/screen"]),beta=(k,l)=>l+(BETA.has(k)?`<em class="beta">Beta</em>`:"");   // pages still being tried out
 function renderNav(){
   const k=cur().k;
   const a=(key,label,cls)=>`<a class="${cls}" href="${href(key)}"${key===k?' aria-current="page"':""}>${label}</a>`;
   const grp=([g,l,kids])=>{const open=SO.has(g);
     return `<div class="sg"><div class="sr">${a(g,NI[g]+`<span>${l}</span>`,"si")}<button class="chev" data-t="${g}" aria-expanded="${open}" aria-label="Show or hide ${l} pages">›</button></div>`+
-      `<div class="sk"${open?"":" hidden"}>${kids.map(([k,kl])=>a(k,kl,"ski")).join("")}</div></div>`};
+      `<div class="sk"${open?"":" hidden"}>${kids.map(([k,kl])=>a(k,beta(k,kl),"ski")).join("")}</div></div>`};
   $("sideNav").innerHTML=
     `<nav aria-label="Menu">`+a("",NI.home+"<span>Main Page</span>","si")+
     GROUPS.filter(g=>g[0]!=="admin").map(grp).join("")+
@@ -3289,7 +3295,7 @@ function renderNav(){
   $("topNav").innerHTML=[["tools","Tools"],["upgrade","Upgrade Cost"],["skills","Skill Booster"],...ADM?[["admin","Control Panel"]]:[]].map(([g,l])=>{
     const kids=(GROUPS.find(x=>x[0]===g)||[])[2]||[];
     return `<div class="tn${tnShut===g?" shut":""}" data-g="${g}"><a href="${href(g)}"${k===g||k.startsWith(g+"/")?' aria-current="page"':""}>${NI[g]}<span>${l}</span>${kids.length?'<i aria-hidden="true">⌄</i>':""}</a>`+
-      (kids.length?`<div class="tdd"><div>${kids.map(([kk,kl])=>`<a href="${href(kk)}"${kk===k?' aria-current="page"':""}>${kl}</a>`).join("")}</div></div>`:"")+`</div>`}).join("");
+      (kids.length?`<div class="tdd"><div>${kids.map(([kk,kl])=>`<a href="${href(kk)}"${kk===k?' aria-current="page"':""}>${beta(kk,kl)}</a>`).join("")}</div></div>`:"")+`</div>`}).join("");
 }
 let lastV="";
 /* quiet: a redraw of the open page (database loaded), keeps its place and doesn't replay the animations */
