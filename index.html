@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-10-31T19:35:31Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-10-31T20:07:19Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -158,6 +158,7 @@ main.enter .hero h1{animation:fadeUp .6s var(--ease) both,shine 10s linear infin
 .cbox.g{background:#f2c230;color:#1b1500;border:1px solid #d9a916}
 .cbox.s{background:#7b2fbe;color:#fff;border:1px solid #5d1f94}
 .cbox.e{background:#fff;color:#1b2430;border:1px solid #cfcfcf}
+.cbox.j{background:#b3123a;color:#fff;border:1px solid #870c2a}
 .sum{display:grid;grid-template-columns:1fr 1fr 1fr 1.5fr;gap:9px;margin-bottom:15px}
 @media (max-width:640px){.sum{grid-template-columns:1fr 1fr}}
 .sum>div{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 11px;min-width:0;transition:transform .25s var(--ease),border-color .25s,box-shadow .25s,background-color .35s}
@@ -1575,7 +1576,7 @@ let sbHide=isM()?true:ld("sbHide",false);
 let X=null;                                       // the one loaded log file (not persisted)
 let mode="all",sk=false,pr=false,SK="v",SD=-1;   // sk: skill books are listed only while "Skill books" is on (a starred one always)
 const AGAP=5;   // drop minutes up to 5 min apart belong to the same farming session
-let EV=[],KN=new Set(),T0=0,T1=0,H=0,SUP=[];
+let EV=[],KN=new Set(),T0=0,T1=0,H=0,SUP=[],JORT=[];
 let calm=false; // true while typing / editing prices so the table doesn't re-animate on every keystroke
 
 /* ---------- formatting ---------- */
@@ -1660,7 +1661,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("setP").hidden){
 
 /* ---------- data ---------- */
 function rebuild(){
-  EV=[];KN=new Set();SUP=X?X.sup:[];
+  EV=[];KN=new Set();SUP=X?X.sup:[];JORT=X?X.jor:[];
   if(X){
     X.rows.forEach(([t,i,q,e])=>{const n=X.items[i];EV.push([t,n,q,e]);KN.add(n)});
     T0=X.from;T1=X.to;H=(X.to-X.from+1)/60;
@@ -1707,6 +1708,7 @@ const CHESTS=[
  [/^heroic chest of razadere$/i,"Heroic Razador","Heroic Chest of Razadere"],[/^heroic chest of jatuno$/i,"Heroic Jotun","Heroic Chest of Jatuno"],
  [/^trea?ss?ure of thorns$/i,"Castle","Treasure of Thorns"]];
 const SPL_G=/^greater splinter$/i, SPL_E=/^elite splinter$/i;
+const JOR=/^jewel of retribution$/i, JOR_MIN=1, JOR_MAX=8;   // a Jewel of Retribution drop counts in Content only for 1-8 pieces
 
 function draw(){
   const w=win(),m={},mins=new Set();
@@ -1733,13 +1735,14 @@ function draw(){
   const names=[...KN];
   const gName=names.find(n=>SPL_G.test(n)),eName=names.find(n=>SPL_E.test(n));
   const ch=CHESTS.map(([r,l])=>{const n=names.find(x=>r.test(x));return n?[l,(m[n]||[0,0])[1],n]:null}).filter(Boolean);
-  const se=SUP.filter(t=>t>=w.a&&t<w.b).length;
-  $("ctSec").hidden=!(gName||eName||SUP.length||ch.length);
+  const se=SUP.filter(t=>t>=w.a&&t<w.b).length,jr=JORT.filter(t=>t>=w.a&&t<w.b).length;
+  $("ctSec").hidden=!(gName||eName||SUP.length||ch.length||JORT.length);
   let ci=0;const si=()=>` style="--i:${ci++}"`;
   const ctHtml=
     (gName?`<div class="cbox g"${si()}>${img("greater portal")}<span>Greater Portal</span><b>${f((m[gName]||[0,0])[1])}</b></div>`:"")+
     (SUP.length?`<div class="cbox s"${si()}>${img("super elite")}<span>Super Elite</span><b>${f(se)}</b></div>`:"")+
     ch.map(([l,c,n])=>`<div class="cbox o"${si()}>${img(n)}<span>${l}</span><b>${f(c)}</b></div>`).join("")+
+    (JORT.length?`<div class="cbox j"${si()}>${img("jewel of retribution")}<span>Jewel of Retribution</span><b>${f(jr)}</b></div>`:"")+
     (eName?`<div class="cbox e"${si()}>${img("elite portal")}<span>Elite Portal</span><b>${f((m[eName]||[0,0])[1])}</b></div>`:"");
   if($("ctList").dataset.h!==ctHtml){$("ctList").dataset.h=ctHtml;$("ctList").innerHTML=ctHtml}
 
@@ -1828,7 +1831,7 @@ async function loadFile(fs){
   for(const f of fs)for(const l of (await f.text()).split(/\r?\n/)){const k=key(l);if(k!==null)ln.push([k,l])}
   ln.sort((a,b)=>a[0]-b[0]);
   const fl={name:fs.length>1?fs.length+" files":fs[0].name};
-  const items=[],idx={},mp={},sup=[];let from=1e12,to=0,c=0,cur=[],cmax=0;
+  const items=[],idx={},mp={},sup=[],jor=[];let from=1e12,to=0,c=0,cur=[],cmax=0;
   const add=(t,n,q)=>{
     let i=idx[n];if(i===undefined){i=idx[n]=items.length;items.push(n)}
     const k=t+"|"+i,r=mp[k]||(mp[k]=[t,i,0,0]);r[2]+=q;r[3]++;
@@ -1838,7 +1841,7 @@ async function loadFile(fs){
     if(!cur.length)return;
     const d=dropInfo(cur.map(x=>[x[1],x[2]]));
     if(d.se)sup.push(cur[0][0]);
-    for(const [t,n,q] of cur)if(keepDrop(n,q,d.ok))add(t,n,q);
+    for(const [t,n,q] of cur)if(keepDrop(n,q,d.ok)){add(t,n,q);if(JOR.test(n)&&q>=JOR_MIN&&q<=JOR_MAX)jor.push(t)}
     cur=[];
   };
   const txt=ln.map(x=>x[1]).join("\n");
@@ -1852,7 +1855,7 @@ async function loadFile(fs){
   flush();
   $("pick").value="";$("dPick").value="";
   if(!c){$("msg").textContent=$("dMsg").textContent=fl.name+": no readable loot lines found.";return}
-  X={name:fl.name,from,to,items,rows:Object.values(mp),sup};
+  X={name:fl.name,from,to,items,rows:Object.values(mp),sup,jor};
   statHit({up:lastV==="dloot"?"dloot":"loot",n:c});   // only the count: the file itself never leaves this browser
   $("msg").textContent=$("dMsg").textContent="";
   dlParse(txt,fl.name);
