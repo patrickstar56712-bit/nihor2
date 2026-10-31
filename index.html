@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-10-31T10:15:55Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-10-31T10:35:57Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -904,6 +904,16 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 .csb:hover{border-color:var(--gold)}
 .csb.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 16%,transparent);color:var(--gold)}
 /* screen tracker: the uploaded pictures with a box on every item read (green = known, red = not recognized) */
+#scUp{padding:18px 20px;margin-bottom:12px;border-style:dashed;border-width:2px}
+#scUp.drag{border-color:var(--gold);background:var(--hl)}
+#scUp.loaded{border-style:solid;border-color:var(--jade)}
+#scUp .bar{margin:0;gap:14px}
+#scUp .lt{font-size:15px}
+#scUp .lt small{font-size:13px}
+#scUp .fbtn,#scClr{padding:6px 14px;font-size:14px}
+#scName{color:var(--mute);font-size:14px}
+#scMsg{margin:12px 0 0;font-size:14px;color:var(--jade)}
+#scMsg:empty{display:none}
 .scpv{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
 .scpv>div{position:relative;max-width:100%;line-height:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;animation:fadeUp .35s var(--ease) both}
 .scpv img{display:block;max-width:100%;image-rendering:pixelated}
@@ -1121,7 +1131,7 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 <main id="v-cpsc" class="cpsc" hidden>
   <p class="crumb"><a href="#/admin">← Control Panel</a></p>
   <div class="lth"><h1>Screen Tracker</h1><button class="flb" id="scaRe">Refresh</button></div>
-  <p class="sub">Slots the Screen Tracker could not recognize in visitors' screenshots. Write the item's name and save: the picture from the screenshot, or one you upload, is used to recognize that item from then on.</p>
+  <p class="sub">Slots the Screen Tracker could not recognize in visitors' screenshots. Write the item's name and save: the picture from the screenshot, or one you upload, is used to recognize that item from then on and becomes its picture in Items.</p>
   <div id="scaBody"></div>
 </main>
 
@@ -1171,7 +1181,7 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 <main id="v-items" hidden>
   <p class="crumb"><a href="#/admin">← Control Panel</a></p>
   <h1>Items</h1>
-  <p class="sub">Every item the site knows. Put its picture in the <b>png</b> folder next to index.html with the file name shown (.png or .webp). Click a file name to copy it.</p>
+  <p class="sub">Every item the site knows and every picture in the <b>png</b> folder. Put a picture in that folder with the file name shown (.png or .webp), or upload it in Control Panel → Screen Tracker. Click a file name to copy it.</p>
   <div class="bar tbar">
     <div class="seg" id="itSeg">
       <button data-v="all" aria-pressed="true">All</button>
@@ -1364,6 +1374,13 @@ const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch
 const API=/^https?:$/.test(location.protocol)?"/api/data":"";
 const UPG=c=>c==="weapons"?"upgW":"upgW_"+c;
 let ADK=String(ld("admKey","")),dbOn=false,dbErr="",dbTm=0,toTm=0,dbUpd="";
+/* pictures saved in Control Panel -> Screen Tracker, by slug: [name, data URL]; an item without a png/ file shows this one */
+let PICS=ld("pics",{});if(!PICS||typeof PICS!=="object")PICS={};
+function setPics(l){
+  const o={};for(const p of Array.isArray(l)?l:[])if(p&&p.name&&p.image&&!o[slug(p.name)])o[slug(p.name)]=[p.name,p.image];
+  const ch=JSON.stringify(o)!==JSON.stringify(PICS);if(ch){PICS=o;sv("pics",o)}
+  return ch;
+}
 /* main page "Last updated": the later of the site's own commit time and the last Control Panel save */
 function drawLastUp(){
   const m=document.querySelector('meta[name="site-updated"]'),t=[m&&m.content,dbUpd].map(s=>Date.parse(s||"")).filter(n=>n>0);
@@ -1389,7 +1406,7 @@ function drawDb(){
 }
 /* database rows replace the Control Panel data kept in this browser (fail times stay per browser);
    a part the database has nothing for is left as it is */
-function dbApply(d){
+function dbApply(d,force){
   const snap=()=>JSON.stringify([Object.keys(CATS).map(c=>ld(UPG(c),[])),SB,CSK]),was=snap();
   const done=ld("defAdded",[]);
   for(const c of Object.keys(CATS)){
@@ -1402,13 +1419,14 @@ function dbApply(d){
   if(d.skills&&(d.skills.m.length||d.skills.y.some(Boolean))){SB=fixS(d.skills);sv("skB",SB)}
   if(d.chars&&Object.keys(d.chars).length){for(const k of Object.keys(CSK))delete CSK[k];Object.assign(CSK,d.chars);sv("skChars",CSK)}
   /* redraw only when the database changed something, and without replaying the page's entry animations */
-  if(snap()!==was){loadCat(CAT);route(true)}
+  if(snap()!==was||force){loadCat(CAT);route(true)}
 }
 async function dbLoad(note){
   if(API)try{
     const r=await fetch(API,{cache:"no-store"});if(!r.ok)throw await why(r);
     const d=await r.json();dbOn=true;dbErr="";dbUpd=d.updated||"";drawLastUp();
-    if(!d.empty)dbApply(d);
+    const pc=setPics(d.pics);
+    if(!d.empty)dbApply(d,pc);else if(pc)route(true);
     if(note)dbNote(d.empty?"The database is empty.":"Loaded from the database.");
   }catch(e){dbOn=false;dbErr=typeof e==="string"?e:"no answer";if(note)dbNote("Database not reachable · "+dbErr,true)}
   drawDb();
@@ -1549,6 +1567,8 @@ const slug=n=>String(n).toLowerCase().replace(/[^a-z0-9]+/g,"");   // picture fi
 const img=n=>`<img class="ic" src="png/${slug(n)}.png" alt="" loading="lazy" onerror="imgErr(this)">`;
 function imgErr(el){
   if(!el.dataset.w){el.dataset.w=1;el.src=el.src.replace(/\.png$/,".webp");return}
+  const k=(/png\/([a-z0-9]+)\.webp$/.exec(el.src)||[])[1];
+  if(el.dataset.w==="1"&&k&&PICS[k]){el.dataset.w=2;el.src=PICS[k][1];return}   // saved in Control Panel -> Screen Tracker
   const p=el.parentElement;el.remove();if(p)p.classList.add("noimg");
 }
 const mchip=(n,c)=>`<span class="chip mc" title="${esc(n)}">${img(n)}<span class="nm">${esc(n)}</span><b>${f(c)}</b></span>`;
@@ -2770,22 +2790,25 @@ const scPx=im=>{const c=document.createElement("canvas");c.width=c.height=32;con
 
 const SCAPI=API?"/api/screen":"";
 let SC=ld("scLast",null);if(!SC||!Array.isArray(SC.items)||!Array.isArray(SC.unk))SC={name:"",items:[],unk:[]};
-let scPrev=[],scIcons=[],scRefP=null;   // this visit's pictures; pictures saved in the Control Panel
-/* reference pictures: png/ (listed in png/icons.json) and the ones saved in Control Panel -> Screen Tracker */
+let scPrev=[],scRefP=null;   // this visit's pictures; reference pictures (loading or loaded)
+/* reference pictures for recognizing slots */
 function scRefs(){
   return scRefP??=(async()=>{
-    let list=[],db=[];
-    try{list=await (await fetch("png/icons.json")).json()}catch(e){}
+    const list=await picList(),names=new Map(itemNames().map(([k,n])=>[k,n]));let db=[];
     if(SCAPI)try{const r=await fetch(SCAPI,{cache:"no-store"});if(r.ok)db=(await r.json()).icons||[]}catch(e){}
-    scIcons=db;
+    setPics(db);
+    /* png/ files (named like the site's items, else by the catalog), pictures uploaded in Upgrade Cost, then the Control Panel ones */
+    const src=[];
+    for(const[n,fl]of list){const nm=names.get(fl.replace(/\.\w+$/,""))||n;if(nm)src.push(["png/"+fl,nm])}
+    for(const c of Object.keys(CATS))for(const w of ld(UPG(c),[])||[])if(w&&w.n&&w.im)src.push([w.im,w.n]);
+    for(const d of db)src.push([d.image,d.name]);
     const out=[];
-    await Promise.all([...list.map(([n,fl])=>["png/"+fl,n]),...db.map(d=>[d.image,d.name])].map(async([src,n])=>{
+    await Promise.all(src.map(async([src,n])=>{
       const im=await scImgLd(src);if(!im)return;try{out.push([n,scPx(im)])}catch(e){}}));
     if(!out.length)scRefP=null;   // try again on the next upload
     return out;
   })();
 }
-const scImg=n=>{const d=scIcons.find(x=>x.name===n);return d?`<img class="ic" src="${d.image}" alt="">`:img(n)};
 async function scFiles(fl){
   fl=[...fl].filter(x=>x&&/^image\//.test(x.type));$("scPick").value="";
   if(!fl.length){$("scMsg").textContent="Pick a picture file (PNG or JPG).";return}
@@ -2833,7 +2856,7 @@ function drawSc(){
   $("scAcc").open=true;
   const it=SC.items.slice().sort((a,b)=>(P[b[0]]||0)*b[1]-(P[a[0]]||0)*a[1]||a[0].localeCompare(b[0]));let k=0;
   $("scMats").innerHTML=`<div class="skmg">`+it.map(([n,q])=>{const en=esc(n),p=P[n]||0;
-      return `<div class="skm" data-n="${en}" style="--i:${Math.min(k++,20)}" title="${en}"><span class="mpic">${scImg(n)}<i>${en.charAt(0).toUpperCase()}</i></span><span class="mnn">${en}</span>`+
+      return `<div class="skm" data-n="${en}" style="--i:${Math.min(k++,20)}" title="${en}"><span class="mpic">${img(n)}<i>${en.charAt(0).toUpperCase()}</i></span><span class="mnn">${en}</span>`+
         `<label class="skpi scq"><input data-sq="${en}" value="${q}" inputmode="numeric" aria-label="${en} count"><em>pcs</em></label>`+
         `<label class="skpi"><input data-pn="${en}" value="${p?fp(p):""}" placeholder="Unit price" inputmode="decimal" aria-label="${en} unit price"><em>Yang</em></label><span class="ut">${fv(p*q)}</span></div>`}).join("")+
     SC.unk.map((u,j)=>`<div class="skm unk" style="--i:${Math.min(k++,20)}" title="Not recognized"><span class="mpic"><img class="ic scc" src="${u.im}" alt=""></span><span class="mnn">Not recognized</span>`+
@@ -2903,6 +2926,7 @@ async function drawScA(){
   let s;
   try{const r=await fetch(SCAPI,{headers:{"x-admin-key":ADK},cache:"no-store"});if(!r.ok)throw await why(r);s=await r.json()}
   catch(e){b.innerHTML=`<p class="err">Could not load the Screen Tracker pictures (${esc(typeof e==="string"?e:"no answer")}).</p>`;return}
+  if(setPics(s.icons)&&s.missing)scRefP=null;
   if(!s.missing){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out.",true);drawScA();return}   // the key was not accepted
   if(!scaNames)try{scaNames=Object.keys(await (await fetch("nihor-icons.json")).json())}catch(e){scaNames=[]}
   const names=[...new Set([...scaNames,...itemNames().map(x=>x[1])])].sort((a,c)=>a.localeCompare(c));
@@ -2924,6 +2948,8 @@ $("scaBody").addEventListener("change",async e=>{
   const u=await scFit(i.files[0]),pic=i.closest(".scac").querySelector(".pix img");i.value="";
   if(!u){dbNote("That picture could not be opened.",true);return}
   pic.src=u;pic.classList.add("up");pic.dataset.up="1";
+  /* with a name already written the picture is saved right away */
+  const fm=pic.closest("form");if(fm.elements.n.value.trim())fm.requestSubmit();else{fm.elements.n.focus();dbNote("Picture ready · write the item's name and press Save.")}
 });
 $("scaBody").addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches("label.fbtn")){e.preventDefault();e.target.querySelector("input").click()}});
 $("scaBody").addEventListener("submit",async e=>{
@@ -2970,15 +2996,24 @@ function itFilter(){
   $("itCnt").textContent=`${its.length} items · ${ok} with picture · ${miss} missing`;
   $("itSeg").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===itF)));
 }
-function drawItems(){
-  const t=Date.now(),list=itemNames();
+/* png/icons.json: every picture file, with its catalog name ("" when it has none) */
+let picListP=null;
+const picList=()=>picListP??=fetch("png/icons.json").then(r=>r.json()).catch(()=>{picListP=null;return[]});
+async function drawItems(){
+  const t=Date.now(),list=itemNames(),have=new Set(list.map(x=>x[0]));
+  /* pictures no item on the site uses yet are listed too, under their catalog or file name */
+  for(const[n,fl]of await picList()){const k=fl.replace(/\.\w+$/,"");if(!have.has(k)){have.add(k);list.push([k,n||k,"Picture only"])}}
+  for(const[k,[n]]of Object.entries(PICS))if(!have.has(k)){have.add(k);list.push([k,n,"Picture only"])}
+  list.sort((a,b)=>a[1].localeCompare(b[1]));
   $("itg").innerHTML=list.map(([k,n,g],i)=>`<div class="itm" style="--i:${Math.min(i,40)}" data-k="${k}" data-n="${esc((n+" "+g).toLowerCase())}"><div class="itp">${esc(n[0].toUpperCase())}</div><b>${esc(n)}</b><small class="itg-t">${esc(g)}</small><button class="cp" title="Copy file name">${k}.png</button><small class="its">Checking…</small></div>`).join("")
     ||`<p class="muted">No items yet.</p>`;
   itFilter();
   $("itg").querySelectorAll(".itm").forEach(e=>probe(e.dataset.k,t,x=>{
-    e.classList.add(x?"ok":"miss");
+    const db=!x&&PICS[e.dataset.k];
+    e.classList.add(x||db?"ok":"miss");
     if(x){e.querySelector(".itp").innerHTML=`<img src="png/${e.dataset.k}.${x}?t=${t}" alt="">`;e.querySelector(".cp").textContent=`${e.dataset.k}.${x}`}
-    e.querySelector(".its").textContent=x?"Has picture":"Missing picture";
+    else if(db)e.querySelector(".itp").innerHTML=`<img src="${db[1]}" alt="">`;
+    e.querySelector(".its").textContent=x?"Has picture":db?"Picture from Control Panel":"Missing picture";
     itFilter();
   }));
 }

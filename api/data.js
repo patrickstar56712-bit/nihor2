@@ -1,5 +1,5 @@
 /* Shared site data on Turso (see schema.sql).
-   GET  /api/data  -> everything the Control Panel manages, for every visitor
+   GET  /api/data  -> everything the Control Panel manages, for every visitor (pics: pictures saved in Control Panel -> Screen Tracker)
    POST /api/data  -> header "x-admin-key: <ADMIN_PASSWORD>", body with any of
                       { check: true } | { items: { weapons: [...], ... } } | { skills: {...} } | { chars: {...} }
    Item, skill and character shapes are the ones index.html keeps in localStorage. */
@@ -57,8 +57,12 @@ async function readAll() {
   const ch = {};
   for (const r of chars.rows) (ch[r.character + "/" + r.grp] ??= []).push(r.skill);
 
+  /* the Screen Tracker table appears on its first use (api/screen.js), so a missing one is no error */
+  let pics = [];
+  try { pics = (await client().execute("SELECT name, image FROM screen_icons ORDER BY id")).rows.map(r => ({ name: r.name, image: r.image })) } catch (e) {}
+
   const empty = !items.rows.length && !lv.rows.length && !smats.rows.length && !chars.rows.length;
-  return { empty, updated: meta.rows[0]?.value || null, items: out, skills: sk, chars: ch };
+  return { empty, updated: meta.rows[0]?.value || null, items: out, skills: sk, chars: ch, pics };
 }
 
 /* ---------- write: each part replaces what the database holds for it ---------- */
