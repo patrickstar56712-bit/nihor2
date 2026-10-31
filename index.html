@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-10-31T17:29:27Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-10-31T19:35:31Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1059,12 +1059,12 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 
   <section class="add" id="dUp">
     <div class="bar">
-      <span class="lt">Add new log file<small>or drop it here</small></span>
+      <span class="lt">Add new log file<small>or drop them here</small></span>
       <label class="fbtn" for="dPick" id="dSel" tabindex="0">Select File</label>
       <span id="dFname">No file was selected</span>
       <button id="dClr" hidden>Clear</button>
     </div>
-    <input id="dPick" type="file" accept=".txt,.log,text/plain" hidden>
+    <input id="dPick" type="file" accept=".txt,.log,text/plain" multiple hidden>
     <p id="dMsg" role="status"></p>
   </section>
 
@@ -1227,13 +1227,13 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 
   <section class="add" id="up">
     <div class="bar">
-      <span class="lt">Add new log file<small>or drop it here</small></span>
+      <span class="lt">Add new log file<small>or drop them here</small></span>
       <label class="fbtn" for="pick" id="selBtn" tabindex="0">Select File</label>
       <span id="fname">No file was selected</span>
       <button id="clr" hidden>Clear</button>
       <span class="pio"><button id="pExp" title="Save your unit prices to a file you can send to others">Export Prices</button><label class="fbtn" for="pImp" id="pImpL" tabindex="0" title="Load unit prices from an exported file">Import Prices</label></span>
     </div>
-    <input id="pick" type="file" accept=".txt,.log,text/plain" hidden>
+    <input id="pick" type="file" accept=".txt,.log,text/plain" multiple hidden>
     <input id="pImp" type="file" accept=".json,application/json,.txt,text/plain" hidden>
     <p id="msg" role="status"></p>
   </section>
@@ -1719,7 +1719,7 @@ function draw(){
 
   let y=0,iv=0;
   for(const n in m){if(n==="Yang")y=m[n][0];else iv+=m[n][0]*price(n)}
-  num($("yang"),y);num($("itemv"),iv);num($("tot"),y+iv);
+  for(const [i,v] of [["yang",y],["itemv",iv],["tot",y+iv]]){const el=$(i);el.dataset.v=v;el.textContent=fv(v)}   // no count-up here
   $("hdur").textContent=fh(w.h);
 
   /* Active Time = time actually spent getting drops: minutes with drops, gaps up to AGAP min count as farming, longer breaks do not */
@@ -1819,10 +1819,15 @@ $("bs").onclick=()=>{
 $("b1").onclick=()=>{sk=!sk;$("b1").setAttribute("aria-pressed",sk);draw()};
 $("b2").onclick=()=>{pr=!pr;$("b2").setAttribute("aria-pressed",pr);draw()};
 
-/* ---------- log file (one file at a time, never saved) ---------- */
+/* ---------- log files (one or more at a time, read together, never saved) ---------- */
 const RX=/^\[(\d\d)\/(\d\d)\/(\d\d)\] \[(\d\d):(\d\d):(\d\d)\]: You receive (\d+) (.+?)\.\s*$/;
-async function loadFile(fl){
-  if(!fl)return;
+async function loadFile(fs){
+  fs=[...(fs instanceof Blob?[fs]:fs||[])];if(!fs.length)return;
+  /* several files: their loot lines are merged in time order, so a drop split over two files stays one */
+  const key=l=>{const m=RX.exec(l.trim());return m?Date.UTC(2000+ +m[3],+m[2]-1,+m[1],+m[4],+m[5],+m[6]):null},ln=[];
+  for(const f of fs)for(const l of (await f.text()).split(/\r?\n/)){const k=key(l);if(k!==null)ln.push([k,l])}
+  ln.sort((a,b)=>a[0]-b[0]);
+  const fl={name:fs.length>1?fs.length+" files":fs[0].name};
   const items=[],idx={},mp={},sup=[];let from=1e12,to=0,c=0,cur=[],cmax=0;
   const add=(t,n,q)=>{
     let i=idx[n];if(i===undefined){i=idx[n]=items.length;items.push(n)}
@@ -1836,7 +1841,7 @@ async function loadFile(fl){
     for(const [t,n,q] of cur)if(keepDrop(n,q,d.ok))add(t,n,q);
     cur=[];
   };
-  const txt=await fl.text();
+  const txt=ln.map(x=>x[1]).join("\n");
   for(const l of txt.split(/\r?\n/)){
     const m=RX.exec(l.trim());if(!m)continue;
     const sec=Date.UTC(2000+ +m[3],+m[2]-1,+m[1],+m[4],+m[5],+m[6])/1000,t=Math.floor(sec/60),n=m[8],q=+m[7];
@@ -1863,7 +1868,7 @@ function dropInfo(list){
   return{ok:list.some(x=>isTrig(x[0])),se:cat.size>=SENEED};
 }
 const keepDrop=(n,q,ok)=>n!=="Yang"||(ok&&q<=YMAX);   // trades / lone Yang are not farming
-$("pick").onchange=()=>loadFile($("pick").files[0]);
+$("pick").onchange=()=>loadFile($("pick").files);
 $("clr").onclick=()=>{X=null;DL=null;$("msg").textContent=$("dMsg").textContent="";rebuild();draw();drawDl()};
 $("selBtn").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("pick").click()}};
 /* unit prices to and from a file, to share them with others; an imported price replaces the same item's own */
@@ -1891,7 +1896,7 @@ $("pImpL").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("
   z.addEventListener("dragenter",e=>{e.preventDefault();n++;z.classList.add("drag")});
   z.addEventListener("dragover",e=>e.preventDefault());
   z.addEventListener("dragleave",()=>{if(--n<=0){n=0;z.classList.remove("drag")}});
-  z.addEventListener("drop",e=>{e.preventDefault();n=0;z.classList.remove("drag");loadFile(e.dataTransfer.files[0])});
+  z.addEventListener("drop",e=>{e.preventDefault();n=0;z.classList.remove("drag");loadFile(e.dataTransfer.files)});
 })();
 
 /* ---------- upgrade cost: weapons ----------
@@ -2664,7 +2669,7 @@ function drawDl(){
     ||empty(DL?"No finished dungeon in this range.":none);
 }
 ["dCd","dCs","dCe"].forEach(id=>$(id).addEventListener("change",drawDl));
-$("dPick").onchange=()=>loadFile($("dPick").files[0]);
+$("dPick").onchange=()=>loadFile($("dPick").files);
 $("dClr").onclick=()=>$("clr").click();
 $("dSel").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("dPick").click()}};
 (()=>{
@@ -2672,7 +2677,7 @@ $("dSel").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("d
   z.addEventListener("dragenter",e=>{e.preventDefault();n++;z.classList.add("drag")});
   z.addEventListener("dragover",e=>e.preventDefault());
   z.addEventListener("dragleave",()=>{if(--n<=0){n=0;z.classList.remove("drag")}});
-  z.addEventListener("drop",e=>{e.preventDefault();n=0;z.classList.remove("drag");loadFile(e.dataTransfer.files[0])});
+  z.addEventListener("drop",e=>{e.preventDefault();n=0;z.classList.remove("drag");loadFile(e.dataTransfer.files)});
 })();
 $("dSeg").onclick=e=>{const b=e.target.closest("[data-m]");if(b){dlMode=b.dataset.m;sv("dlMode",dlMode);drawDl()}};
 $("dlv").onclick=e=>{
