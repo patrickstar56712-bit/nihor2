@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-10-31T00:30:42Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-10-31T09:36:32Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1329,6 +1329,7 @@ function drawDb(){
 /* database rows replace the Control Panel data kept in this browser (fail times stay per browser);
    a part the database has nothing for is left as it is */
 function dbApply(d){
+  const snap=()=>JSON.stringify([Object.keys(CATS).map(c=>ld(UPG(c),[])),SB,CSK]),was=snap();
   const done=ld("defAdded",[]);
   for(const c of Object.keys(CATS)){
     const l=d.items&&d.items[c];if(!Array.isArray(l)||!l.length)continue;
@@ -1339,7 +1340,8 @@ function dbApply(d){
   sv("defAdded",done);sv("defFix1",true);
   if(d.skills&&(d.skills.m.length||d.skills.y.some(Boolean))){SB=fixS(d.skills);sv("skB",SB)}
   if(d.chars&&Object.keys(d.chars).length){for(const k of Object.keys(CSK))delete CSK[k];Object.assign(CSK,d.chars);sv("skChars",CSK)}
-  loadCat(CAT);route();
+  /* redraw only when the database changed something, and without replaying the page's entry animations */
+  if(snap()!==was){loadCat(CAT);route(true)}
 }
 async function dbLoad(note){
   if(API)try{
@@ -2758,10 +2760,12 @@ function renderNav(){
       (kids.length?`<div class="tdd"><div>${kids.map(([kk,kl])=>`<a href="${href(kk)}"${kk===k?' aria-current="page"':""}>${kl}</a>`).join("")}</div></div>`:"")+`</div>`}).join("");
 }
 let lastV="";
-function route(){
+/* quiet: a redraw of the open page (database loaded), keeps its place and doesn't replay the animations */
+function route(quiet){
+  quiet=quiet===true;
   if(HIST&&onCp()){ADM=true;try{sessionStorage.setItem("cp","1")}catch(e){}}
   const c=cur();
-  document.querySelectorAll("main[id^=v-]").forEach(m=>{
+  if(!quiet)document.querySelectorAll("main[id^=v-]").forEach(m=>{
     const on=m.id==="v-"+c.v;m.hidden=!on;m.classList.remove("enter");
     if(on){void m.offsetWidth;m.classList.add("enter")}
   });
@@ -2774,7 +2778,7 @@ function route(){
     $("wLbl").textContent="Select "+(/^[aeiou]/i.test(sg)?"an ":"a ")+sg;
     drawW();
   }
-  if(c.v==="skills"){skP=null;drawSk(true)}
+  if(c.v==="skills"){skP=null;drawSk(!quiet)}
   if(c.v==="items")drawItems();
   if(c.v==="cpup"){cuRen=-1;loadCat(cuCat);drawCpU()}
   if(c.v==="cpsk")drawCpS();
@@ -2782,7 +2786,7 @@ function route(){
   statView(c);
   if(c.v==="dloot"){if(lastV!=="dloot")$("dlBack").hidden=lastV!=="loot";drawDl()}   // Go Back only when opened from the Loot Tracker
   lastV=c.v;
-  renderNav();fitR();window.scrollTo({top:0,behavior:"instant"});
+  renderNav();fitR();if(!quiet)window.scrollTo({top:0,behavior:"instant"});
 }
 $("side").addEventListener("click",e=>{
   const t=e.target.closest("[data-t]");
