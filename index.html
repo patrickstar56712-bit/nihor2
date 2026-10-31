@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-10-31T09:36:32Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-10-31T10:15:55Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -903,6 +903,35 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 .csb.noimg{grid-template-columns:1fr}.csb.noimg small{grid-column:1}
 .csb:hover{border-color:var(--gold)}
 .csb.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 16%,transparent);color:var(--gold)}
+/* screen tracker: the uploaded pictures with a box on every item read (green = known, red = not recognized) */
+.scpv{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.scpv>div{position:relative;max-width:100%;line-height:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;animation:fadeUp .35s var(--ease) both}
+.scpv img{display:block;max-width:100%;image-rendering:pixelated}
+.scpv i{position:absolute;border:2px solid var(--jade);border-radius:4px}
+.scpv i.no{border-color:var(--red)}
+#scMats .skmg{grid-template-columns:repeat(auto-fill,minmax(min(440px,100%),1fr))}
+.skpi.scq{width:78px}
+#scMats .mnn{white-space:normal;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.skm.unk{border-style:dashed;border-color:color-mix(in srgb,var(--red) 55%,var(--line))}
+.skm.unk .mnn{color:var(--mute);font-weight:500}
+.mpic .scc{image-rendering:pixelated}
+/* control panel: screen tracker */
+.scag{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.scac{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px dashed color-mix(in srgb,var(--red) 55%,var(--line));border-radius:12px;background:var(--soft);animation:pop .35s calc(var(--i,0) * .03s) var(--ease) both}
+.scac.ok{border-style:solid;border-color:var(--line)}
+.scac .pix{display:flex;align-items:center;gap:10px;min-width:0}
+.scac .pix img{flex:none;width:64px;height:64px;image-rendering:pixelated;border-radius:8px;background:var(--panel);border:1px solid var(--line)}
+.scac .pix img.up{border-color:var(--gold)}
+.scac .pix div{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:13px}
+.scac .pix b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scac small{color:var(--mute);font-size:12px}
+.scac input[name]{width:100%}
+.scac .edf{margin-top:0;align-items:center}
+.scac .edf .fbtn{padding:5px 10px}
+.scac [data-rm],.scac [data-ri]{margin-left:auto}
+.dlc h2 .scax{margin-left:auto;padding:3px 10px;font-size:12px}
+.scax.armed{border-color:var(--red);color:var(--red)}
+.cpsc .dlc+.dlc{margin-top:12px}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0s!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   #clrAll.hold i{transition:width 2s linear!important}
@@ -960,7 +989,32 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 
 <main id="v-tools" hidden>
   <h1>Tools</h1><p class="sub">Pick a tool.</p>
-  <div class="cards"><a class="card" href="#/tools/loot" style="--i:0"><b>Loot Tracker</b><span>Drop list, values and hourly income from your log file.</span></a><a class="card" href="#/tools/dloot" style="--i:1"><b>Loot Tracker (Detailed)</b><span>Dungeon runs, Super Elites, goals and forecasts from your log file.</span></a></div>
+  <div class="cards"><a class="card" href="#/tools/loot" style="--i:0"><b>Loot Tracker</b><span>Drop list, values and hourly income from your log file.</span></a><a class="card" href="#/tools/dloot" style="--i:1"><b>Loot Tracker (Detailed)</b><span>Dungeon runs, Super Elites, goals and forecasts from your log file.</span></a><a class="card" href="#/tools/screen" style="--i:2"><b>Screen Tracker</b><span>Upload an inventory screenshot, see the items, their counts and value.</span></a></div>
+</main>
+
+<main id="v-screen" hidden>
+  <p class="crumb"><a href="#/tools">← Tools</a></p>
+  <h1>Screen Tracker</h1>
+  <p class="sub">Upload a screenshot of your inventory: the items and their counts are read from the picture. A picture cropped to the item slots reads best.</p>
+  <section class="add" id="scUp">
+    <div class="bar">
+      <span class="lt">Add a screenshot<small>drop it here or paste it with Ctrl+V</small></span>
+      <label class="fbtn" for="scPick" id="scSel" tabindex="0">Select Picture</label>
+      <span id="scName">No picture was selected</span>
+      <button id="scClr" hidden>Clear</button>
+    </div>
+    <input id="scPick" type="file" accept="image/*" multiple hidden>
+    <p id="scMsg" role="status"></p>
+  </section>
+  <div class="scpv" id="scPv"></div>
+  <details class="acc" id="scAcc" open hidden>
+    <summary>Material Prices</summary>
+    <div class="acc-b"><div id="scMats"></div></div>
+  </details>
+  <div class="costbox" id="scCost" aria-live="polite" hidden>
+    <span>Items :</span><b id="scN">0</b>
+    <span class="tt">Total Value :</span><b class="tt" id="scT">0</b>
+  </div>
 </main>
 
 <main id="v-dloot" hidden>
@@ -1061,7 +1115,14 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
     <div id="dbAd" class="dbf" hidden><button id="dbUp" class="primary">Upload this browser's data</button><button id="dbRe">Reload from database</button><button id="dbOut">Log out</button></div>
     <output id="dbMsg" aria-live="polite"></output>
   </section>
-  <div class="cards"><a class="card" href="#/admin/items" style="--i:0"><b>Items</b><span>Every item on the site and whether it has a picture.</span></a><a class="card" href="#/admin/upgrade" style="--i:1"><b>Upgrade Cost</b><span>Add, rename and delete items, fill their materials from text.</span></a><a class="card" href="#/admin/skills" style="--i:2"><b>Skill Booster</b><span>Character skill groups and the skill level cost list.</span></a><a class="card" href="#/admin/stats" style="--i:3"><b>Statistics</b><span>Visits, unique visitors, most opened pages and uploaded tracker files.</span></a></div>
+  <div class="cards"><a class="card" href="#/admin/items" style="--i:0"><b>Items</b><span>Every item on the site and whether it has a picture.</span></a><a class="card" href="#/admin/upgrade" style="--i:1"><b>Upgrade Cost</b><span>Add, rename and delete items, fill their materials from text.</span></a><a class="card" href="#/admin/skills" style="--i:2"><b>Skill Booster</b><span>Character skill groups and the skill level cost list.</span></a><a class="card" href="#/admin/stats" style="--i:3"><b>Statistics</b><span>Visits, unique visitors, most opened pages and uploaded tracker files.</span></a><a class="card" href="#/admin/screen" style="--i:4"><b>Screen Tracker</b><span>Items the Screen Tracker could not recognize: add their pictures.</span></a></div>
+</main>
+
+<main id="v-cpsc" class="cpsc" hidden>
+  <p class="crumb"><a href="#/admin">← Control Panel</a></p>
+  <div class="lth"><h1>Screen Tracker</h1><button class="flb" id="scaRe">Refresh</button></div>
+  <p class="sub">Slots the Screen Tracker could not recognize in visitors' screenshots. Write the item's name and save: the picture from the screenshot, or one you upload, is used to recognize that item from then on.</p>
+  <div id="scaBody"></div>
 </main>
 
 <main id="v-cpup" hidden>
@@ -1410,7 +1471,7 @@ function statView(c){
   let first=false;try{first=!sessionStorage.getItem("sv");sessionStorage.setItem("sv","1")}catch(e){}
   statHit({v:vid(),visit:first,view:p});
 }
-const PNAME={home:"Main Page",tools:"Tools",loot:"Loot Tracker",dloot:"Loot Tracker (Detailed)",upgrade:"Upgrade Cost",weapons:"Weapons",
+const PNAME={home:"Main Page",tools:"Tools",loot:"Loot Tracker",dloot:"Loot Tracker (Detailed)",screen:"Screen Tracker",upgrade:"Upgrade Cost",weapons:"Weapons",
   jewellery:"Jewellery",armour:"Armour",helmets:"Helmets",shields:"Shields",skills:"Skill Booster"};
 const stDay=d=>new Date(d+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short",timeZone:"UTC"});
 async function drawStats(){
@@ -1439,7 +1500,7 @@ async function drawStats(){
     `<div class="st2"><section class="panel"><h2>Most opened pages</h2>`+
       (s.pages.length?`<div class="stls">`+s.pages.map(p=>`<div class="stpr"><span>${esc(PNAME[p.page]||p.page)}</span><i><em style="width:${p.views/pmax*100}%"></em></i><b>${f(p.views)}</b></div>`).join("")+`</div>`:`<p class="muted">No page views yet.</p>`)+
     `</section><section class="panel"><h2>Uploaded tracker files</h2><div class="stls">`+
-      [["loot","Loot Tracker"],["dloot","Loot Tracker (Detailed)"]].map(([k,l])=>`<div class="stu"><span>${l}</span><b>${f(up(k).files)}</b><small>file${up(k).files===1?"":"s"} · ${f(up(k).lines)} loot lines</small></div>`).join("")+
+      [["loot","Loot Tracker","file","loot lines"],["dloot","Loot Tracker (Detailed)","file","loot lines"],["screen","Screen Tracker","picture","items read"]].map(([k,l,u,w])=>`<div class="stu"><span>${l}</span><b>${f(up(k).files)}</b><small>${u}${up(k).files===1?"":"s"} · ${f(up(k).lines)} ${w}</small></div>`).join("")+
     `</div></section></div>`;
   /* hover / focus tooltip for a day */
   const tip=$("stTip"),ch=$("stCh");
@@ -2605,6 +2666,281 @@ $("dlTop").addEventListener("click",e=>{
   sv("lootPins",[...pins]);drawDl();draw();
 });
 
+/* ---------- tools: Screen Tracker (reads item icons and counts from an inventory screenshot) ---------- */
+/* an empty inventory slot, 32x32 brightness (base36, x7.3): finds the slot grid and tells empty slots apart */
+const SC_FR=Float32Array.from("24224c88666677776644266655c94534234584110000000000000000115c72351257411100020002000000001115a73425731111022000022222200011114a72572002221111111123320310121114a77200022300111111332222101111114a5000020510011112123211201111111a5000020211011233211111101311111a5000021111222320300121001121400a5002021100122001012110003111000a5000011100011101321110021112000a5000011111211011322301313111000a5001012211120143122302231121111a5000112111110311322302222421111a5000102211110131123323231211111a5000112321310131122125301412111a4000112211101001113224210222111a4000331111000001000131112222111a4000112214010100000011112254111a4001111111010010100123334222111a4000205031101101010012112221111a4002323031131002110201102000111a4020000031111211102020031121111a4000020043112111320001111121411a3000210100000041211212211001222a6300030210111000222131121001222a693010111310001034313134001022e639930000221101112122211200002ea212aa500022220000222211111111ea23372ac5002222000022221111111ga2423332cc55222266662222111116gb222221215chhiiiiiiiikkeediiiggb12223",c=>parseInt(c,36)*7.3);
+/* the 3x5 count digits, row by row; a glyph 1-2 pixels wide is a 1 */
+const SC_DG={0:"111101101101111",1:"010110010010111",2:"111001111100111",3:"111001111001111",4:"101101111001001",
+  5:"111100111001111",6:"111100111101111",7:"111101001001001",8:"111101111101111",9:"111101111001111"};
+/* the frame's bright lines: dark parts of the frame would match any dark picture */
+const SC_RING=[];for(let p=0;p<1024;p++)if(SC_FR[p]>=45)SC_RING.push(p);
+const SC_PRE=SC_RING.filter((_,i)=>i%9===0);   // a quick first look before checking every line pixel
+const scLum=(d,i)=>d[i]*.3+d[i+1]*.59+d[i+2]*.11;
+/* slot positions: places where the slot frame shows, then the whole 32px grid between them;
+   a slot cut by the picture's edge next to them counts too. fit = how well the frames matched */
+function scGrid(d,W,H){
+  const L=new Float32Array(W*H);for(let i=0;i<W*H;i++)L[i]=scLum(d,i*4);
+  const ring=(x,y,list)=>{let ok=0,n=0;
+    for(const p of list){const X=x+(p&31),Y=y+(p>>5);if(X<0||Y<0||X>=W||Y>=H)continue;n++;if(Math.abs(L[Y*W+X]-SC_FR[p])<=14)ok++}
+    return n>=list.length*.4?ok/n:0};
+  const hits=[];
+  for(let y=-16;y<=H-16;y++)for(let x=-16;x<=W-16;x++){
+    if(ring(x,y,SC_PRE)<.5)continue;
+    const s=ring(x,y,SC_RING);if(s>=.55)hits.push([s,x,y]);
+  }
+  if(!hits.length)return{cells:[],fit:0};
+  hits.sort((a,b)=>b[0]-a[0]);
+  const [,ax,ay]=hits[0],md=v=>((v%32)+32)%32,on=hits.filter(([,x,y])=>md(x-ax)===0&&md(y-ay)===0);
+  const xs=on.map(h=>h[1]),ys=on.map(h=>h[2]),cut=(v,max)=>v<0||v+32>max;
+  let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  if(cut(x0-32,W)&&x0-32>-16)x0-=32;if(cut(x1+32,W)&&x1+32<W-16)x1+=32;
+  if(cut(y0-32,H)&&y0-32>-16)y0-=32;if(cut(y1+32,H)&&y1+32<H-16)y1+=32;
+  const cells=[];for(let y=y0;y<=y1;y+=32)for(let x=x0;x<=x1;x+=32)cells.push([x,y]);
+  return{cells,fit:on.reduce((a,h)=>a+h[0],0)};
+}
+/* the count in the slot's lower right corner: white 3x5 glyphs; returns [count, pixels to leave out] */
+function scCount(d,W,H,cx,cy){
+  const wh=(x,y)=>{const X=cx+x,Y=cy+y;if(X<0||Y<0||X>=W||Y>=H)return 0;const i=(Y*W+X)*4;return Math.min(d[i],d[i+1],d[i+2])>=190};
+  const seen=new Set(),gl=[];
+  for(let y=14;y<32;y++)for(let x=0;x<32;x++){
+    if(!wh(x,y)||seen.has(y*32+x))continue;
+    const st=[[x,y]],px=[];seen.add(y*32+x);
+    while(st.length){const[a,b]=st.pop();px.push([a,b]);
+      for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++){const u=a+i,v=b+j;if(u<0||v<14||u>31||v>31||seen.has(v*32+u)||!wh(u,v))continue;seen.add(v*32+u);st.push([u,v])}}
+    const x0=Math.min(...px.map(p=>p[0])),x1=Math.max(...px.map(p=>p[0])),y0=Math.min(...px.map(p=>p[1])),y1=Math.max(...px.map(p=>p[1]));
+    if(y1-y0===4&&x1-x0<=2)gl.push({x0,x1,y0,px});
+  }
+  /* the number: glyphs on one line, 2 pixels apart, ending near the right edge */
+  gl.sort((a,b)=>b.x1-a.x1);
+  const num=[];
+  for(const g of gl){const l=num[num.length-1];
+    if(!l){if(g.x1>=20)num.push(g);continue}
+    if(g.y0===l.y0&&l.x0-g.x1>=2&&l.x0-g.x1<=3)num.push(g);
+  }
+  if(!num.length)return[1,null];
+  let s="";
+  for(const g of num.reverse()){
+    if(g.x1-g.x0<2){s+="1";continue}
+    const on=new Set(g.px.map(([a,b])=>(b-g.y0)*3+a-g.x0));let best="",bd=99;
+    for(const[k,t]of Object.entries(SC_DG)){let e=0;for(let i=0;i<15;i++)if((t[i]==="1")!==on.has(i))e++;if(e<bd){bd=e;best=k}}
+    s+=best;
+  }
+  return[+s||1,[num[0].x0-1,num[0].y0-1,num[num.length-1].x1+1,num[0].y0+5]];
+}
+/* how far a slot is from a reference icon drawn over an empty slot (0 = same); the count's box is left out */
+function scDiff(cell,ic,box){
+  let e=0,n=0;
+  for(let p=0;p<1024;p++){
+    const i=p*4;if(cell[i+3]===0)continue;
+    if(box){const x=p&31,y=p>>5;if(x>=box[0]&&x<=box[2]&&y>=box[1]&&y<=box[3])continue}
+    const a=ic?ic[i+3]/255:0,f=SC_FR[p]*(1-a);
+    const r=a?ic[i]*a+f:f,g=a?ic[i+1]*a+f:f,b=a?ic[i+2]*a+f:f;
+    e+=Math.min(Math.abs(cell[i]-r)+Math.abs(cell[i+1]-g)+Math.abs(cell[i+2]-b),150);n++;
+  }
+  return n>300?e/n:999;
+}
+function scCell(d,W,H,cx,cy){
+  const o=new Uint8ClampedArray(4096);
+  for(let y=0;y<32;y++)for(let x=0;x<32;x++){const X=cx+x,Y=cy+y;if(X<0||Y<0||X>=W||Y>=H)continue;const i=(Y*W+X)*4,j=(y*32+x)*4;o[j]=d[i];o[j+1]=d[i+1];o[j+2]=d[i+2];o[j+3]=255}
+  return o;
+}
+/* reads one picture; a screenshot taken with display scaling is shrunk back to 32px slots (the size whose frames fit best) */
+function scScan(im){
+  let best=null;
+  for(const s of [1,2,1.5,1.25,3,.75,.5]){
+    const W=Math.round(im.width/s),H=Math.round(im.height/s);if(W<20||H<20)continue;
+    const c=document.createElement("canvas");c.width=W;c.height=H;
+    const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(im,0,0,W,H);
+    const d=x.getImageData(0,0,W,H).data,g=scGrid(d,W,H);
+    if(g.cells.length&&(!best||g.fit>best.fit))best={d,W,H,s,cells:g.cells,fit:g.fit};
+  }
+  return best;
+}
+/* rough colour summary of a slot's upper part (the count is below), so the same unknown item is kept once */
+function scSig(cell){
+  let s="";
+  for(let by=0;by<4;by++)for(let bx=0;bx<4;bx++){let r=0,g=0,b=0;
+    for(let y=by*5;y<by*5+5;y++)for(let x=bx*8;x<bx*8+8;x++){const i=(y*32+x)*4;r+=cell[i];g+=cell[i+1];b+=cell[i+2]}
+    s+=[r,g,b].map(v=>(v/40>>5).toString(16)).join("")}
+  return s;
+}
+const scURL=px=>{const c=document.createElement("canvas");c.width=c.height=32;c.getContext("2d").putImageData(new ImageData(new Uint8ClampedArray(px),32,32),0,0);return c.toDataURL("image/png")};
+const scImgLd=src=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src});
+const scPx=im=>{const c=document.createElement("canvas");c.width=c.height=32;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(im,0,0,32,32);return x.getImageData(0,0,32,32).data};
+
+const SCAPI=API?"/api/screen":"";
+let SC=ld("scLast",null);if(!SC||!Array.isArray(SC.items)||!Array.isArray(SC.unk))SC={name:"",items:[],unk:[]};
+let scPrev=[],scIcons=[],scRefP=null;   // this visit's pictures; pictures saved in the Control Panel
+/* reference pictures: png/ (listed in png/icons.json) and the ones saved in Control Panel -> Screen Tracker */
+function scRefs(){
+  return scRefP??=(async()=>{
+    let list=[],db=[];
+    try{list=await (await fetch("png/icons.json")).json()}catch(e){}
+    if(SCAPI)try{const r=await fetch(SCAPI,{cache:"no-store"});if(r.ok)db=(await r.json()).icons||[]}catch(e){}
+    scIcons=db;
+    const out=[];
+    await Promise.all([...list.map(([n,fl])=>["png/"+fl,n]),...db.map(d=>[d.image,d.name])].map(async([src,n])=>{
+      const im=await scImgLd(src);if(!im)return;try{out.push([n,scPx(im)])}catch(e){}}));
+    if(!out.length)scRefP=null;   // try again on the next upload
+    return out;
+  })();
+}
+const scImg=n=>{const d=scIcons.find(x=>x.name===n);return d?`<img class="ic" src="${d.image}" alt="">`:img(n)};
+async function scFiles(fl){
+  fl=[...fl].filter(x=>x&&/^image\//.test(x.type));$("scPick").value="";
+  if(!fl.length){$("scMsg").textContent="Pick a picture file (PNG or JPG).";return}
+  $("scMsg").textContent="Reading…";
+  const refs=await scRefs();
+  if(!refs.length){$("scMsg").textContent="The item pictures could not be loaded. The Screen Tracker works on the website.";return}
+  await new Promise(r=>setTimeout(r,30));   // lets "Reading…" show
+  const items=new Map(),unk=new Map(),miss=[],prev=[];let read=0;
+  for(const x of fl){
+    const url=URL.createObjectURL(x),im=await scImgLd(url);if(!im)continue;
+    const r=scScan(im),box=[];
+    for(const[cx,cy]of r?r.cells:[]){
+      const cell=scCell(r.d,r.W,r.H,cx,cy),[q,db]=scCount(r.d,r.W,r.H,cx,cy),empty=scDiff(cell,null,db);
+      if(empty<25)continue;
+      let best=999,bn="";for(const[n,ic]of refs){const e=scDiff(cell,ic,db);if(e<best){best=e;bn=n}}
+      const ok=best<45&&best<empty*.6;read++;
+      box.push([cx*r.s,cy*r.s,32*r.s,ok]);
+      if(ok){items.set(bn,(items.get(bn)||0)+q);continue}
+      const sig=scSig(cell),u=unk.get(sig);
+      if(u){u.q+=q;continue}
+      const im2=scURL(cell);unk.set(sig,{sig,im:im2,q});
+      let seen=0;for(let i=3;i<4096;i+=4)if(cell[i])seen++;
+      if(seen>=870)miss.push({sig,image:im2});   // only slots seen (almost) whole go to the Control Panel
+    }
+    prev.push({url,w:im.width,h:im.height,box});
+  }
+  scPrev.forEach(p=>URL.revokeObjectURL(p.url));scPrev=prev;
+  if(!read){
+    $("scMsg").textContent=prev.length?"No items found in the picture. Crop it to the inventory slots and try again.":"The picture could not be opened.";
+    drawSc();return;
+  }
+  SC={name:fl.map(x=>x.name).join(", "),items:[...items],unk:[...unk.values()]};sv("scLast",SC);
+  $("scMsg").textContent=`${read} item slot${read===1?"":"s"} read`+(SC.unk.length?` · ${SC.unk.length} not recognized, sent to the admins so they can add the picture.`:".");
+  if(SCAPI&&miss.length)try{fetch(SCAPI,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({miss:miss.slice(0,20)}),keepalive:true}).catch(()=>{})}catch(e){}
+  statHit({up:"screen",n:read});
+  drawSc();
+}
+function drawSc(){
+  const has=SC.items.length+SC.unk.length>0;
+  $("scName").textContent=SC.name||"No picture was selected";$("scClr").hidden=!has&&!scPrev.length;$("scUp").classList.toggle("loaded",has);
+  $("scPv").innerHTML=scPrev.map(p=>`<div style="width:${Math.min(p.w*2,1100)}px"><img src="${p.url}" alt="Uploaded screenshot" style="width:100%">`+
+    p.box.map(([x,y,s,ok])=>`<i class="${ok?"":"no"}" style="left:${x/p.w*100}%;top:${y/p.h*100}%;width:${s/p.w*100}%;height:${s/p.h*100}%"></i>`).join("")+`</div>`).join("");
+  $("scAcc").hidden=$("scCost").hidden=!has;
+  if(!has){$("scMats").innerHTML="";return}
+  $("scAcc").open=true;
+  const it=SC.items.slice().sort((a,b)=>(P[b[0]]||0)*b[1]-(P[a[0]]||0)*a[1]||a[0].localeCompare(b[0]));let k=0;
+  $("scMats").innerHTML=`<div class="skmg">`+it.map(([n,q])=>{const en=esc(n),p=P[n]||0;
+      return `<div class="skm" data-n="${en}" style="--i:${Math.min(k++,20)}" title="${en}"><span class="mpic">${scImg(n)}<i>${en.charAt(0).toUpperCase()}</i></span><span class="mnn">${en}</span>`+
+        `<label class="skpi scq"><input data-sq="${en}" value="${q}" inputmode="numeric" aria-label="${en} count"><em>pcs</em></label>`+
+        `<label class="skpi"><input data-pn="${en}" value="${p?fp(p):""}" placeholder="Unit price" inputmode="decimal" aria-label="${en} unit price"><em>Yang</em></label><span class="ut">${fv(p*q)}</span></div>`}).join("")+
+    SC.unk.map((u,j)=>`<div class="skm unk" style="--i:${Math.min(k++,20)}" title="Not recognized"><span class="mpic"><img class="ic scc" src="${u.im}" alt=""></span><span class="mnn">Not recognized</span>`+
+        `<label class="skpi scq"><input data-su="${j}" value="${u.q}" inputmode="numeric" aria-label="Count of the item not recognized"><em>pcs</em></label><span class="ut">–</span></div>`).join("")+`</div>`+
+    (SC.unk.length?`<p class="muted">Items not recognized were sent to the admins; once their picture is added they are read like the others.</p>`:"");
+  scTot();
+}
+function scTot(){
+  let t=0,n=0;
+  for(const[nm,q]of SC.items){t+=(P[nm]||0)*q;n+=q}
+  SC.unk.forEach(u=>n+=u.q);
+  $("scMats").querySelectorAll(".skm[data-n]").forEach(r=>{const it=SC.items.find(x=>x[0]===r.dataset.n);if(it)r.querySelector(".ut").textContent=fv((P[it[0]]||0)*it[1])});
+  $("scN").textContent=f(n);setOut($("scT"),fv(t));
+}
+$("scMats").addEventListener("input",e=>{
+  const i=e.target,d=i.dataset;
+  if(d.pn!==undefined){const v=parse(i.value);if(v>0)P[d.pn]=v;else delete P[d.pn];sv("lootPrices",P);calm=true;draw()}
+  else if(d.sq!==undefined){const it=SC.items.find(x=>x[0]===d.sq);if(it)it[1]=Math.round(parse(i.value));sv("scLast",SC)}
+  else if(d.su!==undefined){const u=SC.unk[+d.su];if(u)u.q=Math.round(parse(i.value));sv("scLast",SC)}
+  scTot();
+});
+$("scPick").onchange=()=>scFiles($("scPick").files);
+$("scSel").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("scPick").click()}};
+$("scClr").onclick=()=>{scPrev.forEach(p=>URL.revokeObjectURL(p.url));scPrev=[];SC={name:"",items:[],unk:[]};sv("scLast",SC);$("scMsg").textContent="";drawSc()};
+(()=>{
+  const z=$("scUp");let n=0;
+  z.addEventListener("dragenter",e=>{e.preventDefault();n++;z.classList.add("drag")});
+  z.addEventListener("dragover",e=>e.preventDefault());
+  z.addEventListener("dragleave",()=>{if(--n<=0){n=0;z.classList.remove("drag")}});
+  z.addEventListener("drop",e=>{e.preventDefault();n=0;z.classList.remove("drag");scFiles(e.dataTransfer.files)});
+})();
+/* a screenshot pasted anywhere on the Screen Tracker page */
+document.addEventListener("paste",e=>{
+  if(cur().v!=="screen")return;
+  const fl=[...((e.clipboardData&&e.clipboardData.files)||[])];
+  if(fl.length){e.preventDefault();scFiles(fl)}
+});
+
+/* ---------- control panel: Screen Tracker (slots nobody could recognize) ---------- */
+let scaNames=null;
+/* a saved slot picture: the empty slot's background and the count are made see-through */
+async function scClean(src){
+  const im=await scImgLd(src);if(!im)return "";
+  const d=new Uint8ClampedArray(scPx(im)),[,box]=scCount(d,32,32,0,0);
+  for(let p=0;p<1024;p++){const i=p*4,x=p&31,y=p>>5;
+    if((box&&x>=box[0]&&x<=box[2]&&y>=box[1]&&y<=box[3])||Math.abs(scLum(d,i)-SC_FR[p])<10)d[i+3]=0}
+  return scURL(d);
+}
+/* an uploaded picture, fitted into 32x32 */
+const scFit=x=>new Promise(r=>{const u=URL.createObjectURL(x),im=new Image();
+  im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=32;const k=Math.min(32/im.width,32/im.height),w=im.width*k,h=im.height*k;
+    c.getContext("2d").drawImage(im,(32-w)/2,(32-h)/2,w,h);URL.revokeObjectURL(u);r(c.toDataURL("image/png"))};
+  im.onerror=()=>{URL.revokeObjectURL(u);r("")};im.src=u});
+async function scaPost(body,ok){
+  try{
+    const r=await fetch(SCAPI,{method:"POST",headers:{"content-type":"application/json","x-admin-key":ADK},body:JSON.stringify(body)});
+    if(r.status===401){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out.",true);drawScA();return}
+    if(!r.ok)throw await why(r);
+    dbNote(ok);scRefP=null;drawScA();
+  }catch(e){dbNote("NOT saved ("+(typeof e==="string"?e:"no answer")+").",true)}
+}
+async function drawScA(){
+  const b=$("scaBody");
+  if(!SCAPI){b.innerHTML=`<p class="muted">The Screen Tracker pictures are kept on the website only.</p>`;return}
+  if(!ADK){b.innerHTML=`<p class="muted">Log in with the admin password on the <a href="${href("admin")}">Control Panel</a> page to see the missing pictures.</p>`;return}
+  if(!b.children.length)b.innerHTML=`<p class="muted">Loading…</p>`;
+  let s;
+  try{const r=await fetch(SCAPI,{headers:{"x-admin-key":ADK},cache:"no-store"});if(!r.ok)throw await why(r);s=await r.json()}
+  catch(e){b.innerHTML=`<p class="err">Could not load the Screen Tracker pictures (${esc(typeof e==="string"?e:"no answer")}).</p>`;return}
+  if(!s.missing){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out.",true);drawScA();return}   // the key was not accepted
+  if(!scaNames)try{scaNames=Object.keys(await (await fetch("nihor-icons.json")).json())}catch(e){scaNames=[]}
+  const names=[...new Set([...scaNames,...itemNames().map(x=>x[1])])].sort((a,c)=>a.localeCompare(c));
+  const day=t=>new Date(String(t).replace(" ","T")+"Z").toLocaleDateString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+  const M=s.missing,I=s.icons;
+  b.innerHTML=`<datalist id="scaDl">${names.map(n=>`<option value="${esc(n)}">`).join("")}</datalist>`+
+    `<section class="dlc"><h2>Missing Images <small>${M.length}</small>${M.length?`<button class="scax" id="scaClr">Clear all</button>`:""}</h2>`+
+    (M.length?`<div class="scag">`+M.map((m,i)=>`<form class="scac" data-id="${m.id}" style="--i:${Math.min(i,20)}"><div class="pix"><img src="${m.image}" alt="Slot from a screenshot"><div><b>Not recognized</b><small>Seen ${f(m.seen)}× · ${day(m.last)}</small></div></div>`+
+      `<input name="n" list="scaDl" placeholder="Item name" aria-label="Item name" maxlength="80" autocomplete="off" required>`+
+      `<div class="edf"><label class="fbtn" tabindex="0">Upload picture<input type="file" accept="image/*" hidden></label><button class="primary">Save</button><button type="button" data-rm="${m.id}" title="Remove" aria-label="Remove">✕</button></div></form>`).join("")+`</div>`
+      :`<p class="muted">Nothing missing: every item in the uploaded screenshots was recognized.</p>`)+
+    `</section><section class="dlc"><h2>Added Pictures <small>${I.length}</small></h2>`+
+    (I.length?`<div class="scag">`+I.map((c,i)=>`<div class="scac ok" style="--i:${Math.min(i,20)}"><div class="pix"><img src="${c.image}" alt=""><div><b title="${esc(c.name)}">${esc(c.name)}</b><small>Recognized in screenshots</small></div><button type="button" data-ri="${c.id}" title="Remove" aria-label="Remove ${esc(c.name)}">✕</button></div></div>`).join("")+`</div>`
+      :`<p class="muted">No pictures added yet.</p>`)+`</section>`;
+}
+$("scaRe").onclick=drawScA;
+$("scaBody").addEventListener("change",async e=>{
+  const i=e.target;if(i.type!=="file"||!i.files[0])return;
+  const u=await scFit(i.files[0]),pic=i.closest(".scac").querySelector(".pix img");i.value="";
+  if(!u){dbNote("That picture could not be opened.",true);return}
+  pic.src=u;pic.classList.add("up");pic.dataset.up="1";
+});
+$("scaBody").addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches("label.fbtn")){e.preventDefault();e.target.querySelector("input").click()}});
+$("scaBody").addEventListener("submit",async e=>{
+  e.preventDefault();const fm=e.target,pic=fm.querySelector(".pix img"),name=fm.elements.n.value.trim();if(!name)return;
+  const image=pic.dataset.up?pic.src:await scClean(pic.src);
+  scaPost({save:{name,image,miss:+fm.dataset.id}},`Saved: ${name} is recognized from now on.`);
+});
+$("scaBody").addEventListener("click",e=>{
+  const rm=e.target.closest("[data-rm]"),ri=e.target.closest("[data-ri]"),cl=e.target.closest("#scaClr");
+  if(rm)scaPost({del:[+rm.dataset.rm]},"Removed.");
+  if(ri)scaPost({delIcon:+ri.dataset.ri},"Picture removed.");
+  if(cl){
+    if(!cl.classList.contains("armed")){cl.classList.add("armed");cl.textContent="Click again to clear all";setTimeout(()=>{cl.classList.remove("armed");cl.textContent="Clear all"},4000);return}
+    scaPost({clear:true},"Missing images cleared.");
+  }
+});
+
 /* ---------- tools: items (which item pictures exist in png/) ---------- */
 let itF="all";
 function itemNames(){
@@ -2663,10 +2999,10 @@ document.addEventListener("pointermove",e=>{
 });
 
 /* ---------- sidebar & routing ---------- */
-const V={"":"home",tools:"tools","tools/loot":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons",skills:"skills","tools/items":"items","tools/dloot":"dloot","upgrade/skills":"skills",
-  admin:"admin","admin/items":"items","admin/upgrade":"cpup","admin/skills":"cpsk","admin/stats":"cpst"};
-const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"]]],
-  ["admin","Control Panel",[["admin/items","Items"],["admin/upgrade","Upgrade Cost"],["admin/skills","Skill Booster"],["admin/stats","Statistics"]]]];
+const V={"":"home",tools:"tools","tools/loot":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons",skills:"skills","tools/items":"items","tools/dloot":"dloot","tools/screen":"screen","upgrade/skills":"skills",
+  admin:"admin","admin/items":"items","admin/upgrade":"cpup","admin/skills":"cpsk","admin/stats":"cpst","admin/screen":"cpsc"};
+const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"],["tools/screen","Screen Tracker"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"]]],
+  ["admin","Control Panel",[["admin/items","Items"],["admin/upgrade","Upgrade Cost"],["admin/skills","Skill Booster"],["admin/stats","Statistics"],["admin/screen","Screen Tracker"]]]];
 /* addresses: on the website every page has a real path (/upgrade/weapons; vercel.json serves index.html
    for all of them), opened as a file the #/ addresses are used.
    The Control Panel is hidden: its pages live under /31/admin and open nowhere else; once opened,
@@ -2783,6 +3119,8 @@ function route(quiet){
   if(c.v==="cpup"){cuRen=-1;loadCat(cuCat);drawCpU()}
   if(c.v==="cpsk")drawCpS();
   if(c.v==="cpst")drawStats();
+  if(c.v==="screen"){drawSc();scRefs()}   // the item pictures start loading before the first upload
+  if(c.v==="cpsc"&&!quiet)drawScA();
   statView(c);
   if(c.v==="dloot"){if(lastV!=="dloot")$("dlBack").hidden=lastV!=="loot";drawDl()}   // Go Back only when opened from the Loot Tracker
   lastV=c.v;

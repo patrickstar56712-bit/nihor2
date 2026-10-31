@@ -91,3 +91,22 @@ CREATE TABLE IF NOT EXISTS visitors (
   day  TEXT NOT NULL,
   PRIMARY KEY (id, day)
 );
+
+-- Screen Tracker (api/screen.js makes these on first use).
+-- Inventory slots a visitor's screenshot had but no item picture matched; sig = rough colour summary, so the same item raises seen
+CREATE TABLE IF NOT EXISTS screen_missing (
+  id     INTEGER PRIMARY KEY AUTOINCREMENT,
+  sig    TEXT    NOT NULL UNIQUE,
+  image  TEXT    NOT NULL,                   -- the 32x32 slot as a PNG data URL
+  seen   INTEGER NOT NULL DEFAULT 1,
+  first  TEXT    NOT NULL DEFAULT (datetime('now')),
+  last   TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Pictures added in Control Panel -> Screen Tracker; recognized like the ones in png/
+CREATE TABLE IF NOT EXISTS screen_icons (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  name        TEXT    NOT NULL,
+  image       TEXT    NOT NULL,              -- 32x32 PNG data URL
+  created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+);

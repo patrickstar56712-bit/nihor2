@@ -1,11 +1,11 @@
 /* Site statistics (see schema.sql: stats_daily, visitors). Only counts, never file contents or IPs.
-   POST /api/stats  {v: browser id, visit: true on a session's first page, view: page, up: "loot"|"dloot", n: lines}
+   POST /api/stats  {v: browser id, visit: true on a session's first page, view: page, up: "loot"|"dloot"|"screen", n: lines or items read}
                     -> anyone; adds to today's counters (Turkey time)
    GET  /api/stats  -> header "x-admin-key": last 30 days, totals, pages and uploads for the Control Panel */
 import { client, isAdmin, missing } from "./_db.js";
 
-const PAGES = new Set(["home", "tools", "loot", "dloot", "upgrade", "weapons", "jewellery", "armour", "helmets", "shields", "skills"]);
-const TOOLS = new Set(["loot", "dloot"]);
+const PAGES = new Set(["home", "tools", "loot", "dloot", "screen", "upgrade", "weapons", "jewellery", "armour", "helmets", "shields", "skills"]);
+const TOOLS = new Set(["loot", "dloot", "screen"]);
 const DAY = "date('now', '+3 hours')";
 const BOT = /bot|crawl|spider|slurp|preview|headless|monitor|lighthouse|curl|wget|python|node-fetch/i;
 const ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
