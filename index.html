@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-10-31T23:12:39Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-10-31T23:20:05Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -946,9 +946,11 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .scpv img{display:block;max-width:100%;image-rendering:pixelated}
 .scpv i{position:absolute;border:2px solid var(--jade);border-radius:4px}
 .scpv i.no{border-color:var(--red)}
-.scsum{grid-template-columns:repeat(3,1fr);margin:0 0 12px}
-#scPv{margin:0 0 12px}
+/* the values stand right beside the picture (a wide picture pushes them right, a very wide one below) */
+.scrow{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:0 0 12px}
+#scPv{margin:0;max-width:100%}
 #scPv:empty{display:none}
+.scsum{display:flex;flex-direction:column;width:230px;margin:0}
 .scsum #scK{color:var(--red)}
 .scdga{margin-bottom:12px;padding:12px 20px}
 .scdga .bar{margin:0;gap:10px}
@@ -1089,12 +1091,14 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
     <input id="scPick" type="file" accept="image/*" multiple hidden>
     <p id="scMsg" role="status"></p>
   </section>
-  <div class="sum scsum" id="scSum" aria-live="polite" hidden>
-    <div class="main"><small>Total Value</small><b id="scT">0</b></div>
-    <div><small>Dungeon Keys</small><b id="scK">0</b></div>
-    <div><small>Material Values</small><b id="scM">0</b></div>
+  <div class="scrow">
+    <div class="scpv" id="scPv"></div>
+    <div class="sum scsum" id="scSum" aria-live="polite" hidden>
+      <div class="main"><small>Total Value</small><b id="scT">0</b></div>
+      <div><small>Dungeon Keys</small><b id="scK">0</b></div>
+      <div><small>Material Values</small><b id="scM">0</b></div>
+    </div>
   </div>
-  <div class="scpv" id="scPv"></div>
   <section class="add scdga">
     <div class="bar">
       <span class="lt">Add Dungeons<small>their key or ticket cost comes off the Total Value</small></span>
