@@ -95,6 +95,9 @@ CREATE TABLE IF NOT EXISTS visitors (
 -- An item's kind as set in Control Panel -> Items (Weapon, Earring ...); k = the item's picture key (api/screen.js makes it on first use)
 CREATE TABLE IF NOT EXISTS item_types (k TEXT PRIMARY KEY, t TEXT NOT NULL);
 
+-- Control Panel -> Dungeon Keys: each dungeon's key next to its chest (item names; api/screen.js makes it on first use)
+CREATE TABLE IF NOT EXISTS dungeon_pairs (id INTEGER PRIMARY KEY AUTOINCREMENT, key_name TEXT NOT NULL DEFAULT '', chest_name TEXT NOT NULL DEFAULT '');
+
 -- Screen Tracker (api/screen.js makes these on first use).
 -- Inventory slots a visitor's screenshot had but no item picture matched; sig = rough colour summary, so the same item raises seen
 CREATE TABLE IF NOT EXISTS screen_missing (

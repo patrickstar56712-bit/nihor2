@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-10-31T22:55:37Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-10-31T23:12:39Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,6 +19,9 @@
 :root[data-theme="grey"]{--bg:#2f3237;--panel:#3b3f45;--ink:#f1f1f1;--mute:#b6bac1;--line:#555a62;--gold:#e5a93d;--jade:#7fd1b8;--hl:#4a4636}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+:root{color-scheme:light dark}
+:root[data-theme]{color-scheme:dark}   /* the browser's own lists, pickers and scrollbars follow the theme */
+select option{background:var(--panel);color:var(--ink)}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif;font-variant-numeric:tabular-nums;transition:background-color .35s,color .35s}
 /* soft ambient glow behind everything */
@@ -458,7 +461,7 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 .its{font-size:11px;color:var(--mute)}
 .itadd{padding:10px 14px;margin-bottom:12px}
 .itadd .bar{margin:0;gap:10px}
-#itAn{flex:0 1 240px}
+.itan{flex:0 1 240px}
 .itapv{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:8px;background:var(--soft)}
 .itapv:empty{display:none}
 .itapv img{max-width:32px;max-height:32px}
@@ -949,7 +952,8 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .scsum #scK{color:var(--red)}
 .scdga{margin-bottom:12px;padding:12px 20px}
 .scdga .bar{margin:0;gap:10px}
-#scDn{flex:0 1 260px}
+.scdn{flex:0 1 260px}
+.scdga:focus-within,.itadd:focus-within{position:relative;z-index:6}
 .skm.dg{border-color:color-mix(in srgb,var(--red) 45%,var(--line))}
 .skm.dg .ut{color:var(--red)}
 .skm.dg .xb{flex:none;padding:1px 7px}
@@ -975,6 +979,21 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .scac [data-rm],.scac [data-ri]{margin-left:auto}
 /* item name search: a list under the box, picture + name, "Items" when the item is in Control Panel -> Items */
 .scdd{position:relative}
+/* control panel: dungeon key | chest pairs */
+.dkl{display:flex;flex-direction:column;gap:10px}
+.dkp{display:grid;grid-template-columns:1fr auto 1fr auto;align-items:center;gap:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);animation:pop .35s calc(var(--i,0) * .03s) var(--ease) both}
+.dkp:focus-within{position:relative;z-index:5}
+.dkp.new{border-style:dashed;border-color:color-mix(in srgb,var(--gold) 55%,var(--line))}
+.dks{display:flex;align-items:center;gap:10px;min-width:0}
+.dkpic{flex:none;width:56px;height:56px;display:grid;place-items:center;padding:0;border:1px dashed color-mix(in srgb,var(--gold) 50%,var(--line));border-radius:10px;background:var(--soft);color:var(--mute);font-size:22px;cursor:pointer}
+.dkpic:hover{border-color:var(--gold);color:var(--gold)}
+.dkpic img{width:40px;height:40px;object-fit:contain;margin:0}
+.dkn{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.dkn small{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--gold)}
+.dks[data-s="chest"] .dkn small{color:var(--jade)}
+.dkx{color:var(--mute);font-size:18px}
+.dka{display:flex;gap:6px}
+@media (max-width:760px){.dkp{grid-template-columns:1fr}.dkx{justify-self:center;transform:rotate(90deg)}.dka{justify-content:flex-end}}
 .cpsc .dlc:focus-within,.scac:focus-within{position:relative;z-index:5}   /* the open list stays above the next card and section */
 .scdd input{width:100%}
 .scdd ul{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:30;max-height:244px;overflow-y:auto;overscroll-behavior:contain;margin:0;padding:4px;list-style:none;
@@ -1079,8 +1098,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
   <section class="add scdga">
     <div class="bar">
       <span class="lt">Add Dungeons<small>their key or ticket cost comes off the Total Value</small></span>
-      <input id="scDn" list="scDl" placeholder="Dungeon name" aria-label="Dungeon name" autocomplete="off">
-      <datalist id="scDl"></datalist>
+      <div class="scdd scdn"><input id="scDn" data-cb="dungeons" placeholder="Dungeon name" aria-label="Dungeon name" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list"><ul role="listbox" hidden></ul></div>
       <button id="scDa">Add</button>
     </div>
   </section>
@@ -1188,7 +1206,14 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
     <div id="dbAd" class="dbf" hidden><button id="dbUp" class="primary">Upload this browser's data</button><button id="dbRe">Reload from database</button><button id="dbOut">Log out</button></div>
     <output id="dbMsg" aria-live="polite"></output>
   </section>
-  <div class="cards"><a class="card" href="#/admin/items" style="--i:0"><b>Items</b><span>Every item on the site and whether it has a picture.</span></a><a class="card" href="#/admin/upgrade" style="--i:1"><b>Upgrade Cost</b><span>Add, rename and delete items, fill their materials from text.</span></a><a class="card" href="#/admin/skills" style="--i:2"><b>Skill Booster</b><span>Character skill groups and the skill level cost list.</span></a><a class="card" href="#/admin/stats" style="--i:3"><b>Statistics</b><span>Visits, unique visitors, most opened pages and uploaded tracker files.</span></a><a class="card" href="#/admin/screen" style="--i:4"><b>Screen Tracker</b><span>Items the Screen Tracker could not recognize: add their pictures.</span></a></div>
+  <div class="cards"><a class="card" href="#/admin/items" style="--i:0"><b>Items</b><span>Every item on the site and whether it has a picture.</span></a><a class="card" href="#/admin/upgrade" style="--i:1"><b>Upgrade Cost</b><span>Add, rename and delete items, fill their materials from text.</span></a><a class="card" href="#/admin/skills" style="--i:2"><b>Skill Booster</b><span>Character skill groups and the skill level cost list.</span></a><a class="card" href="#/admin/stats" style="--i:3"><b>Statistics</b><span>Visits, unique visitors, most opened pages and uploaded tracker files.</span></a><a class="card" href="#/admin/screen" style="--i:4"><b>Screen Tracker</b><span>Items the Screen Tracker could not recognize: add their pictures.</span></a><a class="card" href="#/admin/keys" style="--i:5"><b>Dungeon Keys</b><span>Match each dungeon key with its chest and upload their pictures.</span></a></div>
+</main>
+
+<main id="v-cpdk" hidden>
+  <p class="crumb"><a href="#/admin">← Control Panel</a></p>
+  <div class="lth"><h1>Dungeon Keys</h1><button class="flb" id="dkAdd">+ Add Pair</button></div>
+  <p class="sub">Each dungeon's key next to its chest. Pick or write their names, click a picture box to upload its picture: it is saved on the website and shows in Items (as Dungeon Key / Dungeon Chest) too.</p>
+  <div id="dkBody"></div>
 </main>
 
 <main id="v-cpsc" class="cpsc" hidden>
@@ -1258,7 +1283,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
   <section class="add itadd" id="itAdd" hidden>
     <div class="bar">
       <span class="lt">Add a picture<small>saved on the website, every visitor sees it</small></span>
-      <input id="itAn" list="itAl" placeholder="Item name" aria-label="Item name" autocomplete="off"><datalist id="itAl"></datalist>
+      <div class="scdd itan"><input id="itAn" data-cb="items" placeholder="Item name" aria-label="Item name" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list"><ul role="listbox" hidden></ul></div>
       <select id="itAt" aria-label="Kind"></select>
       <label class="fbtn" for="itAf" tabindex="0" id="itAfL">Choose Picture</label><input id="itAf" type="file" accept="image/*" hidden>
       <span class="itapv" id="itApv"></span>
@@ -3042,7 +3067,6 @@ $("scMats").addEventListener("input",e=>{
 });
 $("scMats").addEventListener("click",e=>{const b=e.target.closest("[data-dx]");if(!b)return;SCD.splice(+b.dataset.dx,1);sv("scDg",SCD);drawSc()});
 /* dungeons: the Loot Tracker's list to pick from, or any name; the last price per run of each is remembered */
-$("scDl").innerHTML=DL_DUN.map(d=>`<option value="${esc(d.lb)}">`).join("");
 function scDgAdd(){
   const n=$("scDn").value.trim().replace(/s+/g," ");if(!n)return $("scDn").focus();
   const dd=dlDun(n),nm=dd?dd.lb:n;
@@ -3051,7 +3075,7 @@ function scDgAdd(){
   const inp=$("scMats").querySelector(`.skm.dg[title="${CSS.escape(esc(nm))}"] input`)||$("scMats").querySelector(".skm.dg input");if(inp){inp.focus();inp.select()}
 }
 $("scDa").onclick=scDgAdd;
-$("scDn").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();scDgAdd()}};
+$("scDn").onkeydown=e=>{if(e.key==="Enter"&&!$("scDn").nextElementSibling.querySelector(".act")){e.preventDefault();scDgAdd()}};
 $("scPick").onchange=()=>scFiles($("scPick").files);
 $("scSel").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("scPick").click()}};
 $("scClr").onclick=()=>{scPrev.forEach(p=>URL.revokeObjectURL(p.url));scPrev=[];SC={name:"",items:[],unk:[]};sv("scLast",SC);$("scMsg").textContent="";drawSc()};
@@ -3123,6 +3147,71 @@ async function drawScA(){
     sg.innerHTML=`<span>Closest in Items:</span>`+s.map(([n])=>`<button type="button" data-pick="${esc(n)}" title="Use this name">${img(n)}${esc(n)}</button>`).join("");sg.hidden=false;
   }
 }
+/* ---------- control panel: Dungeon Keys (a dungeon's key next to its chest) ---------- */
+const DKS=[["key","Dungeon Key"],["chest","Dungeon Chest"]];
+const dkRow=(p,i)=>`<div class="dkp${p.id?"":" new"}" data-id="${p.id||""}" style="--i:${Math.min(i,20)}">`+
+  DKS.map(([s,lb])=>{const n=p[s]||"";return `<div class="dks" data-s="${s}"><button type="button" class="dkpic" title="Upload the ${lb.toLowerCase()} picture" aria-label="Upload the ${lb.toLowerCase()} picture">${n?img(n):"+"}</button>`+
+    `<div class="dkn"><small>${lb}</small><div class="scdd"><input data-cb="items" value="${esc(n)}" placeholder="${lb} name" aria-label="${lb} name" maxlength="80" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list"><ul role="listbox" hidden></ul></div></div></div>`}).join(`<span class="dkx" aria-hidden="true">⇄</span>`)+
+  `<div class="dka"><button class="primary" data-dks>Save</button><button data-dkd title="Remove" aria-label="Remove this pair">✕</button></div></div>`;
+async function drawDk(){
+  const b=$("dkBody");$("dkAdd").hidden=!(SCAPI&&ADK);
+  if(!SCAPI){b.innerHTML=`<p class="muted">The dungeon keys are kept on the website only.</p>`;return}
+  if(!ADK){b.innerHTML=`<p class="muted">Log in with the admin password on the <a href="${href("admin")}">Control Panel</a> page to edit the dungeon keys.</p>`;return}
+  if(!b.children.length)b.innerHTML=`<p class="muted">Loading…</p>`;
+  let s;
+  try{const r=await fetch(SCAPI,{headers:{"x-admin-key":ADK},cache:"no-store"});if(!r.ok)throw await why(r);s=await r.json()}
+  catch(e){b.innerHTML=`<p class="err">Could not load the dungeon keys (${esc(typeof e==="string"?e:"no answer")}).</p>`;return}
+  if(!s.missing){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out.",true);drawDk();return}
+  setPics(s.icons||[]);ITY=s.types||{};sv("itTypes",ITY);
+  const P2=s.pairs||[];
+  b.innerHTML=`<div class="dkl" id="dkL">${P2.map(dkRow).join("")}</div>`+(P2.length?"":`<p class="muted" id="dkNo">No pairs yet · press <b>+ Add Pair</b>.</p>`);
+  if(!scaO.length)scaO=await scaOpts();
+}
+async function dkPost(o){
+  try{
+    const r=await fetch(SCAPI,{method:"POST",headers:{"content-type":"application/json","x-admin-key":ADK},body:JSON.stringify(o)});
+    if(r.status===401){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out.",true);drawDk();return false}
+    if(!r.ok)throw await why(r);return true;
+  }catch(x){dbNote("NOT saved ("+(typeof x==="string"?x:"no answer")+").",true);return false}
+}
+$("dkAdd").onclick=()=>{
+  const l=$("dkL");if(!l)return;const no=$("dkNo");if(no)no.remove();
+  l.insertAdjacentHTML("afterbegin",dkRow({},0));l.firstElementChild.querySelector("input").focus();
+};
+$("dkBody").addEventListener("change",e=>{
+  const t=e.target;if(!t.dataset.cb)return;
+  const n=t.value.trim(),pic=t.closest(".dks").querySelector(".dkpic");pic.innerHTML=n?img(n):"+";
+});
+$("dkBody").addEventListener("click",async e=>{
+  const row=e.target.closest(".dkp");if(!row)return;
+  const nm=s=>row.querySelector(`.dks[data-s="${s}"] input`).value.trim().replace(/\s+/g," ");
+  const pic=e.target.closest(".dkpic");
+  if(pic){
+    const side=pic.closest(".dks"),lb=DKS.find(x=>x[0]===side.dataset.s)[1],n=nm(side.dataset.s);
+    if(!n){dbNote(`Write the ${lb.toLowerCase()}'s name first.`,true);side.querySelector("input").focus();return}
+    const inp=document.createElement("input");inp.type="file";inp.accept="image/*";
+    inp.onchange=async()=>{
+      const fl=inp.files[0];if(!fl)return;const u=await scFit(fl);if(!u){dbNote("That picture could not be opened.",true);return}
+      const k=slug(n);
+      if(!await dkPost({save:{name:n,image:u},type:{k,t:lb}}))return;
+      PICS[k]=[n,u];sv("pics",PICS);ITY[k]=lb;sv("itTypes",ITY);scRefP=null;scaO=[];
+      pic.innerHTML=`<img src="${u}" alt="">`;dbNote(`Saved the picture of ${n} · it shows in Items too.`);
+    };
+    inp.click();return;
+  }
+  if(e.target.closest("[data-dks]")){
+    const key=nm("key"),chest=nm("chest");
+    if(!key&&!chest){dbNote("Write the key's or the chest's name first.",true);return}
+    const types=[[key,"Dungeon Key"],[chest,"Dungeon Chest"]].filter(x=>slug(x[0])).map(([n,t])=>({k:slug(n),t}));
+    if(!await dkPost({pair:{id:+row.dataset.id||0,key,chest},types}))return;
+    types.forEach(y=>ITY[y.k]=y.t);sv("itTypes",ITY);
+    dbNote(`Saved: ${key||"–"} ⇄ ${chest||"–"}.`);drawDk();return;
+  }
+  if(e.target.closest("[data-dkd]")){
+    if(row.dataset.id&&!await dkPost({delPair:+row.dataset.id}))return;
+    row.remove();dbNote("Pair removed.");
+  }
+});
 /* names to pick from: everything in Items (with its picture when it has one), then the catalog's other names */
 let scaO=[];
 async function scaOpts(){
@@ -3136,15 +3225,38 @@ async function scaOpts(){
   for(const n of scaNames)add(n,false);
   return[...o.values()].sort((a,c)=>a.n.localeCompare(c.n));
 }
-function scaList(inp,open){
+/* a themed name list under an input (in a .scdd), in place of the browser's datalist popup */
+function cbList(inp,open,src){
   const ul=inp.nextElementSibling;inp.setAttribute("aria-expanded",String(open));
   if(!open){ul.hidden=true;return}
   const q=inp.value.trim().toLowerCase(),st=o=>o.n.toLowerCase().startsWith(q)?0:1;
-  const l=scaO.filter(o=>!q||o.n.toLowerCase().includes(q)).sort((a,c)=>q?st(a)-st(c):0).slice(0,60);
-  ul.innerHTML=l.map(o=>`<li role="option" data-v="${esc(o.n)}">${o.src?`<img src="${o.src}" alt="">`:`<i>${esc(o.n[0].toUpperCase())}</i>`}<span>${esc(o.n)}</span>${o.it?`<em title="In Control Panel → Items">Items</em>`:""}</li>`).join("")
-    ||`<li class="none">No item with that name · it is saved as written</li>`;
+  const l=src.filter(o=>!q||o.n.toLowerCase().includes(q)).sort((a,c)=>q?st(a)-st(c):0).slice(0,60);
+  ul.innerHTML=l.map(o=>`<li role="option" data-v="${esc(o.n)}">${o.src?`<img src="${o.src}" alt="">`:o.ic?img(o.ic):`<i>${esc(o.n[0].toUpperCase())}</i>`}<span>${esc(o.n)}</span>${o.it?`<em title="In Control Panel → Items">Items</em>`:""}</li>`).join("")
+    ||`<li class="none">No match · it is saved as written</li>`;
   ul.hidden=false;ul.scrollTop=0;
 }
+const scaList=(inp,open)=>cbList(inp,open,scaO);
+/* inputs with data-cb anywhere: "items" = everything in Items, "dungeons" = the Loot Tracker's dungeons */
+const CBSRC={items:()=>scaO,dungeons:()=>DL_DUN.map(d=>({n:d.lb,ic:d.ic}))};
+const cbOpen=t=>{cbList(t,true,CBSRC[t.dataset.cb]());
+  if(t.dataset.cb==="items"&&!scaO.length)scaOpts().then(o=>{scaO=o;if(document.activeElement===t)cbList(t,true,scaO)})};
+const cbPick=(t,v)=>{t.value=v;cbList(t,false,[]);t.dispatchEvent(new Event("change",{bubbles:true}))};
+document.addEventListener("input",e=>{if(e.target.dataset&&e.target.dataset.cb)cbOpen(e.target)});
+document.addEventListener("focusin",e=>{if(e.target.dataset&&e.target.dataset.cb)cbOpen(e.target)});
+document.addEventListener("focusout",e=>{if(e.target.dataset&&e.target.dataset.cb)cbList(e.target,false,[])});
+document.addEventListener("mousedown",e=>{
+  const li=e.target.closest&&e.target.closest(".scdd li"),t=li&&li.closest(".scdd").querySelector("input[data-cb]");if(!t)return;
+  e.preventDefault();if(li.dataset.v)cbPick(t,li.dataset.v);
+});
+document.addEventListener("keydown",e=>{
+  const t=e.target;if(!t.dataset||!t.dataset.cb)return;
+  const ul=t.nextElementSibling,li=[...ul.querySelectorAll("li[data-v]")],a=ul.querySelector(".act"),i=li.indexOf(a);
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){
+    e.preventDefault();if(ul.hidden){cbOpen(t);return}if(!li.length)return;
+    a&&a.classList.remove("act");const n=li[(i+(e.key==="ArrowDown"?1:-1)+li.length)%li.length];n.classList.add("act");n.scrollIntoView({block:"nearest"});
+  }else if(e.key==="Enter"&&!ul.hidden&&a){e.preventDefault();cbPick(t,a.dataset.v)}
+  else if(e.key==="Escape")cbList(t,false,[]);
+});
 const scaPick=(inp,v)=>{inp.value=v;scaList(inp,false)};
 $("scaRe").onclick=drawScA;
 $("scaBody").addEventListener("input",e=>{if(e.target.name==="n")scaList(e.target,true)});
@@ -3192,7 +3304,7 @@ $("scaBody").addEventListener("click",e=>{
 /* ---------- tools: items (which item pictures exist in png/) ---------- */
 let itF="all";
 /* the kinds an item can be given in Items; ITY: item key -> kind, set by the admins (database) */
-const KINDS=["Loot","Material","Weapon","Armour","Helmet","Shield","Shoes","Jewellery","Necklace","Earring","Bracelet","Skill Book","Character","Chest","Pet","Mount","Costume","Other"];
+const KINDS=["Loot","Material","Weapon","Armour","Helmet","Shield","Shoes","Jewellery","Necklace","Earring","Bracelet","Skill Book","Character","Chest","Dungeon Key","Dungeon Chest","Pet","Mount","Costume","Other"];
 let ITY=ld("itTypes",{});
 async function itTypes(){
   if(!SCAPI)return;
@@ -3237,7 +3349,6 @@ async function drawItems(){
   for(const[k,[n]]of Object.entries(PICS))if(!have.has(k)){have.add(k);list.push([k,n,"Picture only"])}
   list.forEach(x=>{if(ITY[x[0]])x[2]=ITY[x[0]]});
   list.sort((a,b)=>a[1].localeCompare(b[1]));
-  $("itAl").innerHTML=list.map(x=>`<option value="${esc(x[1])}">`).join("");
   if(!$("itAt").options.length)$("itAt").innerHTML=KINDS.map(k=>`<option>${k}</option>`).join("");
   $("itg").innerHTML=list.map(([k,n,g],i)=>`<div class="itm" style="--i:${Math.min(i,40)}" data-k="${k}" data-nm="${esc(n)}" data-n="${esc((n+" "+g).toLowerCase())}"><div class="itp">${esc(n[0].toUpperCase())}</div><b>${esc(n)}</b>${adm?`<button class="itg-t" title="Click to set what this item is">${esc(g)}</button>`:`<small class="itg-t">${esc(g)}</small>`}<button class="cp" title="Copy file name">${k}.png</button><small class="its">Checking…</small></div>`).join("")
     ||`<p class="muted">No items yet.</p>`;
@@ -3330,9 +3441,9 @@ document.addEventListener("pointermove",e=>{
 
 /* ---------- sidebar & routing ---------- */
 const V={"":"home",tools:"tools","tools/loot":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons",skills:"skills","tools/items":"items","tools/dloot":"dloot","tools/screen":"screen","upgrade/skills":"skills",
-  admin:"admin","admin/items":"items","admin/upgrade":"cpup","admin/skills":"cpsk","admin/stats":"cpst","admin/screen":"cpsc"};
+  admin:"admin","admin/items":"items","admin/upgrade":"cpup","admin/skills":"cpsk","admin/stats":"cpst","admin/screen":"cpsc","admin/keys":"cpdk"};
 const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"],["tools/screen","Screen Tracker"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"]]],
-  ["admin","Control Panel",[["admin/items","Items"],["admin/upgrade","Upgrade Cost"],["admin/skills","Skill Booster"],["admin/stats","Statistics"],["admin/screen","Screen Tracker"]]]];
+  ["admin","Control Panel",[["admin/items","Items"],["admin/upgrade","Upgrade Cost"],["admin/skills","Skill Booster"],["admin/stats","Statistics"],["admin/screen","Screen Tracker"],["admin/keys","Dungeon Keys"]]]];
 /* addresses: on the website every page has a real path (/upgrade/weapons; vercel.json serves index.html
    for all of them), opened as a file the #/ addresses are used.
    The Control Panel is hidden: its pages live under /31/admin and open nowhere else; once opened,
@@ -3452,6 +3563,7 @@ function route(quiet){
   if(c.v==="cpst")drawStats();
   if(c.v==="screen"){drawSc();scRefs()}   // the item pictures start loading before the first upload
   if(c.v==="cpsc"&&!quiet)drawScA();
+  if(c.v==="cpdk"&&!quiet)drawDk();
   statView(c);
   if(c.v==="dloot"){if(lastV!=="dloot")$("dlBack").hidden=lastV!=="loot";drawDl()}   // Go Back only when opened from the Loot Tracker
   lastV=c.v;
