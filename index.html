@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-10-31T20:10:39Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-10-31T22:25:22Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -931,6 +931,18 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 .scpv img{display:block;max-width:100%;image-rendering:pixelated}
 .scpv i{position:absolute;border:2px solid var(--jade);border-radius:4px}
 .scpv i.no{border-color:var(--red)}
+.scrow{display:flex;gap:12px;align-items:flex-start;margin:12px 0}
+.scrow .scpv{flex:1;min-width:0;margin-top:0}
+.scrow .scpv:empty{display:none}
+.scsum{display:flex;flex-direction:column;width:250px;flex:none;margin:0 0 0 auto}
+.scsum #scK{color:var(--red)}
+.scdga{margin-bottom:12px;padding:12px 20px}
+.scdga .bar{margin:0;gap:10px}
+#scDn{flex:0 1 260px}
+.skm.dg{border-color:color-mix(in srgb,var(--red) 45%,var(--line))}
+.skm.dg .ut{color:var(--red)}
+.skm.dg .xb{flex:none;padding:1px 7px}
+@media (max-width:760px){.scrow{flex-direction:column;align-items:stretch}.scsum{width:auto;margin:0}}
 #scMats .skmg{grid-template-columns:repeat(auto-fill,minmax(min(440px,100%),1fr))}
 .skpi.scq{width:78px}
 #scMats .mnn{white-space:normal;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
@@ -1048,15 +1060,26 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
     <input id="scPick" type="file" accept="image/*" multiple hidden>
     <p id="scMsg" role="status"></p>
   </section>
-  <div class="scpv" id="scPv"></div>
+  <div class="scrow">
+    <div class="scpv" id="scPv"></div>
+    <div class="sum scsum" id="scSum" aria-live="polite" hidden>
+      <div class="main"><small>Total Value</small><b id="scT">0</b></div>
+      <div><small>Dungeon Keys</small><b id="scK">0</b></div>
+      <div><small>Material Values</small><b id="scM">0</b></div>
+    </div>
+  </div>
+  <section class="add scdga">
+    <div class="bar">
+      <span class="lt">Add Dungeons<small>their key or ticket cost comes off the Total Value</small></span>
+      <input id="scDn" list="scDl" placeholder="Dungeon name" aria-label="Dungeon name" autocomplete="off">
+      <datalist id="scDl"></datalist>
+      <button id="scDa">Add</button>
+    </div>
+  </section>
   <details class="acc" id="scAcc" open hidden>
     <summary>Material Prices</summary>
     <div class="acc-b"><div id="scMats"></div></div>
   </details>
-  <div class="costbox" id="scCost" aria-live="polite" hidden>
-    <span>Items :</span><b id="scN">0</b>
-    <span class="tt">Total Value :</span><b class="tt" id="scT">0</b>
-  </div>
 </main>
 
 <main id="v-dloot" hidden>
@@ -1701,7 +1724,7 @@ function win(){
   return{ok:1,a,b,h};
 }
 function fitR(){
-  const el=$("rngph"),sm=document.querySelector(".sum");
+  const el=$("rngph"),sm=document.querySelector("#v-loot .sum");
   const fit=()=>{let s=11;el.style.fontSize=s+"px";while(el.scrollWidth>el.clientWidth&&s>9){s-=.5;el.style.fontSize=s+"px"}return el.scrollWidth<=el.clientWidth};
   sm.classList.remove("tight");
   if(!fit()){sm.classList.add("tight");fit()}
@@ -2834,18 +2857,35 @@ function scDiff(cell,ic,m,ox=0,oy=0,st=1){
 /* best matching names for a slot, closest first: [[name, distance], ...]. A reference that is not a plain 32x32 icon
    comes in several sizes and is tried a few pixels around; the closest few are tried around once more */
 function scBest(cell,m,refs,top=3){
-  const r=new Map(),put=(n,e)=>{if(!(r.get(n)<=e))r.set(n,e)};
+  const r=new Map(),put=(n,e,px,ox=0,oy=0)=>{const o=r.get(n);if(!o||e<o[0])r.set(n,[e,px,ox,oy])};
   const around=(px,d,st)=>{let b=999,bo=[0,0];for(let oy=-d;oy<=d;oy++)for(let ox=-d;ox<=d;ox++){const e=scDiff(cell,px,m,ox,oy,st);if(e<b){b=e;bo=[ox,oy]}}return bo};
   for(const[n,vs]of refs)for(const[px,odd]of vs){
-    if(!odd){put(n,scDiff(cell,px,m));continue}
-    const[ox,oy]=around(px,3,3);put(n,scDiff(cell,px,m,ox,oy));
+    if(!odd){put(n,scDiff(cell,px,m),px);continue}
+    const[ox,oy]=around(px,3,3);put(n,scDiff(cell,px,m,ox,oy),px,ox,oy);
   }
-  const s=[...r].sort((a,b)=>a[1]-b[1]);
-  for(const[n]of s.slice(0,6))for(const[px]of refs.get(n)){const[ox,oy]=around(px,2,2);put(n,scDiff(cell,px,m,ox,oy))}
-  return[...r].sort((a,b)=>a[1]-b[1]).slice(0,top);
+  const all=()=>[...r].map(([n,[e,px,ox,oy]])=>[n,e,px,ox,oy]).sort((a,b)=>a[1]-b[1]);
+  for(const[n]of all().slice(0,6))for(const[px]of refs.get(n)){const[ox,oy]=around(px,2,2);put(n,scDiff(cell,px,m,ox,oy),px,ox,oy)}
+  return all().slice(0,top);   // [name, distance, pixels, x offset, y offset]
+}
+/* only where the icon itself is drawn: [distance to the icon, distance to an empty slot]; a small icon leaves most
+   of the slot empty, so over the whole slot it hardly differs from an empty one */
+function scOn(cell,m,[,,ic,ox,oy]){
+  let a=0,b=0,n=0;
+  for(let p=0;p<1024;p++){
+    const i=p*4,u=(p&31)-ox,v=(p>>5)-oy;if(cell[i+3]===0||m[p]||u<0||v<0||u>31||v>31)continue;
+    const j=(v*32+u)*4,al=ic[j+3]/255;if(al<.5)continue;
+    const f=SC_FR[p]*(1-al),d=k=>Math.abs(cell[i+k]-(ic[j+k]*al+f));
+    a+=Math.min(d(0)+d(1)+d(2),150);b+=Math.min(Math.abs(cell[i]-SC_FR[p])+Math.abs(cell[i+1]-SC_FR[p])+Math.abs(cell[i+2]-SC_FR[p]),150);n++;
+  }
+  return n>=40?[a/n,b/n]:[999,0];
 }
 /* a slot counts as that item when it is close, or fairly close and clearly closer than any other item */
-const scOk=(s,empty)=>!!s[0]&&s[0][1]<empty*.6&&(s[0][1]<45||(s[0][1]<65&&(!s[1]||s[0][1]<s[1][1]*.75)));
+const scOk=(s,empty,cell,m)=>{
+  if(!s[0])return false;const e=s[0][1],far=!s[1]||e<s[1][1]*.85;
+  if(e<empty*.6&&(e<45||(e<65&&(!s[1]||e<s[1][1]*.75))))return true;
+  if(!cell||e>=45||!far)return false;
+  const[a,b]=scOn(cell,m,s[0]);return a<b*.45;   // a small icon: judged where it is drawn
+};
 function scCell(d,W,H,cx,cy){
   const o=new Uint8ClampedArray(4096);
   for(let y=0;y<32;y++)for(let x=0;x<32;x++){const X=cx+x,Y=cy+y;if(X<0||Y<0||X>=W||Y>=H)continue;const i=(Y*W+X)*4,j=(y*32+x)*4;o[j]=d[i];o[j+1]=d[i+1];o[j+2]=d[i+2];o[j+3]=255}
@@ -2854,7 +2894,7 @@ function scCell(d,W,H,cx,cy){
 /* reads one picture; a screenshot taken with display scaling is shrunk back to 32px slots (the size whose frames fit best) */
 function scScan(im){
   let best=null;
-  for(const s of [1,2,1.5,1.25,3,.75,.5]){
+  for(const s of [1,2,1.5,1.25,1.75,3,.75,.5]){
     const W=Math.round(im.width/s),H=Math.round(im.height/s);if(W<20||H<20)continue;
     const c=document.createElement("canvas");c.width=W;c.height=H;
     const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(im,0,0,W,H);
@@ -2887,6 +2927,7 @@ function scVars(im){
 
 const SCAPI=API?"/api/screen":"";
 let SC=ld("scLast",null);if(!SC||!Array.isArray(SC.items)||!Array.isArray(SC.unk))SC={name:"",items:[],unk:[]};
+let SCD=ld("scDg",[]),DGP=ld("dgPrices",{});if(!Array.isArray(SCD))SCD=[];   // added dungeons [{n, r: runs, p: price per run}], last price per dungeon
 let scPrev=[],scRefP=null;   // this visit's pictures; reference pictures (loading or loaded)
 /* reference pictures for recognizing slots */
 function scRefs(){
@@ -2920,7 +2961,7 @@ async function scFiles(fl){
     for(const[cx,cy]of r?r.cells:[]){
       const cell=scCell(r.d,r.W,r.H,cx,cy),[q,db]=scCount(r.d,r.W,r.H,cx,cy),m=scMask(cell,db),empty=scDiff(cell,null,m);
       if(empty<25)continue;
-      const s=scBest(cell,m,refs),ok=scOk(s,empty),bn=ok?s[0][0]:"";read++;
+      const s=scBest(cell,m,refs),ok=scOk(s,empty,cell,m),bn=ok?s[0][0]:"";read++;
       box.push([cx*r.s,cy*r.s,32*r.s,ok]);
       if(ok){items.set(bn,(items.get(bn)||0)+q);continue}
       const sig=scSig(cell),u=unk.get(sig);
@@ -2947,11 +2988,15 @@ function drawSc(){
   $("scName").textContent=SC.name||"No picture was selected";$("scClr").hidden=!has&&!scPrev.length;$("scUp").classList.toggle("loaded",has);
   $("scPv").innerHTML=scPrev.map(p=>`<div style="width:${Math.min(p.w*2,1100)}px"><img src="${p.url}" alt="Uploaded screenshot" style="width:100%">`+
     p.box.map(([x,y,s,ok])=>`<i class="${ok?"":"no"}" style="left:${x/p.w*100}%;top:${y/p.h*100}%;width:${s/p.w*100}%;height:${s/p.h*100}%"></i>`).join("")+`</div>`).join("");
-  $("scAcc").hidden=$("scCost").hidden=!has;
-  if(!has){$("scMats").innerHTML="";return}
+  $("scSum").hidden=!has&&!SCD.length;$("scAcc").hidden=!has&&!SCD.length;
+  if($("scAcc").hidden){$("scMats").innerHTML="";return}
   $("scAcc").open=true;
   const it=SC.items.slice().sort((a,b)=>(P[b[0]]||0)*b[1]-(P[a[0]]||0)*a[1]||a[0].localeCompare(b[0]));let k=0;
-  $("scMats").innerHTML=`<div class="skmg">`+it.map(([n,q])=>{const en=esc(n),p=P[n]||0;
+  $("scMats").innerHTML=`<div class="skmg">`+SCD.map((d,j)=>{const en=esc(d.n),dd=dlDun(d.n);
+      return `<div class="skm dg" style="--i:${Math.min(k++,20)}" title="${en}"><span class="mpic">${img(dd?dd.ic:d.n)}<i>${en.charAt(0).toUpperCase()}</i></span><span class="mnn">${en}</span>`+
+        `<label class="skpi scq"><input data-dr="${j}" value="${d.r}" inputmode="numeric" aria-label="${en} runs"><em>run${d.r===1?"":"s"}</em></label>`+
+        `<label class="skpi"><input data-dp="${j}" value="${d.p?fp(d.p):""}" placeholder="Price / run" inputmode="decimal" aria-label="${en} key price per run"><em>Yang</em></label><span class="ut"></span>`+
+        `<button class="xb" data-dx="${j}" aria-label="Remove ${en}">✕</button></div>`}).join("")+it.map(([n,q])=>{const en=esc(n),p=P[n]||0;
       return `<div class="skm" data-n="${en}" style="--i:${Math.min(k++,20)}" title="${en}"><span class="mpic">${img(n)}<i>${en.charAt(0).toUpperCase()}</i></span><span class="mnn">${en}</span>`+
         `<label class="skpi scq"><input data-sq="${en}" value="${q}" inputmode="numeric" aria-label="${en} count"><em>pcs</em></label>`+
         `<label class="skpi"><input data-pn="${en}" value="${p?fp(p):""}" placeholder="Unit price" inputmode="decimal" aria-label="${en} unit price"><em>Yang</em></label><span class="ut">${fv(p*q)}</span></div>`}).join("")+
@@ -2960,20 +3005,36 @@ function drawSc(){
     (SC.unk.length?`<p class="muted">Items not recognized were sent to the admins; once their picture is added they are read like the others.</p>`:"");
   scTot();
 }
+/* materials minus the dungeons' keys / tickets (runs x price per run) */
 function scTot(){
-  let t=0,n=0;
-  for(const[nm,q]of SC.items){t+=(P[nm]||0)*q;n+=q}
-  SC.unk.forEach(u=>n+=u.q);
+  let t=0,k=0;const neg=v=>v>0?"−"+fv(v):"0";
+  for(const[nm,q]of SC.items)t+=(P[nm]||0)*q;
+  for(const d of SCD)k+=d.r*d.p;
   $("scMats").querySelectorAll(".skm[data-n]").forEach(r=>{const it=SC.items.find(x=>x[0]===r.dataset.n);if(it)r.querySelector(".ut").textContent=fv((P[it[0]]||0)*it[1])});
-  $("scN").textContent=f(n);setOut($("scT"),fv(t));
+  $("scMats").querySelectorAll(".skm.dg").forEach((r,j)=>{const d=SCD[j];if(d)r.querySelector(".ut").textContent=neg(d.r*d.p)});
+  setOut($("scM"),fv(t));setOut($("scK"),neg(k));setOut($("scT"),t-k<0?neg(k-t):fv(t-k));
 }
 $("scMats").addEventListener("input",e=>{
   const i=e.target,d=i.dataset;
   if(d.pn!==undefined){const v=parse(i.value);if(v>0)P[d.pn]=v;else delete P[d.pn];sv("lootPrices",P);calm=true;draw()}
   else if(d.sq!==undefined){const it=SC.items.find(x=>x[0]===d.sq);if(it)it[1]=Math.round(parse(i.value));sv("scLast",SC)}
   else if(d.su!==undefined){const u=SC.unk[+d.su];if(u)u.q=Math.round(parse(i.value));sv("scLast",SC)}
+  else if(d.dr!==undefined){const g=SCD[+d.dr];if(g){g.r=Math.max(0,Math.round(parse(i.value)));const em=i.nextElementSibling;if(em)em.textContent=g.r===1?"run":"runs";sv("scDg",SCD)}}
+  else if(d.dp!==undefined){const g=SCD[+d.dp];if(g){g.p=Math.max(0,parse(i.value));DGP[g.n]=g.p;sv("dgPrices",DGP);sv("scDg",SCD)}}
   scTot();
 });
+$("scMats").addEventListener("click",e=>{const b=e.target.closest("[data-dx]");if(!b)return;SCD.splice(+b.dataset.dx,1);sv("scDg",SCD);drawSc()});
+/* dungeons: the Loot Tracker's list to pick from, or any name; the last price per run of each is remembered */
+$("scDl").innerHTML=DL_DUN.map(d=>`<option value="${esc(d.lb)}">`).join("");
+function scDgAdd(){
+  const n=$("scDn").value.trim().replace(/s+/g," ");if(!n)return $("scDn").focus();
+  const dd=dlDun(n),nm=dd?dd.lb:n;
+  if(!SCD.some(d=>d.n.toLowerCase()===nm.toLowerCase()))SCD.unshift({n:nm,r:1,p:DGP[nm]||0});
+  sv("scDg",SCD);$("scDn").value="";drawSc();
+  const inp=$("scMats").querySelector(`.skm.dg[title="${CSS.escape(esc(nm))}"] input`)||$("scMats").querySelector(".skm.dg input");if(inp){inp.focus();inp.select()}
+}
+$("scDa").onclick=scDgAdd;
+$("scDn").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();scDgAdd()}};
 $("scPick").onchange=()=>scFiles($("scPick").files);
 $("scSel").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("scPick").click()}};
 $("scClr").onclick=()=>{scPrev.forEach(p=>URL.revokeObjectURL(p.url));scPrev=[];SC={name:"",items:[],unk:[]};sv("scLast",SC);$("scMsg").textContent="";drawSc()};
