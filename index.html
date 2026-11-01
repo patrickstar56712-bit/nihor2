@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-01T11:41:34Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-01T15:16:07Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1197,108 +1197,16 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
   </div>
 </main>
 
-<main id="v-cpst" hidden>
-  <p class="crumb"><a href="#/admin">← Control Panel</a></p>
-  <div class="lth"><h1>Statistics</h1><button class="flb" id="stRe">Refresh</button></div>
-  <p class="sub">Counts only: no file contents and no IP addresses are kept. Days follow Turkey time. Visits from a browser logged in as admin are not counted.</p>
-  <div id="stBody"></div>
-</main>
-<main id="v-admin" hidden>
+<main id="v-login" hidden>
   <p class="crumb"><a href="#/">← Main Page</a></p>
-  <h1>Control Panel</h1><p class="sub">Manage what the other pages show.</p>
+  <h1>Control Panel</h1>
   <section class="panel dbp">
-    <h2>Database</h2>
-    <p id="dbSt" class="muted">Checking the database…</p>
-    <form id="dbIn" class="dbf"><input type="password" id="dbPw" placeholder="Admin password" autocomplete="current-password" aria-label="Admin password"><button class="primary">Log in</button></form>
-    <div id="dbAd" class="dbf" hidden><button id="dbUp" class="primary">Upload this browser's data</button><button id="dbRe">Reload from database</button><button id="dbOut">Log out</button></div>
-    <output id="dbMsg" aria-live="polite"></output>
-  </section>
-  <div class="cards"><a class="card" href="#/admin/items" style="--i:0"><b>Items</b><span>Every item on the site and whether it has a picture.</span></a><a class="card" href="#/admin/upgrade" style="--i:1"><b>Upgrade Cost</b><span>Add, rename and delete items, fill their materials from text.</span></a><a class="card" href="#/admin/skills" style="--i:2"><b>Skill Booster</b><span>Character skill groups and the skill level cost list.</span></a><a class="card" href="#/admin/stats" style="--i:3"><b>Statistics</b><span>Visits, unique visitors, most opened pages and uploaded tracker files.</span></a><a class="card" href="#/admin/screen" style="--i:4"><b>Screen Tracker</b><span>Items the Screen Tracker could not recognize: add their pictures.</span></a><a class="card" href="#/admin/keys" style="--i:5"><b>Dungeon Keys</b><span>Match each dungeon key with its chest and upload their pictures.</span></a></div>
-</main>
-
-<main id="v-cpdk" hidden>
-  <p class="crumb"><a href="#/admin">← Control Panel</a></p>
-  <div class="lth"><h1>Dungeon Keys</h1><button class="flb" id="dkAdd">+ Add Pair</button></div>
-  <p class="sub">Each dungeon's key next to its chest. Pick or write their names, click a picture box to upload its picture: it is saved on the website and shows in Items (as Dungeon Key / Dungeon Chest) too.</p>
-  <div id="dkBody"></div>
-</main>
-
-<main id="v-cpsc" class="cpsc" hidden>
-  <p class="crumb"><a href="#/admin">← Control Panel</a></p>
-  <div class="lth"><h1>Screen Tracker</h1><button class="flb" id="scaRe">Refresh</button></div>
-  <p class="sub">Slots the Screen Tracker could not recognize in visitors' screenshots. Write the item's name and save: the picture from the screenshot, or one you upload, is used to recognize that item from then on and becomes its picture in Items.</p>
-  <div id="scaBody"></div>
-</main>
-
-<main id="v-cpup" hidden>
-  <p class="crumb"><a href="#/admin">← Control Panel</a></p>
-  <h1>Upgrade Cost</h1><p class="sub">Add, rename and delete items, then paste their upgrade list. The Upgrade Cost pages show what you save here.</p>
-  <div class="bar tbar"><div class="seg" id="cuSeg"></div></div>
-  <div class="cpg">
-    <section class="dlc">
-      <h2>Items <small id="cuCnt"></small></h2>
-      <div class="cul" id="cuList"></div>
-      <form class="dlgf" id="cuNewF"><input id="cuNew" placeholder="New item name" aria-label="New item name" maxlength="60" autocomplete="off"><button>+ New</button></form>
-    </section>
-    <section class="dlc">
-      <h2>Text to list <small id="cuSelN"></small></h2>
-      <div class="imp cpimp">
-        <label for="impTx">Paste the upgrade list <small>— materials and Yang are filled into the selected item</small></label>
-        <textarea id="impTx" spellcheck="false" placeholder="+0 -> +1:&#10;Shard: 1.650 adet&#10;Red Citrine Dust: 70 adet&#10;Toplam Maliyet: 3.600.000 Yang&#10;+9 -> +0 (Craft):&#10;..."></textarea>
-        <div class="edf"><button class="primary" id="cuImp">Apply text</button><output id="impMsg" aria-live="polite"></output></div>
-      </div>
-      <h2 class="cph">Material counts</h2>
-      <div id="cuMats"></div>
-    </section>
-  </div>
-</main>
-
-<main id="v-cpsk" hidden>
-  <p class="crumb"><a href="#/admin">← Control Panel</a></p>
-  <h1>Skill Booster</h1><p class="sub">Pick a character's skill group, then click skill books to add or remove them. The Skill Booster page shows them under Select Character.</p>
-  <section class="dlc cps">
-    <h2>Character Skills</h2>
-    <div class="csc" id="csChar"></div>
-    <div class="csin" id="csIn"></div>
-    <div class="bar tbar"><input id="csQ" type="search" placeholder="Search skill books" aria-label="Search skill books"><span class="muted" id="csCnt"></span></div>
-    <div class="csg" id="csAll"></div>
-  </section>
-  <section class="dlc cps">
-    <h2>Text to list <small>skill level cost</small></h2>
-    <div class="imp cpimp">
-      <label for="skTx">Paste the skill list <small>— materials and Yang are filled per level</small></label>
-      <textarea id="skTx" spellcheck="false" placeholder="Master 1 -> Master 2:&#10;Shard: 6.300 adet&#10;Skillbook M-G: 5 adet&#10;Toplam Maliyet: 2.100.000 Yang&#10;&#10;Grandmaster 10 -> P1:&#10;Shard: 12k (12.000) adet&#10;Skillbook G-P: 50 adet&#10;..."></textarea>
-      <div class="edf"><button class="primary" id="skApply">Apply text</button><output id="skMsg" aria-live="polite"></output></div>
-    </div>
+    <p id="lgSt" class="muted"></p>
+    <form id="lgF" class="dbf"><input type="password" id="lgPw" placeholder="Admin password" autocomplete="current-password" aria-label="Admin password"><button class="primary">Log in</button></form>
+    <output id="lgMsg" aria-live="polite"></output>
   </section>
 </main>
-
-<main id="v-items" hidden>
-  <p class="crumb"><a href="#/admin">← Control Panel</a></p>
-  <h1>Items</h1>
-  <p class="sub">Every item the site knows and every picture in the <b>png</b> folder. Put a picture in that folder with the file name shown (.png or .webp), or upload it in Control Panel → Screen Tracker. Click a file name to copy it.</p>
-  <div class="bar tbar">
-    <div class="seg" id="itSeg">
-      <button data-v="all" aria-pressed="true">All</button>
-      <button data-v="miss" aria-pressed="false">Missing</button>
-      <button data-v="ok" aria-pressed="false">Has picture</button>
-    </div>
-    <input id="itQ" type="search" placeholder="Search items" aria-label="Search items">
-    <button id="itRe">Check again</button>
-    <span id="itCnt" class="muted"></span>
-  </div>
-  <section class="add itadd" id="itAdd" hidden>
-    <div class="bar">
-      <span class="lt">Add a picture<small>saved on the website, every visitor sees it</small></span>
-      <div class="scdd itan"><input id="itAn" data-cb="items" placeholder="Item name" aria-label="Item name" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list"><ul role="listbox" hidden></ul></div>
-      <select id="itAt" aria-label="Kind"></select>
-      <label class="fbtn" for="itAf" tabindex="0" id="itAfL">Choose Picture</label><input id="itAf" type="file" accept="image/*" hidden>
-      <span class="itapv" id="itApv"></span>
-      <button id="itAs">Save</button>
-    </div>
-  </section>
-  <div class="itg" id="itg"></div>
-</main>
+<!-- the Control Panel's pages are added here after a login (they come from /api/admin) -->
 
 <main id="v-loot" hidden>
   <p class="crumb"><a href="#/tools">← Tools</a></p>
@@ -1479,7 +1387,8 @@ const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch
    Opened as a file, or with the database down, the site keeps working from this browser's data. */
 const API=/^https?:$/.test(location.protocol)?"/api/data":"";
 const UPG=c=>c==="weapons"?"upgW":"upgW_"+c;
-let ADK=String(ld("admKey","")),dbOn=false,dbErr="",dbTm=0,toTm=0,dbUpd="";
+let ADK=String(ld("admKey","")),   // "1": this browser holds the admin cookie (an older login kept the password here)
+  dbOn=false,dbErr="",dbTm=0,toTm=0,dbUpd="";
 /* pictures saved in Control Panel -> Screen Tracker, by slug: [name, data URL]; an item without a png/ file shows this one */
 let PICS=ld("pics",{});if(!PICS||typeof PICS!=="object")PICS={};
 function setPics(l){
@@ -1499,16 +1408,16 @@ function drawLastUp(){
 const why=async r=>{try{return (await r.json()).error||"HTTP "+r.status}catch(e){return "HTTP "+r.status}};
 const dbQ=new Set();
 function dbNote(t,err){
-  $("dbMsg").textContent=t;$("dbMsg").className=err?"err":"";
+  const m=$("dbMsg");if(m){m.textContent=t;m.className=err?"err":""}
   const o=$("dbToast");o.textContent=t;o.className="dbt"+(err?" err":"");o.hidden=false;
   clearTimeout(toTm);toTm=setTimeout(()=>{o.hidden=true},err?8000:2600);
 }
 function drawDb(){
-  const st=$("dbSt");
+  const st=$("dbSt");if(!st)return;   // the Database box is part of the Control Panel
   st.textContent=!API?"Opened as a file: the database is only used on the website.":!dbOn?"Database not reachable · using this browser's data."+(dbErr?" ("+dbErr+")":"")
     :ADK?"Connected · logged in, Control Panel changes are saved for everyone.":"Connected · log in to save Control Panel changes for everyone.";
   st.className=!API?"muted":dbOn?"ok":"err";
-  $("dbIn").hidden=!API||!!ADK;$("dbAd").hidden=!API||!ADK;
+  $("dbAd").hidden=!API||!ADK;
 }
 /* database rows replace the Control Panel data kept in this browser (fail times stay per browser);
    a part the database has nothing for is left as it is */
@@ -1548,31 +1457,51 @@ async function dbPush(parts){
   }
   if(!Object.keys(body).length)return;
   try{
-    const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json","x-admin-key":ADK},body:JSON.stringify(body)});
+    const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
     if(r.status===401){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out. Changes are only in this browser.",true);return}
     if(!r.ok)throw await why(r);
     dbOn=true;dbErr="";dbUpd=new Date().toISOString();drawLastUp();dbNote("Saved to the database.");
   }catch(e){parts.forEach(p=>dbQ.add(p));dbNote("NOT saved to the database ("+(typeof e==="string"?e:"no answer")+") · kept in this browser, will retry on the next save.",true)}
   drawDb();
 }
-$("dbIn").onsubmit=async e=>{
-  e.preventDefault();const k=$("dbPw").value;if(!k)return;
-  try{
-    const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json","x-admin-key":k},body:'{"check":true}'});
-    if(r.ok){ADK=k;sv("admKey",k);$("dbPw").value="";dbOn=true;dbNote("Logged in.")}
-    else dbNote(r.status===401?"Wrong password.":"Login failed · "+await why(r),true);
-  }catch(x){dbNote("Database not reachable.",true)}
-  drawDb();
-};
-$("dbOut").onclick=()=>{ADK="";sv("admKey","");drawDb();dbNote("Logged out.")};
-$("dbRe").onclick=()=>dbLoad(true);
-/* overwrites the database with this browser's lists, so it asks for a second click */
-$("dbUp").onclick=()=>{
-  const b=$("dbUp");
-  if(!b.classList.contains("armed")){b.classList.add("armed");b.textContent="Click again to overwrite the database";setTimeout(()=>{b.classList.remove("armed");b.textContent="Upload this browser's data"},4000);return}
-  b.classList.remove("armed");b.textContent="Upload this browser's data";
-  const cur=CAT;for(const c of Object.keys(CATS))loadCat(c);loadCat(cur);   // every category gets its saved list (with the built-in items)
-  dbPush([...Object.keys(CATS),"skills","chars"]);
+
+/* ---------- Control Panel sign-in ----------
+   The Control Panel's pages and code are not in this file: /api/admin sends them only to a browser holding
+   the admin cookie. Logging in once with the password sets it (HttpOnly: no script can read it), so the
+   browser stays trusted and opens the Control Panel without a password from then on. */
+const CPAPI=API?"/api/admin":"";
+let CPL=false,cpP=null,cpWait=false;   // Control Panel loaded; its loading; opening it on page load
+function cpLoad(){
+  return cpP??=(async()=>{
+    try{
+      const r=await fetch(CPAPI,{cache:"no-store"});
+      if(r.status===401){ADK="";sv("admKey","")}
+      if(!r.ok)return false;
+      const p=await r.json();
+      $("v-login").insertAdjacentHTML("afterend",p.html);
+      if(HIST)document.querySelectorAll('a[href^="#/"]').forEach(a=>a.setAttribute("href",href(a.getAttribute("href").slice(2).replace(/\/$/,""))));
+      const sc=document.createElement("script");sc.textContent=p.js;document.body.appendChild(sc);
+      CPL=ADM=true;ADK="1";sv("admKey","1");drawDb();return true;
+    }catch(e){return false}
+  })().then(ok=>{if(!ok)cpP=null;return ok});
+}
+async function cpLogin(pw){
+  const r=await fetch(CPAPI,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({login:pw})});
+  if(!r.ok)throw await why(r);
+}
+const lgNote=(t,err)=>{$("lgMsg").textContent=t;$("lgMsg").className=err?"err":""};
+function drawLogin(){
+  const w=cpWait;$("lgF").hidden=w||!CPAPI;
+  $("lgSt").textContent=!CPAPI?"Opened as a file: the Control Panel works on the website only."
+    :w?"Opening the Control Panel…":"Log in once on this browser: it stays logged in, no password next time.";
+}
+$("lgF").onsubmit=async e=>{
+  e.preventDefault();const pw=$("lgPw").value;if(!pw)return;
+  lgNote("Checking…");
+  try{await cpLogin(pw)}catch(x){lgNote(typeof x==="string"?x:"Server not reachable.",true);return}
+  $("lgPw").value="";lgNote("");
+  if(!await cpLoad()){lgNote("Logged in, but the Control Panel could not be loaded. Try again.",true);return}
+  route();
 };
 
 /* ---------- statistics: counts only (visits, pages, uploaded files), read in Control Panel -> Statistics ----------
@@ -1595,50 +1524,6 @@ function statView(c){
   let first=false;try{first=!sessionStorage.getItem("sv");sessionStorage.setItem("sv","1")}catch(e){}
   statHit({v:vid(),visit:first,view:p});
 }
-const PNAME={home:"Main Page",tools:"Tools",loot:"Loot Tracker",dloot:"Loot Tracker (Detailed)",screen:"Screen Tracker",upgrade:"Upgrade Cost",weapons:"Weapons",
-  jewellery:"Jewellery",armour:"Armour",helmets:"Helmets",shields:"Shields",skills:"Skill Booster"};
-const stDay=d=>new Date(d+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short",timeZone:"UTC"});
-async function drawStats(){
-  const b=$("stBody");
-  if(!STATS){b.innerHTML=`<p class="muted">Statistics are collected on the website only.</p>`;return}
-  if(!ADK){b.innerHTML=`<p class="muted">Log in with the admin password on the <a href="${href("admin")}">Control Panel</a> page to see the statistics.</p>`;return}
-  b.innerHTML=`<p class="muted">Loading…</p>`;
-  let s;
-  try{const r=await fetch(STATS,{headers:{"x-admin-key":ADK},cache:"no-store"});if(!r.ok)throw await why(r);s=await r.json()}
-  catch(e){b.innerHTML=`<p class="err">Could not load the statistics (${esc(typeof e==="string"?e:"no answer")}).</p>`;return}
-  /* the last 30 days, days without visits included */
-  const by=Object.fromEntries(s.days.map(d=>[d.day,d])),days=[];
-  for(let i=29;i>=0;i--){const t=new Date(s.today+"T12:00:00Z");t.setUTCDate(t.getUTCDate()-i);const k=t.toISOString().slice(0,10);days.push(by[k]||{day:k,visits:0,unique:0,views:0,uploads:0})}
-  const td=days[29],max=Math.max(1,...days.map(d=>d.visits)),pmax=Math.max(1,...s.pages.map(p=>p.views)),T=s.totals;
-  const tile=(l,v,sub)=>`<div class="stt"><small>${l}</small><b>${f(v)}</b>${sub?`<span>${sub}</span>`:""}</div>`;
-  const up=k=>s.uploads[k]||{files:0,lines:0};
-  b.innerHTML=
-    `<div class="stg">`+tile("Visits today",td.visits,`${f(td.unique)} unique visitor${td.unique===1?"":"s"}`)+tile("Total visits",T.visits)+
-      tile("Unique visitors",T.unique,"all time")+tile("Page views",T.views,`${f(td.views)} today`)+tile("Files uploaded",T.uploads,`${f(td.uploads)} today`)+`</div>`+
-    `<section class="panel stc"><h2>Visits · last 30 days</h2><div class="stch" id="stCh" style="--max:${max}">`+
-      `<div class="sty"><span>${f(max)}</span><span>${f(Math.round(max/2))}</span><span>0</span></div><div class="stbars">`+
-      days.map((d,i)=>`<div class="stb${i===29?" now":""}" data-i="${i}" tabindex="0" aria-label="${stDay(d.day)}: ${d.visits} visits, ${d.unique} unique visitors"><i style="height:${d.visits/max*100}%"></i></div>`).join("")+
-      `</div><div class="stx"><span>${stDay(days[0].day)}</span><span>${stDay(days[15].day)}</span><span>Today</span></div><div class="sttip" id="stTip" hidden></div></div>`+
-      `<details class="stdt"><summary>Show as table</summary><table><thead><tr><th>Day</th><th>Visits</th><th>Unique</th><th>Page views</th><th>Files</th></tr></thead><tbody>`+
-      days.slice().reverse().map(d=>`<tr><td>${stDay(d.day)}</td><td>${f(d.visits)}</td><td>${f(d.unique)}</td><td>${f(d.views)}</td><td>${f(d.uploads)}</td></tr>`).join("")+`</tbody></table></details></section>`+
-    `<div class="st2"><section class="panel"><h2>Most opened pages</h2>`+
-      (s.pages.length?`<div class="stls">`+s.pages.map(p=>`<div class="stpr"><span>${esc(PNAME[p.page]||p.page)}</span><i><em style="width:${p.views/pmax*100}%"></em></i><b>${f(p.views)}</b></div>`).join("")+`</div>`:`<p class="muted">No page views yet.</p>`)+
-    `</section><section class="panel"><h2>Uploaded tracker files</h2><div class="stls">`+
-      [["loot","Loot Tracker","file","loot lines"],["dloot","Loot Tracker (Detailed)","file","loot lines"],["screen","Screen Tracker","picture","items read"]].map(([k,l,u,w])=>`<div class="stu"><span>${l}</span><b>${f(up(k).files)}</b><small>${u}${up(k).files===1?"":"s"} · ${f(up(k).lines)} ${w}</small></div>`).join("")+
-    `</div></section></div>`;
-  /* hover / focus tooltip for a day */
-  const tip=$("stTip"),ch=$("stCh");
-  const show=el=>{const d=days[+el.dataset.i];
-    tip.innerHTML=`<b>${stDay(d.day)}${+el.dataset.i===29?" · today":""}</b><span>Visits <em>${f(d.visits)}</em></span><span>Unique visitors <em>${f(d.unique)}</em></span><span>Page views <em>${f(d.views)}</em></span><span>Files uploaded <em>${f(d.uploads)}</em></span>`;
-    tip.hidden=false;const r=el.getBoundingClientRect(),c=ch.getBoundingClientRect();
-    tip.style.left=Math.min(Math.max(r.left-c.left+r.width/2-tip.offsetWidth/2,0),c.width-tip.offsetWidth)+"px";};
-  ch.addEventListener("pointerover",e=>{const el=e.target.closest(".stb");if(el)show(el)});
-  ch.addEventListener("focusin",e=>{const el=e.target.closest(".stb");if(el)show(el)});
-  ch.addEventListener("pointerleave",()=>{tip.hidden=true});
-  ch.addEventListener("focusout",()=>{tip.hidden=true});
-}
-$("stRe").onclick=drawStats;
-
 /* ---------- state ---------- */
 let P=ld("lootPrices",{});                       // unit prices
 let pins=new Set(ld("lootPins",[]));              // pinned items, the latest last
@@ -2353,64 +2238,6 @@ $("mats").addEventListener("input",e=>{
 });
 $("mats").addEventListener("click",e=>matClick(e,$("mats"),()=>{drawMats();drawCost()}));
 
-/* ---------- control panel: upgrade cost items (new / rename / delete, text to list, material counts) ---------- */
-let cuCat=CATS[ld("cpCat","weapons")]?ld("cpCat","weapons"):"weapons",cuRen=-1;
-$("cuSeg").innerHTML=Object.keys(CATS).map(c=>`<button data-c="${c}" aria-pressed="false">${CATS[c][0]}</button>`).join("");
-function drawCpU(){
-  if(CAT!==cuCat||!W)loadCat(cuCat);
-  $("cuSeg").querySelectorAll("[data-c]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.c===cuCat)));
-  $("cuCnt").textContent=`(${W.length})`;
-  $("cuNew").placeholder="New "+CATS[CAT][1].toLowerCase()+" name";
-  $("cuList").innerHTML=wOrd().map(([w,i],k)=>`<div class="cur${i===WS?" sel":""}" data-i="${i}" style="--i:${Math.min(k,12)}">${ico(w)}`+
-    (i===cuRen?`<input class="cun" value="${esc(w.n)}" maxlength="60" aria-label="New name">`:`<button class="cunb" data-pick="${i}">${esc(w.n)}</button>`)+
-    `<button class="xb" data-ren="${i}">${i===cuRen?"Save":"Rename"}</button><button class="xb" data-del="${i}"${W.length<2?" disabled":""}>Delete</button></div>`).join("");
-  $("cuSelN").textContent="· "+cw().n;
-  $("cuMats").innerHTML=matTable(cw(),-1,-1);
-  if(cuRen>=0){const n=$("cuList").querySelector(".cun");n.focus();n.select()}
-}
-const cuSel=i=>{WS=i;sv(K("upgSel"),WS)};
-function cuEndRen(){
-  if(cuRen<0)return;
-  const n=$("cuList").querySelector(".cun"),v=n?n.value.trim():"";
-  if(v){W[cuRen].n=v;saveW()}
-  cuRen=-1;drawCpU();
-}
-$("cuSeg").onclick=e=>{const b=e.target.closest("[data-c]");if(b){cuCat=b.dataset.c;sv("cpCat",cuCat);cuRen=-1;loadCat(cuCat);drawCpU()}};
-$("cuList").addEventListener("click",e=>{
-  const p=e.target.closest("[data-pick]"),r=e.target.closest("[data-ren]"),d=e.target.closest("[data-del]");
-  if(p){cuSel(+p.dataset.pick);drawCpU();return}
-  if(r){const i=+r.dataset.ren;if(cuRen===i)cuEndRen();else{cuEndRen();cuRen=i;cuSel(i);drawCpU()}return}
-  if(d){
-    if(!d.classList.contains("armed")){
-      $("cuList").querySelectorAll(".armed").forEach(x=>{x.classList.remove("armed");x.textContent="Delete"});
-      d.classList.add("armed");d.textContent="Sure?";
-      clearTimeout(delTm);delTm=setTimeout(()=>{d.classList.remove("armed");d.textContent="Delete"},3000);return;
-    }
-    clearTimeout(delTm);const i=+d.dataset.del;
-    W.splice(i,1);if(WS>=i)WS=Math.max(0,WS-1);saveW();sv(K("upgSel"),WS);cuRen=-1;drawCpU();
-  }
-});
-$("cuList").addEventListener("keydown",e=>{
-  if(!e.target.matches(".cun")||e.isComposing||e.keyCode===229)return;
-  if(e.key==="Enter"){e.preventDefault();cuEndRen()}
-  if(e.key==="Escape"){cuRen=-1;drawCpU()}
-});
-$("cuList").addEventListener("focusout",e=>{if(e.target.matches(".cun")&&!(e.relatedTarget&&e.relatedTarget.dataset.ren))cuEndRen()});
-$("cuNewF").onsubmit=e=>{
-  e.preventDefault();
-  const n=$("cuNew").value.trim()||"New "+CATS[CAT][1]+" "+(W.length+1);
-  W.push(blankW(n));cuSel(W.length-1);saveW();$("cuNew").value="";drawCpU();
-};
-$("cuImp").onclick=()=>{
-  const r=importText($("impTx").value),o=$("impMsg");
-  if(!r.steps&&!r.craft){o.textContent="No step headers like “+0 -> +1:” found.";o.className="err";return}
-  saveW();drawCpU();
-  o.className="";
-  o.textContent=`${cw().n}: `+(r.steps?`filled ${r.steps} step${r.steps>1?"s":""}, ${r.mats} material${r.mats===1?"":"s"}.`:"")+(r.craft?" Craft block saved.":"")+(r.skip.length?` Skipped: ${r.skip.join(", ")}`:"");
-};
-$("cuMats").addEventListener("input",e=>matInput(e.target,cw()));
-$("cuMats").addEventListener("click",e=>matClick(e,$("cuMats"),drawCpU));
-
 /* ---------- skill booster ----------
    30 levels M1..M10, G1..G10, P1..P10 (index 0..29). Each level keeps what is
    needed to reach it: SB.y[i] = Yang, SB.m[].c[i] = material count. */
@@ -2567,70 +2394,6 @@ $("chSk").onclick=e=>{const b=e.target.closest("[data-s]");if(!b)return;
   const n=b.dataset.s;chSel.s=chSel.s.includes(n)?chSel.s.filter(x=>x!==n):[...chSel.s,n];sv("skChar",chSel);drawSk()};
 document.addEventListener("click",e=>{if(chIsOpen()&&!e.target.closest("#chDd"))chOpen(false)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&chIsOpen()){chOpen(false);$("chB").focus()}});
-
-/* control panel: add / remove skill books for one character group */
-let csSel=ld("cpSkGrp","warrior/body");
-function drawCpS(){
-  $("csChar").innerHTML=CHARS.map(([k,n,gs])=>`<div class="csr">${chPic(k)}<b>${n}</b>${gs.map(([gk,gl])=>{const id=k+"/"+gk,c=(CSK[id]||[]).length;
-    return `<button data-cs="${id}" aria-pressed="${id===csSel}">${gl}<small>${c}</small></button>`}).join("")}</div>`).join("");
-  const [c,g]=csSel.split("/"),mine=CSK[csSel]||[];
-  $("csIn").innerHTML=`<h3>${esc(chOf(c)[1])} · ${esc(gLbl(c,g))} <small>${mine.length} skill${mine.length===1?"":"s"} · ‹ › set the order</small></h3>`+
-    (mine.length?`<div class="csl">${mine.map((n,i)=>`<span class="csi" title="${esc(skBase(n))}">${img(skGP(n))}<span>${esc(skBase(n))}</span><button class="xb" data-mv="${i}" data-d="-1" aria-label="Move ${esc(skBase(n))} left"${i?"":" disabled"}>‹</button><button class="xb" data-mv="${i}" data-d="1" aria-label="Move ${esc(skBase(n))} right"${i<mine.length-1?"":" disabled"}>›</button><button class="xb" data-rm="${esc(n)}" aria-label="Remove ${esc(skBase(n))}">✕</button></span>`).join("")}</div>`
-      :`<p class="muted">No skills yet. Click skill books below to add them.</p>`);
-  const own={};for(const id in CSK)for(const n of CSK[id])(own[n]=own[n]||[]).push(id);
-  const q=$("csQ").value.trim().toLowerCase(),list=SKBOOKS.filter(n=>!q||n.toLowerCase().includes(q));
-  $("csAll").innerHTML=list.map(n=>{const on=mine.includes(n),o=(own[n]||[]).filter(x=>x!==csSel).map(x=>{const [a,b]=x.split("/");return chOf(a)[1]+" "+gLbl(a,b)});
-    return `<button class="csb${on?" on":""}" data-add="${esc(n)}" aria-pressed="${on}" title="${esc(skBase(n))}">${img(skGP(n))}<span>${esc(skBase(n))}</span>${o.length?`<small>${esc(o.join(", "))}</small>`:""}</button>`}).join("")
-    ||`<p class="muted">No skill book matches.</p>`;
-  $("csCnt").textContent=`${list.length} skill books`;
-}
-const csSave=()=>{sv("skChars",CSK);dbQueue("chars");drawCpS();drawCh()};
-$("csChar").onclick=e=>{const b=e.target.closest("[data-cs]");if(b){csSel=b.dataset.cs;sv("cpSkGrp",csSel);drawCpS()}};
-$("csAll").onclick=e=>{const b=e.target.closest("[data-add]");if(!b)return;
-  const n=b.dataset.add,l=CSK[csSel]=CSK[csSel]||[],i=l.indexOf(n);if(i<0)l.push(n);else l.splice(i,1);csSave()};
-$("csIn").onclick=e=>{const l=CSK[csSel]||[],r=e.target.closest("[data-rm]"),m=e.target.closest("[data-mv]");
-  if(r){l.splice(l.indexOf(r.dataset.rm),1);csSave()}
-  else if(m){const i=+m.dataset.mv,j=i+ +m.dataset.d;if(j>=0&&j<l.length){[l[i],l[j]]=[l[j],l[i]];csSave()}}};
-$("csQ").addEventListener("input",drawCpS);
-/* Parses blocks headed "M1:" (or "M1 -> M2:" / "Master 1 -> Master 2:", stored on the start
-   level M1; Grandmaster = G, Perfect Master = P; a bare "P:" means P1) followed by "Name: 3 adet"
-   lines (also "10k (10.000) adet") and a "Toplam Maliyet: 500.000 Yang" line. */
-function skImport(src){
-  const HEAD=/^([mgp])\s*(\d{0,2})\s*(?:(?:->|→|=>|-)\s*([mgp])\s*(\d{0,2}))?\s*:?\s*$/i,LINE=/^(.+?)\s*[:=]\s*([\d.,\s]+)\s*([^\d]*)$/,
-    YANG=/^(toplam\s*maliyet|toplam|total(\s*cost)?|yang(\s*cost)?|maliyet)$/i;
-  const toN=s=>+s.replace(/[\s.,]/g,"")||0,lv=(t,n)=>{const ti=SKT.indexOf(t.toUpperCase()),k=n===""?1:+n;return ti>=0&&k>=1&&k<=10?ti*10+k-1:-1};
-  const tier=l=>l.replace(/\(.*?\)/g,"").replace(/grand\s*master/gi,"G").replace(/perfect(\s*master)?/gi,"P").replace(/master/gi,"M").trim();
-  const got={},yang={},order=[],skip=[];let at=-1;
-  for(const raw of src.split(/\r?\n/)){
-    let l=raw.replace(/^[\s*•·•-]+(?=\S)/,"").trim();if(!l)continue;
-    const h=HEAD.exec(tier(l));
-    if(h){at=lv(h[1],h[2]);if(at<0)skip.push(l.replace(/:$/,""));else yang[at]??=0;continue}
-    if(at<0)continue;
-    l=l.replace(/\d[\d.,]*\s*k+\s*\(\s*([\d.,\s]+)\)/i,"$1");   // "10k (10.000)" -> "10.000"
-    const m=LINE.exec(l);if(!m)continue;
-    const u=/^(k{1,2})\b/i.exec(m[3].trim()),n=m[1].trim(),v=toN(m[2])*(u?u[1].length>1?1e6:1e3:1),k=n.toLowerCase();
-    if(YANG.test(n)||/yang/i.test(m[3])){yang[at]=v;continue}
-    if(!got[k]){got[k]={n,c:{}};order.push(k)}
-    got[k].c[at]=(got[k].c[at]||0)+v;
-  }
-  const lvs=Object.keys(yang).map(Number);
-  for(const s of lvs)SB.y[s]=yang[s];
-  for(const m of SB.m)if(!got[m.n.trim().toLowerCase()])for(const s of lvs)m.c[s]=0;
-  for(const k of order){
-    let m=SB.m.find(x=>x.n.trim().toLowerCase()===k);
-    if(!m){m={n:got[k].n,c:Array(SKN).fill(0)};SB.m.push(m)}
-    for(const s of lvs)m.c[s]=got[k].c[s]||0;
-  }
-  SB.m=SB.m.filter(m=>m.c.some(c=>c>0));
-  return{lvs,mats:order.length,skip};
-}
-$("skApply").onclick=()=>{
-  const r=skImport($("skTx").value),o=$("skMsg");
-  if(!r.lvs.length){o.textContent="No level headers like “M1:” found.";o.className="err";return}
-  sv("skB",SB);dbQueue("skills");drawSk();
-  o.className="";
-  o.textContent=`Filled ${r.lvs.length} level${r.lvs.length>1?"s":""} (${r.lvs.sort((a,b)=>a-b).map(skL).join(", ")}), ${r.mats} material${r.mats===1?"":"s"}.`+(r.skip.length?` Skipped: ${r.skip.join(", ")}`:"");
-};
 
 /* ---------- tools: detailed loot tracker ----------
    Same log file as the Loot Tracker, kept at second precision. A dungeon run ends with the drop
@@ -3105,125 +2868,8 @@ document.addEventListener("paste",e=>{
   if(fl.length){e.preventDefault();scFiles(fl)}
 });
 
-/* ---------- control panel: Screen Tracker (slots nobody could recognize) ---------- */
+/* ---------- item names to pick from (lists in the Control Panel) ---------- */
 let scaNames=null;
-/* a saved slot picture: the empty slot's background and the count are made see-through */
-async function scClean(src){
-  const im=await scImgLd(src);if(!im)return "";
-  const d=new Uint8ClampedArray(scPx(im)),[,box]=scCount(d,32,32,0,0),m=scMask(d,box);
-  for(let p=0;p<1024;p++)if(m[p]||Math.abs(scLum(d,p*4)-SC_FR[p])<10)d[p*4+3]=0;
-  return scURL(d);
-}
-/* an uploaded picture, fitted into 32x32 */
-const scFit=x=>new Promise(r=>{const u=URL.createObjectURL(x),im=new Image();
-  im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=32;const k=Math.min(32/im.width,32/im.height),w=im.width*k,h=im.height*k;
-    c.getContext("2d").drawImage(im,(32-w)/2,(32-h)/2,w,h);URL.revokeObjectURL(u);r(c.toDataURL("image/png"))};
-  im.onerror=()=>{URL.revokeObjectURL(u);r("")};im.src=u});
-async function scaPost(body,ok){
-  try{
-    const r=await fetch(SCAPI,{method:"POST",headers:{"content-type":"application/json","x-admin-key":ADK},body:JSON.stringify(body)});
-    if(r.status===401){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out.",true);drawScA();return}
-    if(!r.ok)throw await why(r);
-    dbNote(ok);scRefP=null;drawScA();
-  }catch(e){dbNote("NOT saved ("+(typeof e==="string"?e:"no answer")+").",true)}
-}
-async function drawScA(){
-  const b=$("scaBody");
-  if(!SCAPI){b.innerHTML=`<p class="muted">The Screen Tracker pictures are kept on the website only.</p>`;return}
-  if(!ADK){b.innerHTML=`<p class="muted">Log in with the admin password on the <a href="${href("admin")}">Control Panel</a> page to see the missing pictures.</p>`;return}
-  if(!b.children.length)b.innerHTML=`<p class="muted">Loading…</p>`;
-  let s;
-  try{const r=await fetch(SCAPI,{headers:{"x-admin-key":ADK},cache:"no-store"});if(!r.ok)throw await why(r);s=await r.json()}
-  catch(e){b.innerHTML=`<p class="err">Could not load the Screen Tracker pictures (${esc(typeof e==="string"?e:"no answer")}).</p>`;return}
-  if(setPics(s.icons)&&s.missing)scRefP=null;
-  if(!s.missing){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out.",true);drawScA();return}   // the key was not accepted
-  scaO=await scaOpts();
-  const day=t=>new Date(String(t).replace(" ","T")+"Z").toLocaleDateString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
-  const M=s.missing,I=s.icons;
-  b.innerHTML=`<section class="dlc"><h2>Missing Images <small>${M.length}</small>${M.length?`<button class="scax" id="scaClr">Clear all</button>`:""}</h2>`+
-    (M.length?`<div class="scag">`+M.map((m,i)=>`<form class="scac" data-id="${m.id}" style="--i:${Math.min(i,20)}"><div class="pix"><img src="${m.image}" alt="Slot from a screenshot"><div><b>Not recognized</b><small>Seen ${f(m.seen)}× · ${day(m.last)}</small></div></div>`+
-      `<div class="scdd"><input name="n" placeholder="Search item name" aria-label="Item name" maxlength="80" autocomplete="off" required role="combobox" aria-expanded="false" aria-autocomplete="list"><ul role="listbox" hidden></ul></div>`+
-      `<div class="scsg" hidden></div>`+
-      `<div class="edf"><label class="fbtn" tabindex="0">Upload picture<input type="file" accept="image/*" hidden></label><button class="primary">Save</button><button type="button" data-rm="${m.id}" title="Remove" aria-label="Remove">✕</button></div></form>`).join("")+`</div>`
-      :`<p class="muted">Nothing missing: every item in the uploaded screenshots was recognized.</p>`)+
-    `</section><section class="dlc"><h2>Added Pictures <small>${I.length}</small></h2>`+
-    (I.length?`<div class="scag">`+I.map((c,i)=>`<div class="scac ok" style="--i:${Math.min(i,20)}"><div class="pix"><img src="${c.image}" alt=""><div><b title="${esc(c.name)}">${esc(c.name)}</b><small>Recognized in screenshots</small></div><button type="button" data-ri="${c.id}" title="Remove" aria-label="Remove ${esc(c.name)}">✕</button></div></div>`).join("")+`</div>`
-      :`<p class="muted">No pictures added yet.</p>`)+`</section>`;
-  /* the closest pictures the site already has, one card after the other */
-  const refs=await scRefs();
-  for(const fm of b.querySelectorAll("form.scac")){
-    await new Promise(r=>setTimeout(r,0));if(!fm.isConnected)return;
-    const im=await scImgLd(fm.querySelector(".pix img").src);if(!im)continue;
-    const cell=scPx(im),[,box]=scCount(cell,32,32,0,0),sg=fm.querySelector(".scsg"),s=scBest(cell,scMask(cell,box),refs).filter(x=>x[1]<90);
-    if(!s.length)continue;
-    sg.innerHTML=`<span>Closest in Items:</span>`+s.map(([n])=>`<button type="button" data-pick="${esc(n)}" title="Use this name">${img(n)}${esc(n)}</button>`).join("");sg.hidden=false;
-  }
-}
-/* ---------- control panel: Dungeon Keys (a dungeon's key next to its chest) ---------- */
-const DKS=[["key","Dungeon Key"],["chest","Dungeon Chest"]];
-const dkRow=(p,i)=>`<div class="dkp${p.id?"":" new"}" data-id="${p.id||""}" style="--i:${Math.min(i,20)}">`+
-  DKS.map(([s,lb])=>{const n=p[s]||"";return `<div class="dks" data-s="${s}"><button type="button" class="dkpic" title="Upload the ${lb.toLowerCase()} picture" aria-label="Upload the ${lb.toLowerCase()} picture">${n?img(n):"+"}</button>`+
-    `<div class="dkn"><small>${lb}</small><div class="scdd"><input data-cb="items" value="${esc(n)}" placeholder="${lb} name" aria-label="${lb} name" maxlength="80" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list"><ul role="listbox" hidden></ul></div></div></div>`}).join(`<span class="dkx" aria-hidden="true">⇄</span>`)+
-  `<div class="dka"><button class="primary" data-dks>Save</button><button data-dkd title="Remove" aria-label="Remove this pair">✕</button></div></div>`;
-async function drawDk(){
-  const b=$("dkBody");$("dkAdd").hidden=!(SCAPI&&ADK);
-  if(!SCAPI){b.innerHTML=`<p class="muted">The dungeon keys are kept on the website only.</p>`;return}
-  if(!ADK){b.innerHTML=`<p class="muted">Log in with the admin password on the <a href="${href("admin")}">Control Panel</a> page to edit the dungeon keys.</p>`;return}
-  if(!b.children.length)b.innerHTML=`<p class="muted">Loading…</p>`;
-  let s;
-  try{const r=await fetch(SCAPI,{headers:{"x-admin-key":ADK},cache:"no-store"});if(!r.ok)throw await why(r);s=await r.json()}
-  catch(e){b.innerHTML=`<p class="err">Could not load the dungeon keys (${esc(typeof e==="string"?e:"no answer")}).</p>`;return}
-  if(!s.missing){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out.",true);drawDk();return}
-  setPics(s.icons||[]);ITY=s.types||{};sv("itTypes",ITY);
-  const P2=s.pairs||[];
-  b.innerHTML=`<div class="dkl" id="dkL">${P2.map(dkRow).join("")}</div>`+(P2.length?"":`<p class="muted" id="dkNo">No pairs yet · press <b>+ Add Pair</b>.</p>`);
-  if(!scaO.length)scaO=await scaOpts();
-}
-async function dkPost(o){
-  try{
-    const r=await fetch(SCAPI,{method:"POST",headers:{"content-type":"application/json","x-admin-key":ADK},body:JSON.stringify(o)});
-    if(r.status===401){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out.",true);drawDk();return false}
-    if(!r.ok)throw await why(r);return true;
-  }catch(x){dbNote("NOT saved ("+(typeof x==="string"?x:"no answer")+").",true);return false}
-}
-$("dkAdd").onclick=()=>{
-  const l=$("dkL");if(!l)return;const no=$("dkNo");if(no)no.remove();
-  l.insertAdjacentHTML("afterbegin",dkRow({},0));l.firstElementChild.querySelector("input").focus();
-};
-$("dkBody").addEventListener("change",e=>{
-  const t=e.target;if(!t.dataset.cb)return;
-  const n=t.value.trim(),pic=t.closest(".dks").querySelector(".dkpic");pic.innerHTML=n?img(n):"+";
-});
-$("dkBody").addEventListener("click",async e=>{
-  const row=e.target.closest(".dkp");if(!row)return;
-  const nm=s=>row.querySelector(`.dks[data-s="${s}"] input`).value.trim().replace(/\s+/g," ");
-  const pic=e.target.closest(".dkpic");
-  if(pic){
-    const side=pic.closest(".dks"),lb=DKS.find(x=>x[0]===side.dataset.s)[1],n=nm(side.dataset.s);
-    if(!n){dbNote(`Write the ${lb.toLowerCase()}'s name first.`,true);side.querySelector("input").focus();return}
-    const inp=document.createElement("input");inp.type="file";inp.accept="image/*";
-    inp.onchange=async()=>{
-      const fl=inp.files[0];if(!fl)return;const u=await scFit(fl);if(!u){dbNote("That picture could not be opened.",true);return}
-      const k=slug(n);
-      if(!await dkPost({save:{name:n,image:u},type:{k,t:lb}}))return;
-      PICS[k]=[n,u];sv("pics",PICS);ITY[k]=lb;sv("itTypes",ITY);scRefP=null;scaO=[];
-      pic.innerHTML=`<img src="${u}" alt="">`;dbNote(`Saved the picture of ${n} · it shows in Items too.`);
-    };
-    inp.click();return;
-  }
-  if(e.target.closest("[data-dks]")){
-    const key=nm("key"),chest=nm("chest");
-    if(!key&&!chest){dbNote("Write the key's or the chest's name first.",true);return}
-    const types=[[key,"Dungeon Key"],[chest,"Dungeon Chest"]].filter(x=>slug(x[0])).map(([n,t])=>({k:slug(n),t}));
-    if(!await dkPost({pair:{id:+row.dataset.id||0,key,chest},types}))return;
-    types.forEach(y=>ITY[y.k]=y.t);sv("itTypes",ITY);
-    dbNote(`Saved: ${key||"–"} ⇄ ${chest||"–"}.`);drawDk();return;
-  }
-  if(e.target.closest("[data-dkd]")){
-    if(row.dataset.id&&!await dkPost({delPair:+row.dataset.id}))return;
-    row.remove();dbNote("Pair removed.");
-  }
-});
 /* names to pick from: everything in Items (with its picture when it has one), then the catalog's other names */
 let scaO=[];
 async function scaOpts(){
@@ -3269,59 +2915,7 @@ document.addEventListener("keydown",e=>{
   }else if(e.key==="Enter"&&!ul.hidden&&a){e.preventDefault();cbPick(t,a.dataset.v)}
   else if(e.key==="Escape")cbList(t,false,[]);
 });
-const scaPick=(inp,v)=>{inp.value=v;scaList(inp,false)};
-$("scaRe").onclick=drawScA;
-$("scaBody").addEventListener("input",e=>{if(e.target.name==="n")scaList(e.target,true)});
-$("scaBody").addEventListener("focusin",e=>{if(e.target.name==="n")scaList(e.target,true)});
-$("scaBody").addEventListener("focusout",e=>{if(e.target.name==="n")scaList(e.target,false)});
-$("scaBody").addEventListener("mousedown",e=>{
-  const li=e.target.closest(".scdd li");if(!li)return;
-  e.preventDefault();if(li.dataset.v)scaPick(li.closest(".scdd").querySelector("input"),li.dataset.v);
-});
-$("scaBody").addEventListener("change",async e=>{
-  const i=e.target;if(i.type!=="file"||!i.files[0])return;
-  const u=await scFit(i.files[0]),pic=i.closest(".scac").querySelector(".pix img");i.value="";
-  if(!u){dbNote("That picture could not be opened.",true);return}
-  pic.src=u;pic.classList.add("up");pic.dataset.up="1";
-  /* with a name already written the picture is saved right away */
-  const fm=pic.closest("form");if(fm.elements.n.value.trim())fm.requestSubmit();else{fm.elements.n.focus();dbNote("Picture ready · write the item's name and press Save.")}
-});
-$("scaBody").addEventListener("keydown",e=>{
-  const t=e.target;
-  if((e.key==="Enter"||e.key===" ")&&t.matches("label.fbtn")){e.preventDefault();t.querySelector("input").click();return}
-  if(t.name!=="n")return;
-  const ul=t.nextElementSibling,li=[...ul.querySelectorAll("li[data-v]")],a=ul.querySelector(".act"),i=li.indexOf(a);
-  if(e.key==="ArrowDown"||e.key==="ArrowUp"){
-    e.preventDefault();if(ul.hidden){scaList(t,true);return}if(!li.length)return;
-    a&&a.classList.remove("act");const n=li[(i+(e.key==="ArrowDown"?1:-1)+li.length)%li.length];n.classList.add("act");n.scrollIntoView({block:"nearest"});
-  }else if(e.key==="Enter"&&!ul.hidden&&a){e.preventDefault();scaPick(t,a.dataset.v)}
-  else if(e.key==="Escape")scaList(t,false);
-});
-$("scaBody").addEventListener("submit",async e=>{
-  e.preventDefault();const fm=e.target,pic=fm.querySelector(".pix img"),name=fm.elements.n.value.trim();if(!name)return;
-  const image=pic.dataset.up?pic.src:await scClean(pic.src);
-  scaPost({save:{name,image,miss:+fm.dataset.id}},`Saved: ${name} is recognized from now on.`);
-});
-$("scaBody").addEventListener("click",e=>{
-  const rm=e.target.closest("[data-rm]"),ri=e.target.closest("[data-ri]"),cl=e.target.closest("#scaClr"),pk=e.target.closest("[data-pick]");
-  if(pk){const i=pk.closest("form").elements.n;scaPick(i,pk.dataset.pick);i.focus();scaList(i,false)}
-  if(rm)scaPost({del:[+rm.dataset.rm]},"Removed.");
-  if(ri)scaPost({delIcon:+ri.dataset.ri},"Picture removed.");
-  if(cl){
-    if(!cl.classList.contains("armed")){cl.classList.add("armed");cl.textContent="Click again to clear all";setTimeout(()=>{cl.classList.remove("armed");cl.textContent="Clear all"},4000);return}
-    scaPost({clear:true},"Missing images cleared.");
-  }
-});
-
-/* ---------- tools: items (which item pictures exist in png/) ---------- */
-let itF="all";
-/* the kinds an item can be given in Items; ITY: item key -> kind, set by the admins (database) */
-const KINDS=["Loot","Material","Weapon","Armour","Helmet","Shield","Shoes","Jewellery","Necklace","Earring","Bracelet","Skill Book","Character","Chest","Dungeon Key","Dungeon Chest","Pet","Mount","Costume","Other"];
-let ITY=ld("itTypes",{});
-async function itTypes(){
-  if(!SCAPI)return;
-  try{const r=await fetch(SCAPI,{cache:"no-store"});if(r.ok){const j=await r.json();ITY=j.types||{};sv("itTypes",ITY);setPics(j.icons||[])}}catch(e){}
-}
+/* ---------- item names and picture files (the Screen Tracker reads with them) ---------- */
 function itemNames(){
   const s=new Map(),add=(n,g="Material")=>{n=String(n||"").trim();const k=slug(n);if(k&&!/^yang$/i.test(n)&&!s.has(k))s.set(k,[n,g])};
   for(const c in CATS){
@@ -3337,113 +2931,9 @@ function itemNames(){
   KN.forEach(n=>add(n,"Loot"));Object.keys(P).forEach(n=>add(n,"Loot"));
   return[...s].map(([k,[n,g]])=>[k,n,g]).sort((a,b)=>a[1].localeCompare(b[1]));
 }
-function probe(k,t,cb){
-  const a=new Image();a.onload=()=>cb("png");
-  a.onerror=()=>{const b=new Image();b.onload=()=>cb("webp");b.onerror=()=>cb("");b.src=`png/${k}.webp?t=${t}`};
-  a.src=`png/${k}.png?t=${t}`;
-}
-function itFilter(){
-  const q=$("itQ").value.trim().toLowerCase(),its=[...$("itg").children];let miss=0,ok=0;
-  its.forEach(e=>{if(e.classList.contains("miss"))miss++;if(e.classList.contains("ok"))ok++;
-    e.hidden=(q&&!e.dataset.n.includes(q))||(itF==="miss"&&!e.classList.contains("miss"))||(itF==="ok"&&!e.classList.contains("ok"))});
-  $("itCnt").textContent=`${its.length} items · ${ok} with picture · ${miss} missing`;
-  $("itSeg").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===itF)));
-}
 /* png/icons.json: every picture file, with its catalog name ("" when it has none) */
 let picListP=null;
 const picList=()=>picListP??=fetch("png/icons.json").then(r=>r.json()).catch(()=>{picListP=null;return[]});
-async function drawItems(){
-  const adm=!!(SCAPI&&ADK);$("itAdd").hidden=!adm;
-  await itTypes();
-  const t=Date.now(),list=itemNames(),have=new Set(list.map(x=>x[0]));
-  /* pictures no item on the site uses yet are listed too, under their catalog or file name */
-  for(const[n,fl]of await picList()){const k=fl.replace(/\.\w+$/,"");if(!have.has(k)){have.add(k);list.push([k,n||k,"Picture only"])}}
-  for(const[k,[n]]of Object.entries(PICS))if(!have.has(k)){have.add(k);list.push([k,n,"Picture only"])}
-  list.forEach(x=>{if(ITY[x[0]])x[2]=ITY[x[0]]});
-  list.sort((a,b)=>a[1].localeCompare(b[1]));
-  if(!$("itAt").options.length)$("itAt").innerHTML=KINDS.map(k=>`<option>${k}</option>`).join("");
-  $("itg").innerHTML=list.map(([k,n,g],i)=>`<div class="itm" style="--i:${Math.min(i,40)}" data-k="${k}" data-nm="${esc(n)}" data-n="${esc((n+" "+g).toLowerCase())}"><div class="itp">${esc(n[0].toUpperCase())}</div><b>${esc(n)}</b>${adm?`<button class="itg-t" title="Click to set what this item is">${esc(g)}</button>`:`<small class="itg-t">${esc(g)}</small>`}<button class="cp" title="Copy file name">${k}.png</button><small class="its">Checking…</small></div>`).join("")
-    ||`<p class="muted">No items yet.</p>`;
-  itFilter();
-  $("itg").querySelectorAll(".itm").forEach(e=>probe(e.dataset.k,t,x=>{
-    const db=!x&&PICS[e.dataset.k];
-    e.classList.add(x||db?"ok":"miss");
-    if(x){e.querySelector(".itp").innerHTML=`<img src="png/${e.dataset.k}.${x}?t=${t}" alt="">`;e.querySelector(".cp").textContent=`${e.dataset.k}.${x}`}
-    else if(db)e.querySelector(".itp").innerHTML=`<img src="${db[1]}" alt="">`;
-    const up=!x&&!db&&SCAPI&&ADK;e.classList.toggle("adm",!!up);if(up){const p=e.querySelector(".itp");p.title="Upload a picture";p.tabIndex=0;p.setAttribute("role","button")}
-    e.querySelector(".its").textContent=x?"Has picture":db?"Picture from Control Panel":up?"Missing picture · click the box to upload":"Missing picture";
-    itFilter();
-  }));
-}
-$("itSeg").onclick=e=>{const b=e.target.closest("[data-v]");if(b){itF=b.dataset.v;itFilter()}};
-$("itQ").addEventListener("input",itFilter);
-$("itRe").onclick=drawItems;
-/* a missing picture uploaded on its card: kept in the database (like Control Panel -> Screen Tracker), so every visitor sees it */
-function itUpload(card){
-  const inp=document.createElement("input");inp.type="file";inp.accept="image/*";
-  inp.onchange=async()=>{
-    const fl=inp.files[0];if(!fl)return;
-    const u=await scFit(fl),n=card.dataset.nm,k=card.dataset.k;
-    if(!u){dbNote("That picture could not be opened.",true);return}
-    try{
-      const r=await fetch(SCAPI,{method:"POST",headers:{"content-type":"application/json","x-admin-key":ADK},body:JSON.stringify({save:{name:n,image:u}})});
-      if(r.status===401){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out.",true);drawItems();return}
-      if(!r.ok)throw await why(r);
-    }catch(x){dbNote("Picture NOT saved ("+(typeof x==="string"?x:"no answer")+").",true);return}
-    PICS[k]=[n,u];sv("pics",PICS);scRefP=null;
-    card.classList.remove("miss","adm");card.classList.add("ok");card.querySelector(".itp").innerHTML=`<img src="${u}" alt="">`;card.querySelector(".itp").title="";
-    card.querySelector(".its").textContent="Picture from Control Panel";itFilter();
-    dbNote(`Saved the picture of ${n} · every visitor sees it now.`);
-  };
-  inp.click();
-}
-$("itg").addEventListener("keydown",e=>{const p=e.target.closest(".itm.adm .itp");if(p&&(e.key==="Enter"||e.key===" ")){e.preventDefault();itUpload(p.closest(".itm"))}});
-/* the kind under a picture: click it, pick one from the list; saved in the database */
-async function itKind(card,t){
-  const k=card.dataset.k,old=ITY[k];ITY[k]=t;sv("itTypes",ITY);
-  try{
-    const r=await fetch(SCAPI,{method:"POST",headers:{"content-type":"application/json","x-admin-key":ADK},body:JSON.stringify({type:{k,t}})});
-    if(r.status===401){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out.",true);drawItems();return}
-    if(!r.ok)throw await why(r);
-  }catch(x){if(old)ITY[k]=old;else delete ITY[k];sv("itTypes",ITY);dbNote("Kind NOT saved ("+(typeof x==="string"?x:"no answer")+").",true);drawItems();return}
-  dbNote(`${card.dataset.nm} is now: ${t}.`);
-}
-function itKindPick(b){
-  const card=b.closest(".itm"),cur=b.textContent,s=document.createElement("select");s.className="itg-s";s.setAttribute("aria-label","Kind of "+card.dataset.nm);
-  s.innerHTML=[...new Set([cur,...KINDS])].map(k=>`<option${k===cur?" selected":""}>${esc(k)}</option>`).join("");
-  b.replaceWith(s);s.focus();try{s.showPicker()}catch(e){}
-  let done=false;const end=()=>{if(done)return;done=true;const v=s.value;b.textContent=v;s.replaceWith(b);
-    card.dataset.n=(card.dataset.nm+" "+v).toLowerCase();if(v!==cur)itKind(card,v);b.focus()};
-  s.onchange=end;s.onblur=end;s.onkeydown=e=>{if(e.key==="Escape"){s.value=cur;end()}};
-}
-/* Add a picture: any name (a known item or a new one), its kind, a picture file */
-let itAU="";
-$("itAf").onchange=async()=>{const fl=$("itAf").files[0];$("itAf").value="";if(!fl)return;itAU=await scFit(fl)||"";
-  $("itApv").innerHTML=itAU?`<img src="${itAU}" alt="">`:"";if(!itAU)dbNote("That picture could not be opened.",true)};
-$("itAfL").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("itAf").click()}};
-$("itAn").addEventListener("change",()=>{const k=slug($("itAn").value),c=$("itg").querySelector(`.itm[data-k="${k}"] .itg-t`);if(c&&KINDS.includes(c.textContent))$("itAt").value=c.textContent});
-$("itAs").onclick=async()=>{
-  const n=$("itAn").value.trim().replace(/\s+/g," "),k=slug(n),t=$("itAt").value;
-  if(!k){dbNote("Write the item's name first.",true);return $("itAn").focus()}
-  if(!itAU){dbNote("Choose a picture first.",true);return $("itAfL").focus()}
-  try{
-    const r=await fetch(SCAPI,{method:"POST",headers:{"content-type":"application/json","x-admin-key":ADK},body:JSON.stringify({save:{name:n,image:itAU},type:{k,t}})});
-    if(r.status===401){ADK="";sv("admKey","");drawDb();dbNote("Wrong admin password · logged out.",true);drawItems();return}
-    if(!r.ok)throw await why(r);
-  }catch(x){dbNote("Picture NOT saved ("+(typeof x==="string"?x:"no answer")+").",true);return}
-  PICS[k]=[n,itAU];sv("pics",PICS);ITY[k]=t;sv("itTypes",ITY);scRefP=null;
-  $("itAn").value="";$("itApv").innerHTML="";itAU="";
-  dbNote(`Saved the picture of ${n} · every visitor sees it now.`);
-  await drawItems();const c=$("itg").querySelector(`.itm[data-k="${k}"]`);if(c)c.scrollIntoView({block:"center",behavior:RM.matches?"auto":"smooth"});
-};
-$("itg").addEventListener("click",e=>{
-  const kb=e.target.closest("button.itg-t");if(kb){itKindPick(kb);return}
-  const up=e.target.closest(".itm.adm .itp");if(up){itUpload(up.closest(".itm"));return}
-  const b=e.target.closest(".cp");if(!b)return;
-  const s=b.textContent,done=()=>{b.textContent="Copied!";setTimeout(()=>{b.textContent=s},900)};
-  try{navigator.clipboard.writeText(s).then(done,()=>{})}catch(x){}
-});
-
 /* ---------- card spotlight follows the cursor ---------- */
 document.addEventListener("pointermove",e=>{
   const c=e.target.closest&&e.target.closest(".card");if(!c)return;
@@ -3452,10 +2942,8 @@ document.addEventListener("pointermove",e=>{
 });
 
 /* ---------- sidebar & routing ---------- */
-const V={"":"home",tools:"tools","tools/loot":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons",skills:"skills","tools/items":"items","tools/dloot":"dloot","tools/screen":"screen","upgrade/skills":"skills",
-  admin:"admin","admin/items":"items","admin/upgrade":"cpup","admin/skills":"cpsk","admin/stats":"cpst","admin/screen":"cpsc","admin/keys":"cpdk"};
-const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"],["tools/screen","Screen Tracker"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"]]],
-  ["admin","Control Panel",[["admin/items","Items"],["admin/upgrade","Upgrade Cost"],["admin/skills","Skill Booster"],["admin/stats","Statistics"],["admin/screen","Screen Tracker"],["admin/keys","Dungeon Keys"]]]];
+const V={"":"home",tools:"tools","tools/loot":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons",skills:"skills","tools/dloot":"dloot","tools/screen":"screen","upgrade/skills":"skills"};
+const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"],["tools/screen","Screen Tracker"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"]]]];   // the Control Panel adds its own group
 /* addresses: on the website every page has a real path (/upgrade/weapons; vercel.json serves index.html
    for all of them), opened as a file the #/ addresses are used.
    The Control Panel is hidden: its pages live under /31/admin and open nowhere else; once opened,
@@ -3464,13 +2952,14 @@ const HIST=location.protocol!=="file:",CPB="31/";
 const isCp=k=>k==="admin"||k.startsWith("admin/")||k==="tools/items";
 const href=k=>HIST?"/"+(isCp(k)?CPB:"")+k:"#/"+k;
 const onCp=()=>!HIST||/^\/31\/admin(\/|$)/.test(location.pathname);
-let ADM=onCp()||(()=>{try{return sessionStorage.getItem("cp")==="1"}catch(e){return false}})();
+let ADM=false;   // the Control Panel's menu: shown once its pages are loaded
 function cur(){
   let k;
   if(HIST){
     const p=location.pathname.replace(/^\/+|\/+$/g,"");
     k=onCp()?p.slice(CPB.length):isCp(p)?"":p;
   }else k=location.hash.replace(/^#\/?/,"").replace(/\/$/,"");
+  if(isCp(k)&&!CPL)return{v:"login",k};   // its pages exist only after a login
   return{v:Object.prototype.hasOwnProperty.call(V,k)?V[k]:"home",k};
 }
 if(HIST){
@@ -3553,7 +3042,6 @@ let lastV="";
 /* quiet: a redraw of the open page (database loaded), keeps its place and doesn't replay the animations */
 function route(quiet){
   quiet=quiet===true;
-  if(HIST&&onCp()){ADM=true;try{sessionStorage.setItem("cp","1")}catch(e){}}
   const c=cur();
   if(!quiet)document.querySelectorAll("main[id^=v-]").forEach(m=>{
     const on=m.id==="v-"+c.v;m.hidden=!on;m.classList.remove("enter");
@@ -3569,13 +3057,9 @@ function route(quiet){
     drawW();
   }
   if(c.v==="skills"){skP=null;drawSk(!quiet)}
-  if(c.v==="items")drawItems();
-  if(c.v==="cpup"){cuRen=-1;loadCat(cuCat);drawCpU()}
-  if(c.v==="cpsk")drawCpS();
-  if(c.v==="cpst")drawStats();
+  if(c.v==="login")drawLogin();
+  if(CPL)cpRoute(c,quiet);   // the Control Panel's pages
   if(c.v==="screen"){drawSc();scRefs()}   // the item pictures start loading before the first upload
-  if(c.v==="cpsc"&&!quiet)drawScA();
-  if(c.v==="cpdk"&&!quiet)drawDk();
   statView(c);
   if(c.v==="dloot"){if(lastV!=="dloot")$("dlBack").hidden=lastV!=="loot";drawDl()}   // Go Back only when opened from the Loot Tracker
   lastV=c.v;
@@ -3598,7 +3082,18 @@ addEventListener("resize",fitR);
 /* ---------- init ---------- */
 $("bs").setAttribute("aria-pressed",short);
 $("bs").textContent="kk format: "+(short?"On":"Off");
-applyTh();applyAc();rebuild();draw();applyBar();route();drawLastUp();dbLoad();
+applyTh();applyAc();rebuild();draw();applyBar();
+/* a browser that logged in before opens with the Control Panel; a password kept by the old login is traded once for the cookie */
+if(CPAPI&&ADK){
+  cpWait=true;
+  (async()=>{
+    if(ADK!=="1")try{await cpLogin(ADK)}catch(e){}
+    const ok=await cpLoad();cpWait=false;
+    if(!ok&&ADK!=="1"){ADK="";sv("admKey","")}
+    if(lastV==="login"){if(ok)route();else drawLogin()}else renderNav();
+  })();
+}
+route();drawLastUp();dbLoad();
 </script>
 </body>
 </html>

@@ -1,0 +1,101 @@
+<main id="v-cpst" hidden>
+  <p class="crumb"><a href="#/admin">← Control Panel</a></p>
+  <div class="lth"><h1>Statistics</h1><button class="flb" id="stRe">Refresh</button></div>
+  <p class="sub">Counts only: no file contents and no IP addresses are kept. Days follow Turkey time. Visits from a browser logged in as admin are not counted.</p>
+  <div id="stBody"></div>
+</main>
+<main id="v-admin" hidden>
+  <p class="crumb"><a href="#/">← Main Page</a></p>
+  <h1>Control Panel</h1><p class="sub">Manage what the other pages show.</p>
+  <section class="panel dbp">
+    <h2>Database</h2>
+    <p id="dbSt" class="muted">Checking the database…</p>
+    <div id="dbAd" class="dbf"><button id="dbUp" class="primary">Upload this browser's data</button><button id="dbRe">Reload from database</button><button id="dbOut">Log out</button><button id="dbOutAll" title="Every browser that is logged in has to log in with the password again">Log out everywhere</button></div>
+    <output id="dbMsg" aria-live="polite"></output>
+  </section>
+  <div class="cards"><a class="card" href="#/admin/items" style="--i:0"><b>Items</b><span>Every item on the site and whether it has a picture.</span></a><a class="card" href="#/admin/upgrade" style="--i:1"><b>Upgrade Cost</b><span>Add, rename and delete items, fill their materials from text.</span></a><a class="card" href="#/admin/skills" style="--i:2"><b>Skill Booster</b><span>Character skill groups and the skill level cost list.</span></a><a class="card" href="#/admin/stats" style="--i:3"><b>Statistics</b><span>Visits, unique visitors, most opened pages and uploaded tracker files.</span></a><a class="card" href="#/admin/screen" style="--i:4"><b>Screen Tracker</b><span>Items the Screen Tracker could not recognize: add their pictures.</span></a><a class="card" href="#/admin/keys" style="--i:5"><b>Dungeon Keys</b><span>Match each dungeon key with its chest and upload their pictures.</span></a></div>
+</main>
+
+<main id="v-cpdk" hidden>
+  <p class="crumb"><a href="#/admin">← Control Panel</a></p>
+  <div class="lth"><h1>Dungeon Keys</h1><button class="flb" id="dkAdd">+ Add Pair</button></div>
+  <p class="sub">Each dungeon's key next to its chest. Pick or write their names, click a picture box to upload its picture: it is saved on the website and shows in Items (as Dungeon Key / Dungeon Chest) too.</p>
+  <div id="dkBody"></div>
+</main>
+
+<main id="v-cpsc" class="cpsc" hidden>
+  <p class="crumb"><a href="#/admin">← Control Panel</a></p>
+  <div class="lth"><h1>Screen Tracker</h1><button class="flb" id="scaRe">Refresh</button></div>
+  <p class="sub">Slots the Screen Tracker could not recognize in visitors' screenshots. Write the item's name and save: the picture from the screenshot, or one you upload, is used to recognize that item from then on and becomes its picture in Items.</p>
+  <div id="scaBody"></div>
+</main>
+
+<main id="v-cpup" hidden>
+  <p class="crumb"><a href="#/admin">← Control Panel</a></p>
+  <h1>Upgrade Cost</h1><p class="sub">Add, rename and delete items, then paste their upgrade list. The Upgrade Cost pages show what you save here.</p>
+  <div class="bar tbar"><div class="seg" id="cuSeg"></div></div>
+  <div class="cpg">
+    <section class="dlc">
+      <h2>Items <small id="cuCnt"></small></h2>
+      <div class="cul" id="cuList"></div>
+      <form class="dlgf" id="cuNewF"><input id="cuNew" placeholder="New item name" aria-label="New item name" maxlength="60" autocomplete="off"><button>+ New</button></form>
+    </section>
+    <section class="dlc">
+      <h2>Text to list <small id="cuSelN"></small></h2>
+      <div class="imp cpimp">
+        <label for="impTx">Paste the upgrade list <small>— materials and Yang are filled into the selected item</small></label>
+        <textarea id="impTx" spellcheck="false" placeholder="+0 -> +1:&#10;Shard: 1.650 adet&#10;Red Citrine Dust: 70 adet&#10;Toplam Maliyet: 3.600.000 Yang&#10;+9 -> +0 (Craft):&#10;..."></textarea>
+        <div class="edf"><button class="primary" id="cuImp">Apply text</button><output id="impMsg" aria-live="polite"></output></div>
+      </div>
+      <h2 class="cph">Material counts</h2>
+      <div id="cuMats"></div>
+    </section>
+  </div>
+</main>
+
+<main id="v-cpsk" hidden>
+  <p class="crumb"><a href="#/admin">← Control Panel</a></p>
+  <h1>Skill Booster</h1><p class="sub">Pick a character's skill group, then click skill books to add or remove them. The Skill Booster page shows them under Select Character.</p>
+  <section class="dlc cps">
+    <h2>Character Skills</h2>
+    <div class="csc" id="csChar"></div>
+    <div class="csin" id="csIn"></div>
+    <div class="bar tbar"><input id="csQ" type="search" placeholder="Search skill books" aria-label="Search skill books"><span class="muted" id="csCnt"></span></div>
+    <div class="csg" id="csAll"></div>
+  </section>
+  <section class="dlc cps">
+    <h2>Text to list <small>skill level cost</small></h2>
+    <div class="imp cpimp">
+      <label for="skTx">Paste the skill list <small>— materials and Yang are filled per level</small></label>
+      <textarea id="skTx" spellcheck="false" placeholder="Master 1 -> Master 2:&#10;Shard: 6.300 adet&#10;Skillbook M-G: 5 adet&#10;Toplam Maliyet: 2.100.000 Yang&#10;&#10;Grandmaster 10 -> P1:&#10;Shard: 12k (12.000) adet&#10;Skillbook G-P: 50 adet&#10;..."></textarea>
+      <div class="edf"><button class="primary" id="skApply">Apply text</button><output id="skMsg" aria-live="polite"></output></div>
+    </div>
+  </section>
+</main>
+
+<main id="v-items" hidden>
+  <p class="crumb"><a href="#/admin">← Control Panel</a></p>
+  <h1>Items</h1>
+  <p class="sub">Every item the site knows and every picture in the <b>png</b> folder. Put a picture in that folder with the file name shown (.png or .webp), or upload it in Control Panel → Screen Tracker. Click a file name to copy it.</p>
+  <div class="bar tbar">
+    <div class="seg" id="itSeg">
+      <button data-v="all" aria-pressed="true">All</button>
+      <button data-v="miss" aria-pressed="false">Missing</button>
+      <button data-v="ok" aria-pressed="false">Has picture</button>
+    </div>
+    <input id="itQ" type="search" placeholder="Search items" aria-label="Search items">
+    <button id="itRe">Check again</button>
+    <span id="itCnt" class="muted"></span>
+  </div>
+  <section class="add itadd" id="itAdd" hidden>
+    <div class="bar">
+      <span class="lt">Add a picture<small>saved on the website, every visitor sees it</small></span>
+      <div class="scdd itan"><input id="itAn" data-cb="items" placeholder="Item name" aria-label="Item name" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list"><ul role="listbox" hidden></ul></div>
+      <select id="itAt" aria-label="Kind"></select>
+      <label class="fbtn" for="itAf" tabindex="0" id="itAfL">Choose Picture</label><input id="itAf" type="file" accept="image/*" hidden>
+      <span class="itapv" id="itApv"></span>
+      <button id="itAs">Save</button>
+    </div>
+  </section>
+  <div class="itg" id="itg"></div>
+</main>

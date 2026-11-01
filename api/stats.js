@@ -1,7 +1,7 @@
 /* Site statistics (see schema.sql: stats_daily, visitors). Only counts, never file contents or IPs.
    POST /api/stats  {v: browser id, visit: true on a session's first page, view: page, up: "loot"|"dloot"|"screen", n: lines or items read}
                     -> anyone; adds to today's counters (Turkey time)
-   GET  /api/stats  -> header "x-admin-key": last 30 days, totals, pages and uploads for the Control Panel */
+   GET  /api/stats  -> admin cookie: last 30 days, totals, pages and uploads for the Control Panel */
 import { client, isAdmin, missing } from "./_db.js";
 
 const PAGES = new Set(["home", "tools", "loot", "dloot", "screen", "upgrade", "weapons", "jewellery", "armour", "helmets", "shields", "skills"]);
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
     if (req.method === "POST") return await record(req, res);
     if (req.method !== "GET") return res.status(405).json({ error: "GET or POST" });
     if (!process.env.ADMIN_PASSWORD) return res.status(500).json({ error: "Missing in Vercel Environment Variables: ADMIN_PASSWORD" });
-    if (!isAdmin(req)) return res.status(401).json({ error: "Wrong admin password" });
+    if (!await isAdmin(req)) return res.status(401).json({ error: "Not logged in" });
     return await report(res);
   } catch (e) {
     console.error(e);

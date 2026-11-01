@@ -1,8 +1,8 @@
 /* Screen Tracker pictures (see schema.sql: screen_missing, screen_icons).
    GET  /api/screen -> {icons: [{id, name, image}]} for every visitor: recognized in screenshots besides png/
-                       with header "x-admin-key" also {missing: [{id, image, seen, first, last}]}
+                       with the admin cookie also {missing: [{id, image, seen, first, last}]}
    POST /api/screen {miss: [{sig, image}]} -> anyone: inventory slots nobody could recognize (up to 300 kept)
-   POST /api/screen + "x-admin-key": {save: {name, image, miss}} | {del: [ids]} | {clear: true} | {delIcon: id}
+   POST /api/screen + admin cookie:  {save: {name, image, miss}} | {del: [ids]} | {clear: true} | {delIcon: id}
                                      | {type: {k, t}} or {types: [{k, t}]} (an item's kind shown in Items; t "" goes back to the default)
                                      | {pair: {id, key, chest}} (a dungeon key and its chest; no id = a new pair) | {delPair: id}
    GET also gives {types: {item key: kind}, pairs: [{id, key, chest}]} */
@@ -28,7 +28,7 @@ const setup = () => ready ??= client().batch([
 ], "write").catch(e => { ready = null; throw e });
 
 async function read(req, res) {
-  const adm = isAdmin(req);
+  const adm = await isAdmin(req);
   const [icons, miss, types, pairs] = await client().batch([
     "SELECT id, name, image FROM screen_icons ORDER BY name COLLATE NOCASE",
     adm ? "SELECT id, image, seen, first, last FROM screen_missing ORDER BY last DESC" : "SELECT 1 WHERE 0",
@@ -98,7 +98,7 @@ export default async function handler(req, res) {
     const b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
     if (b.miss) return BOT.test(req.headers["user-agent"] || "") ? res.status(204).end() : await report(b, res);
     if (!process.env.ADMIN_PASSWORD) return res.status(500).json({ error: "Missing in Vercel Environment Variables: ADMIN_PASSWORD" });
-    if (!isAdmin(req)) return res.status(401).json({ error: "Wrong admin password" });
+    if (!await isAdmin(req)) return res.status(401).json({ error: "Not logged in" });
     return await admin(b, res);
   } catch (e) {
     console.error(e);

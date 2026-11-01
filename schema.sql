@@ -92,6 +92,10 @@ CREATE TABLE IF NOT EXISTS visitors (
   PRIMARY KEY (id, day)
 );
 
+-- Control Panel sign-in (api/_db.js makes these on first use): hashes of the admin cookies, and wrong passwords per address
+CREATE TABLE IF NOT EXISTS admin_sessions (h TEXT PRIMARY KEY, ua TEXT NOT NULL DEFAULT '', created TEXT NOT NULL DEFAULT (datetime('now')));
+CREATE TABLE IF NOT EXISTS admin_fails (ip TEXT PRIMARY KEY, n INTEGER NOT NULL DEFAULT 0, until INTEGER NOT NULL DEFAULT 0);
+
 -- An item's kind as set in Control Panel -> Items (Weapon, Earring ...); k = the item's picture key (api/screen.js makes it on first use)
 CREATE TABLE IF NOT EXISTS item_types (k TEXT PRIMARY KEY, t TEXT NOT NULL);
 

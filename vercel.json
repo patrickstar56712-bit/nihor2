@@ -1,5 +1,13 @@
 {
+  "functions": {
+    "api/admin.js": {
+      "includeFiles": "api/_panel/**"
+    }
+  },
   "rewrites": [
-    { "source": "/((?!api/)[^.]*)", "destination": "/index.html" }
+    {
+      "source": "/((?!api/)[^.]*)",
+      "destination": "/index.html"
+    }
   ]
 }

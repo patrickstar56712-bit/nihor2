@@ -1,6 +1,6 @@
 /* Shared site data on Turso (see schema.sql).
    GET  /api/data  -> everything the Control Panel manages, for every visitor (pics: pictures saved in Control Panel -> Screen Tracker)
-   POST /api/data  -> header "x-admin-key: <ADMIN_PASSWORD>", body with any of
+   POST /api/data  -> admin cookie (api/admin.js), body with any of
                       { check: true } | { items: { weapons: [...], ... } } | { skills: {...} } | { chars: {...} }
    Item, skill and character shapes are the ones index.html keeps in localStorage. */
 import { client, isAdmin, missing } from "./_db.js";
@@ -135,7 +135,7 @@ export default async function handler(req, res) {
     if (req.method === "GET") return res.status(200).json(await readAll());
     if (req.method !== "POST") return res.status(405).json({ error: "GET or POST" });
     if (!process.env.ADMIN_PASSWORD) return res.status(500).json({ error: "Missing in Vercel Environment Variables: ADMIN_PASSWORD" });
-    if (!isAdmin(req)) return res.status(401).json({ error: "Wrong admin password" });
+    if (!await isAdmin(req)) return res.status(401).json({ error: "Not logged in" });
     const b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
     if (b.check) { await client().execute("SELECT 1 FROM items LIMIT 1"); return res.status(200).json({ ok: true }) }   // login also proves the database answers
     const st = [];
