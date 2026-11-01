@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-01T19:11:35Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-01T21:13:33Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -959,7 +959,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .scdga .bar{margin:0;gap:10px}
 .scdn{flex:0 1 260px}
 .scdt{flex:none;width:180px;max-width:100%}
-#v-screen{max-width:1200px}
+#v-screen{max-width:1500px}
 #scAcc{overflow:visible}
 .skm:focus-within{position:relative;z-index:6}
 .skm.unk .scun{flex:1;min-width:0}
@@ -973,7 +973,8 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .skm.dg{border-color:color-mix(in srgb,var(--red) 45%,var(--line))}
 .skm.dg .ut{color:var(--red)}
 .skm.dg .xb{flex:none;padding:1px 7px}
-#scMats .skmg{grid-template-columns:repeat(auto-fill,minmax(min(440px,100%),1fr))}
+#scMats .skmg{grid-template-columns:repeat(auto-fill,minmax(min(580px,100%),1fr))}
+#scMats .skm{min-width:0}
 .skpi.scq{width:78px}
 #scMats .mnn{white-space:normal;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .skm.unk{border-style:dashed;border-color:color-mix(in srgb,var(--red) 55%,var(--line))}
@@ -1280,7 +1281,6 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
     <select id="sort" aria-label="Sort">
       <option value="v">By value</option>
       <option value="q">By quantity</option>
-      <option value="e">By drop count</option>
       <option value="u">By unit price</option>
       <option value="n">By name</option>
     </select>
@@ -1290,7 +1290,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
   </div>
   <div class="wrap">
     <table>
-      <thead><tr><th>Item</th><th class="s" data-s="q" tabindex="0">Qty</th><th class="s" data-s="e" tabindex="0">Drops</th><th class="s" data-s="u" tabindex="0">Unit price (Yang)</th><th class="s" data-s="v" tabindex="0">Total value</th></tr></thead>
+      <thead><tr><th>Item</th><th class="s" data-s="q" tabindex="0">Qty</th><th class="s" data-s="u" tabindex="0">Unit price (Yang)</th><th class="s" data-s="v" tabindex="0">Total value</th></tr></thead>
       <tbody id="rows"></tbody>
     </table>
   </div>
@@ -1738,7 +1738,7 @@ function draw(){
   $("sort").value=SK;
   document.querySelectorAll("th.s").forEach(h=>h.setAttribute("aria-sort",h.dataset.s===SK?(SD>0?"ascending":"descending"):"none"));
   const r=Object.entries(m).filter(([n,v])=>n!=="Yang"&&(v[0]>0||pins.has(n))&&(!t||n.toLowerCase().includes(t))&&(sk?isSk(n):pins.has(n)||!isSk(n))&&(!pr||price(n)>0));
-  const key=(n,v)=>SK==="n"?n:SK==="q"?v[0]:SK==="e"?v[1]:SK==="u"?price(n):v[0]*price(n);
+  const key=(n,v)=>SK==="n"?n:SK==="q"?v[0]:SK==="u"?price(n):v[0]*price(n);
   r.sort((a,b)=>{
     const pd=pinCmp(a[0],b[0]);if(pd)return pd;
     const x=key(a[0],a[1]),y=key(b[0],b[1]);
@@ -1747,10 +1747,10 @@ function draw(){
   });
   const tb=$("rows");
   tb.classList.toggle("calm",calm);calm=false;
-  tb.innerHTML=r.map(([n,[qt,e]],i)=>{
+  tb.innerHTML=r.map(([n,[qt]],i)=>{
     const p=price(n),pn=pins.has(n),en=esc(n);
-    return `<tr class="${p?"set":""}${pn?" pin":""}" style="--i:${Math.min(i,20)}"><td class="n"><button class="pb" data-p="${en}" aria-pressed="${pn}" aria-label="Pin ${en}">★</button>${img(n)}${en}</td><td>${f(qt)}</td><td>${f(e)}</td><td><input data-n="${en}" value="${p?fp(p):""}" placeholder="0" inputmode="decimal" aria-label="${en} unit price"></td><td class="v">${p?fv(qt*p):"–"}</td></tr>`;
-  }).join("")||`<tr><td class="empty" colspan="5">${EV.length?"No items in this range.":"Add a log file above to get started."}</td></tr>`;
+    return `<tr class="${p?"set":""}${pn?" pin":""}" style="--i:${Math.min(i,20)}"><td class="n"><button class="pb" data-p="${en}" aria-pressed="${pn}" aria-label="Pin ${en}">★</button>${img(n)}${en}</td><td>${f(qt)}</td><td><input data-n="${en}" value="${p?fp(p):""}" placeholder="0" inputmode="decimal" aria-label="${en} unit price"></td><td class="v">${p?fv(qt*p):"–"}</td></tr>`;
+  }).join("")||`<tr><td class="empty" colspan="4">${EV.length?"No items in this range.":"Add a log file above to get started."}</td></tr>`;
 }
 
 /* ---------- loot tracker events ---------- */
@@ -1824,6 +1824,7 @@ async function loadFile(fs){
   /* one "drop" = consecutive log lines whose time stays within GAP seconds of the latest line */
   const flush=()=>{
     if(!cur.length)return;
+    if(cur.length===1&&cur[0][1]!=="Yang"){cur=[];return}   // one item alone in its seconds: a craft, not a drop
     const d=dropInfo(cur.map(x=>[x[1],x[2]]));
     if(d.se)sup.push(cur[0][0]);
     for(const [t,n,q] of cur)if(keepDrop(n,q,d.ok)){add(t,n,q);if(JOR.test(n)&&q>=JOR_MIN&&q<=JOR_MAX)jor.push(t)}
