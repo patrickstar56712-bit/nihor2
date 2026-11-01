@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-10-31T23:26:56Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-01T11:41:34Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -872,6 +872,9 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .skm.skbk{border-color:color-mix(in srgb,var(--gold) 55%,var(--line))}
 .skm .mpic{width:36px;height:36px}
 .skm .mpic .ic{width:28px;height:28px}
+.skm .mnw{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.skm .mnw .mnn{flex:none;max-width:100%}
+.skm .dc{flex:none;font-size:11px;line-height:1.3;font-weight:800;color:var(--jade);background:color-mix(in srgb,var(--jade) 14%,transparent);border:1px solid color-mix(in srgb,var(--jade) 40%,transparent);border-radius:6px;padding:1px 6px}
 .skm .mnn{flex:1;min-width:0;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .skm.skbk .mnn{color:var(--gold);font-weight:800}
 .skpi{display:flex;align-items:center;width:128px;flex:none;border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:hidden}
@@ -3044,7 +3047,7 @@ function drawSc(){
         `<label class="skpi scq"><input data-dr="${j}" value="${d.r}" inputmode="numeric" aria-label="${en} runs"><em>run${d.r===1?"":"s"}</em></label>`+
         `<label class="skpi"><input data-dp="${j}" value="${d.p?fp(d.p):""}" placeholder="Price / run" inputmode="decimal" aria-label="${en} key price per run"><em>Yang</em></label><span class="ut"></span>`+
         `<button class="xb" data-dx="${j}" aria-label="Remove ${en}">✕</button></div>`}).join("")+it.map(([n,q])=>{const en=esc(n),p=P[n]||0;
-      return `<div class="skm" data-n="${en}" style="--i:${Math.min(k++,20)}" title="${en}"><span class="mpic">${img(n)}<i>${en.charAt(0).toUpperCase()}</i></span><span class="mnn">${en}</span>`+
+      return `<div class="skm" data-n="${en}" style="--i:${Math.min(k++,20)}" title="${en}"><span class="mpic">${img(n)}<i>${en.charAt(0).toUpperCase()}</i></span><span class="mnw"><span class="mnn">${en}</span><span class="dc" title="Drop chance: pieces per dungeon run" hidden></span></span>`+
         `<label class="skpi scq"><input data-sq="${en}" value="${q}" inputmode="numeric" aria-label="${en} count"><em>pcs</em></label>`+
         `<label class="skpi"><input data-pn="${en}" value="${p?fp(p):""}" placeholder="Unit price" inputmode="decimal" aria-label="${en} unit price"><em>Yang</em></label><span class="ut">${fv(p*q)}</span></div>`}).join("")+
     SC.unk.map((u,j)=>`<div class="skm unk" style="--i:${Math.min(k++,20)}" title="Not recognized"><span class="mpic"><img class="ic scc" src="${u.im}" alt=""></span><span class="mnn">Not recognized</span>`+
@@ -3059,6 +3062,10 @@ function scTot(){
   for(const d of SCD)k+=d.r*d.p;
   $("scMats").querySelectorAll(".skm[data-n]").forEach(r=>{const it=SC.items.find(x=>x[0]===r.dataset.n);if(it)r.querySelector(".ut").textContent=fv((P[it[0]]||0)*it[1])});
   $("scMats").querySelectorAll(".skm.dg").forEach((r,j)=>{const d=SCD[j];if(d)r.querySelector(".ut").textContent=neg(d.r*d.p)});
+  /* drop chance: the item's pieces over all the dungeon runs added (3 from 30 runs = 10%) */
+  const runs=SCD.reduce((a,d)=>a+d.r,0);
+  $("scMats").querySelectorAll(".skm[data-n] .dc").forEach(e=>{const it=SC.items.find(x=>x[0]===e.closest(".skm").dataset.n),p=it&&runs?it[1]/runs*100:0;
+    e.hidden=!p;e.textContent=!p?"":p<=100?(p<10?Math.round(p*10)/10:Math.round(p))+"%":(p<1000?Math.round(p/10)/10:Math.round(p/100))+"/run"});   // more than one a run: pieces per run
   setOut($("scM"),fv(t));setOut($("scK"),neg(k));setOut($("scT"),t-k<0?neg(k-t):fv(t-k));
 }
 $("scMats").addEventListener("input",e=>{
