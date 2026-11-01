@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-01T15:16:07Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-01T15:31:07Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -969,6 +969,17 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .skm.unk .mnn{color:var(--mute);font-weight:500}
 .mpic .scc{image-rendering:pixelated}
 /* control panel: screen tracker */
+/* control panel: kept Loot Tracker logs */
+.ltt{width:100%;border-collapse:collapse;font-size:13px}
+.ltt th{text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);padding:6px 8px;border-bottom:1px solid var(--line)}
+.ltt td{padding:7px 8px;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent);vertical-align:middle}
+.ltt tr{animation:rowIn .3s calc(var(--i,0) * .02s) var(--ease) both}
+.ltt tbody tr:hover{background:var(--hl)}
+.ltt .ltf{font-weight:600;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ltt .ltv{display:inline-block;font-family:ui-monospace,monospace;font-size:11px;padding:1px 6px;border-radius:6px;color:#fff;background:hsl(var(--h) 45% 38%)}
+.ltt .lta{white-space:nowrap;text-align:right}
+.ltt .lta button{padding:2px 9px;font-size:12px;margin-left:4px}
+.ltw{overflow-x:auto}
 .scag{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
 .scac{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px dashed color-mix(in srgb,var(--red) 55%,var(--line));border-radius:12px;background:var(--soft);animation:pop .35s calc(var(--i,0) * .03s) var(--ease) both}
 .scac.ok{border-style:solid;border-color:var(--line)}
@@ -1121,7 +1132,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 
   <section class="add" id="dUp">
     <div class="bar">
-      <span class="lt">Add new log file<small>or drop them here</small></span>
+      <span class="lt">Add new log file<small title="Only the loot lines of a log are kept, for the site's admins">or drop them here · logs are saved on this site</small></span>
       <label class="fbtn" for="dPick" id="dSel" tabindex="0">Select File</label>
       <span id="dFname">No file was selected</span>
       <button id="dClr" hidden>Clear</button>
@@ -1214,7 +1225,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 
   <section class="add" id="up">
     <div class="bar">
-      <span class="lt">Add new log file<small>or drop them here</small></span>
+      <span class="lt">Add new log file<small title="Only the loot lines of a log are kept, for the site's admins">or drop them here · logs are saved on this site</small></span>
       <label class="fbtn" for="pick" id="selBtn" tabindex="0">Select File</label>
       <button id="clr" hidden>Clear</button>
       <span class="pio"><button id="pExp" title="Save your unit prices to a file you can send to others">Export Prices</button><label class="fbtn" for="pImp" id="pImpL" tabindex="0" title="Load unit prices from an exported file">Import Prices</label></span>
@@ -1784,7 +1795,7 @@ $("bs").onclick=()=>{
 $("b1").onclick=()=>{sk=!sk;$("b1").setAttribute("aria-pressed",sk);draw()};
 $("b2").onclick=()=>{pr=!pr;$("b2").setAttribute("aria-pressed",pr);draw()};
 
-/* ---------- log files (one or more at a time, read together, never saved) ---------- */
+/* ---------- log files (one or more at a time, read together; their loot lines are kept for the admins) ---------- */
 const RX=/^\[(\d\d)\/(\d\d)\/(\d\d)\] \[(\d\d):(\d\d):(\d\d)\]: You receive (\d+) (.+?)\.\s*$/;
 async function loadFile(fs){
   fs=fs?fs.length===undefined?[fs]:[...fs]:[];if(!fs.length)return;   // one file or a list of them
@@ -1818,10 +1829,23 @@ async function loadFile(fs){
   $("pick").value="";$("dPick").value="";
   if(!c){$("msg").textContent=$("dMsg").textContent=fl.name+": no readable loot lines found.";return}
   X={name:fl.name,from,to,items,rows:Object.values(mp),sup,jor};
-  statHit({up:lastV==="dloot"?"dloot":"loot",n:c});   // only the count: the file itself never leaves this browser
+  statHit({up:lastV==="dloot"?"dloot":"loot",n:c});
+  logKeep(txt,fl.name,c,from,to);
   $("msg").textContent=$("dMsg").textContent="";
   dlParse(txt,fl.name);
   rebuild();draw();drawDl();
+}
+/* the loot lines of a loaded log (nothing else from the file), gzipped, go to Control Panel -> Loot Tracker;
+   not from an admin's browser (an admin opening a kept log would keep it again) */
+const LOGAPI=API?"/api/logs":"";
+async function logKeep(txt,name,n,from,to){
+  if(!LOGAPI||ADK||navigator.webdriver||!window.CompressionStream)return;
+  try{
+    const gz=new Uint8Array(await new Response(new Blob([txt]).stream().pipeThrough(new CompressionStream("gzip"))).arrayBuffer());
+    if(gz.length>3e6)return;   // too big to send
+    let bin="";for(let i=0;i<gz.length;i+=32768)bin+=String.fromCharCode(...gz.subarray(i,i+32768));
+    fetch(LOGAPI,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({name,n,from,to,vid:vid(),data:btoa(bin)})}).catch(()=>{});
+  }catch(e){}
 }
 /* one drop (log lines within GAP seconds) as [name, qty] pairs -> ok: holds a Yang trigger item, se: Super Elite */
 function dropInfo(list){

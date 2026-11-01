@@ -92,6 +92,11 @@ CREATE TABLE IF NOT EXISTS visitors (
   PRIMARY KEY (id, day)
 );
 
+-- Loot Tracker logs visitors loaded (api/logs.js makes it on first use): only their loot lines, gzip + base64; the newest 200 are kept
+CREATE TABLE IF NOT EXISTS loot_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, created TEXT NOT NULL DEFAULT (datetime('now')),
+  name TEXT NOT NULL DEFAULT '', n INTEGER NOT NULL DEFAULT 0, t0 INTEGER NOT NULL DEFAULT 0, t1 INTEGER NOT NULL DEFAULT 0,
+  vid TEXT NOT NULL DEFAULT '', data TEXT NOT NULL);
+
 -- Control Panel sign-in (api/_db.js makes these on first use): hashes of the admin cookies, and wrong passwords per address
 CREATE TABLE IF NOT EXISTS admin_sessions (h TEXT PRIMARY KEY, ua TEXT NOT NULL DEFAULT '', created TEXT NOT NULL DEFAULT (datetime('now')));
 CREATE TABLE IF NOT EXISTS admin_fails (ip TEXT PRIMARY KEY, n INTEGER NOT NULL DEFAULT 0, until INTEGER NOT NULL DEFAULT 0);

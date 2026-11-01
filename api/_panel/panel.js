@@ -1,8 +1,8 @@
 /* Control Panel: sent by /api/admin to a logged-in browser only, then run on top of index.html (it uses the page's functions and data).
    Its pages are in panel.html, its styles stay in index.html. */
 "use strict";
-Object.assign(V,{admin:"admin","admin/items":"items","admin/upgrade":"cpup","admin/skills":"cpsk","admin/stats":"cpst","admin/screen":"cpsc","admin/keys":"cpdk"});
-GROUPS.push(["admin","Control Panel",[["admin/items","Items"],["admin/upgrade","Upgrade Cost"],["admin/skills","Skill Booster"],["admin/stats","Statistics"],["admin/screen","Screen Tracker"],["admin/keys","Dungeon Keys"]]]);
+Object.assign(V,{admin:"admin","admin/items":"items","admin/upgrade":"cpup","admin/skills":"cpsk","admin/stats":"cpst","admin/screen":"cpsc","admin/keys":"cpdk","admin/loot":"cplt"});
+GROUPS.push(["admin","Control Panel",[["admin/items","Items"],["admin/upgrade","Upgrade Cost"],["admin/skills","Skill Booster"],["admin/stats","Statistics"],["admin/screen","Screen Tracker"],["admin/keys","Dungeon Keys"],["admin/loot","Loot Tracker"]]]);
 /* called by route() for every page */
 function cpRoute(c,quiet){
   if(c.v==="admin")drawDb();
@@ -12,7 +12,51 @@ function cpRoute(c,quiet){
   if(c.v==="cpst")drawStats();
   if(c.v==="cpsc"&&!quiet)drawScA();
   if(c.v==="cpdk"&&!quiet)drawDk();
+  if(c.v==="cplt"&&!quiet)drawLt();
 }
+
+/* ---------- Loot Tracker: the logs visitors loaded (api/logs.js) ---------- */
+async function drawLt(){
+  const b=$("ltBody");
+  if(!LOGAPI){b.innerHTML=`<p class="muted">The logs are kept on the website only.</p>`;return}
+  if(!b.children.length)b.innerHTML=`<p class="muted">Loading…</p>`;
+  let L;
+  try{const r=await fetch(LOGAPI,{cache:"no-store"});if(!r.ok)throw await why(r);L=(await r.json()).logs}
+  catch(e){b.innerHTML=`<p class="err">Could not load the logs (${esc(typeof e==="string"?e:"no answer")}).</p>`;return}
+  const day=t=>new Date(String(t).replace(" ","T")+"Z").toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+  const hue=v=>{let h=0;for(const c of v)h=(h*31+c.charCodeAt(0))%360;return h};
+  b.innerHTML=`<section class="dlc"><h2>Loaded Logs <small>${L.length}</small>${L.length?`<button class="scax" id="ltClr">Clear all</button>`:""}</h2>`+
+    (L.length?`<div class="ltw"><table class="ltt"><thead><tr><th>Loaded</th><th>File</th><th>Loot lines</th><th>Game time</th><th>Visitor</th><th></th></tr></thead><tbody>`+
+      L.map((l,i)=>`<tr style="--i:${Math.min(i,30)}"><td>${day(l.created)}</td><td class="ltf" title="${esc(l.name)}">${esc(l.name||"–")}</td><td>${f(l.n)}</td>`+
+        `<td>${l.from?fd(l.from)+" – "+fd(l.to):"–"}</td><td>${l.vid?`<span class="ltv" style="--h:${hue(l.vid)}" title="Same code = same browser">${esc(l.vid.slice(0,6))}</span>`:"–"}</td>`+
+        `<td class="lta"><button class="primary" data-lo="${l.id}" data-nm="${esc(l.name)}">Open</button><button data-ld="${l.id}" title="Remove" aria-label="Remove ${esc(l.name)}">✕</button></td></tr>`).join("")+`</tbody></table></div>`
+      :`<p class="muted">No logs yet: they show here once visitors load a log file in the Loot Tracker.</p>`)+`</section>`;
+}
+async function ltPost(o,ok){
+  try{const r=await fetch(LOGAPI,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(o)});if(!r.ok)throw await why(r)}
+  catch(e){dbNote("NOT done ("+(typeof e==="string"?e:"no answer")+").",true);return}
+  dbNote(ok);drawLt();
+}
+/* a kept log opens in the Loot Tracker like a file loaded there (it is not kept again: this browser is an admin's) */
+async function ltOpen(id,name){
+  dbNote("Opening…");
+  try{
+    const r=await fetch(LOGAPI+"?id="+id,{cache:"no-store"});if(!r.ok)throw await why(r);
+    const bin=Uint8Array.from(atob((await r.json()).data),c=>c.charCodeAt(0));
+    const txt=await new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+    history.pushState(null,"",href("tools/loot"));route();
+    await loadFile(new File([txt],name||"log.txt"));
+    dbNote(`Opened ${name||"the log"} in the Loot Tracker.`);
+  }catch(e){dbNote("Could not open the log ("+(typeof e==="string"?e:"broken file")+").",true)}
+}
+$("ltRe").onclick=drawLt;
+$("ltBody").addEventListener("click",e=>{
+  const o=e.target.closest("[data-lo]");if(o){ltOpen(+o.dataset.lo,o.dataset.nm);return}
+  const d=e.target.closest("[data-ld]");if(d){ltPost({del:[+d.dataset.ld]},"Log removed.");return}
+  const c=e.target.closest("#ltClr");if(!c)return;
+  if(!c.classList.contains("armed")){c.classList.add("armed");c.textContent="Click again to clear all";setTimeout(()=>{c.classList.remove("armed");c.textContent="Clear all"},4000);return}
+  ltPost({clear:true},"All logs cleared.");
+});
 
 const PNAME={home:"Main Page",tools:"Tools",loot:"Loot Tracker",dloot:"Loot Tracker (Detailed)",screen:"Screen Tracker",upgrade:"Upgrade Cost",weapons:"Weapons",
   jewellery:"Jewellery",armour:"Armour",helmets:"Helmets",shields:"Shields",skills:"Skill Booster"};

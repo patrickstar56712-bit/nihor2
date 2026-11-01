@@ -1,7 +1,7 @@
 <main id="v-cpst" hidden>
   <p class="crumb"><a href="#/admin">← Control Panel</a></p>
   <div class="lth"><h1>Statistics</h1><button class="flb" id="stRe">Refresh</button></div>
-  <p class="sub">Counts only: no file contents and no IP addresses are kept. Days follow Turkey time. Visits from a browser logged in as admin are not counted.</p>
+  <p class="sub">Counts only, no IP addresses are kept (the loaded loot logs are in Control Panel → Loot Tracker). Days follow Turkey time. Visits from a browser logged in as admin are not counted.</p>
   <div id="stBody"></div>
 </main>
 <main id="v-admin" hidden>
@@ -13,7 +13,14 @@
     <div id="dbAd" class="dbf"><button id="dbUp" class="primary">Upload this browser's data</button><button id="dbRe">Reload from database</button><button id="dbOut">Log out</button><button id="dbOutAll" title="Every browser that is logged in has to log in with the password again">Log out everywhere</button></div>
     <output id="dbMsg" aria-live="polite"></output>
   </section>
-  <div class="cards"><a class="card" href="#/admin/items" style="--i:0"><b>Items</b><span>Every item on the site and whether it has a picture.</span></a><a class="card" href="#/admin/upgrade" style="--i:1"><b>Upgrade Cost</b><span>Add, rename and delete items, fill their materials from text.</span></a><a class="card" href="#/admin/skills" style="--i:2"><b>Skill Booster</b><span>Character skill groups and the skill level cost list.</span></a><a class="card" href="#/admin/stats" style="--i:3"><b>Statistics</b><span>Visits, unique visitors, most opened pages and uploaded tracker files.</span></a><a class="card" href="#/admin/screen" style="--i:4"><b>Screen Tracker</b><span>Items the Screen Tracker could not recognize: add their pictures.</span></a><a class="card" href="#/admin/keys" style="--i:5"><b>Dungeon Keys</b><span>Match each dungeon key with its chest and upload their pictures.</span></a></div>
+  <div class="cards"><a class="card" href="#/admin/items" style="--i:0"><b>Items</b><span>Every item on the site and whether it has a picture.</span></a><a class="card" href="#/admin/upgrade" style="--i:1"><b>Upgrade Cost</b><span>Add, rename and delete items, fill their materials from text.</span></a><a class="card" href="#/admin/skills" style="--i:2"><b>Skill Booster</b><span>Character skill groups and the skill level cost list.</span></a><a class="card" href="#/admin/stats" style="--i:3"><b>Statistics</b><span>Visits, unique visitors, most opened pages and uploaded tracker files.</span></a><a class="card" href="#/admin/screen" style="--i:4"><b>Screen Tracker</b><span>Items the Screen Tracker could not recognize: add their pictures.</span></a><a class="card" href="#/admin/keys" style="--i:5"><b>Dungeon Keys</b><span>Match each dungeon key with its chest and upload their pictures.</span></a><a class="card" href="#/admin/loot" style="--i:6"><b>Loot Tracker</b><span>The last log files visitors loaded: open them in the Loot Tracker.</span></a></div>
+</main>
+
+<main id="v-cplt" hidden>
+  <p class="crumb"><a href="#/admin">← Control Panel</a></p>
+  <div class="lth"><h1>Loot Tracker</h1><button class="flb" id="ltRe">Refresh</button></div>
+  <p class="sub">The last log files visitors loaded in the Loot Tracker (only their loot lines; the newest 200 are kept). Open one to see it in the Loot Tracker. Logs loaded in a logged-in browser are not kept.</p>
+  <div id="ltBody"></div>
 </main>
 
 <main id="v-cpdk" hidden>
