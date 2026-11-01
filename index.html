@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-01T15:53:28Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-01T18:06:08Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -958,6 +958,9 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .scdga{margin-bottom:12px;padding:12px 20px}
 .scdga .bar{margin:0;gap:10px}
 .scdn{flex:0 1 260px}
+.scdt{flex:0 1 150px;min-width:0}
+.scph:not(:empty)::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--jade);margin-right:6px;vertical-align:middle}
+.skpi.sct{width:96px}
 .scdga:focus-within,.itadd:focus-within{position:relative;z-index:6}
 .skm.dg{border-color:color-mix(in srgb,var(--red) 45%,var(--line))}
 .skm.dg .ut{color:var(--red)}
@@ -1108,15 +1111,16 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
   <div class="scrow">
     <div class="scpv" id="scPv"></div>
     <div class="sum scsum" id="scSum" aria-live="polite" hidden>
-      <div class="main"><small>Total Value</small><b id="scT">0</b></div>
+      <div class="main"><small>Total Value</small><b id="scT">0</b><span class="ph blk scph" id="scH"></span></div>
       <div><small>Dungeon Keys</small><b id="scK">0</b></div>
       <div><small>Material Values</small><b id="scM">0</b></div>
     </div>
   </div>
   <section class="add scdga">
     <div class="bar">
-      <span class="lt">Add Dungeons<small>their key or ticket cost comes off the Total Value</small></span>
+      <span class="lt">Add Dungeons</span>
       <div class="scdd scdn"><input id="scDn" data-cb="dungeons" placeholder="Dungeon name" aria-label="Dungeon name" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list"><ul role="listbox" hidden></ul></div>
+      <input id="scDt" class="scdt" placeholder="Avg. dungeon time" aria-label="Average dungeon time, e.g. 2m30s or 2:30" title="e.g. 2m30s or 2:30" autocomplete="off">
       <button id="scDa">Add</button>
     </div>
   </section>
@@ -1132,7 +1136,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 
   <section class="add" id="dUp">
     <div class="bar">
-      <span class="lt">Add new log file<small title="Only the loot lines of a log are kept, for the site's admins">or drop them here · logs are saved on this site</small></span>
+      <span class="lt">Add new log file</span>
       <label class="fbtn" for="dPick" id="dSel" tabindex="0">Select File</label>
       <span id="dFname">No file was selected</span>
       <button id="dClr" hidden>Clear</button>
@@ -1225,7 +1229,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 
   <section class="add" id="up">
     <div class="bar">
-      <span class="lt">Add new log file<small title="Only the loot lines of a log are kept, for the site's admins">or drop them here · logs are saved on this site</small></span>
+      <span class="lt">Add new log file</span>
       <label class="fbtn" for="pick" id="selBtn" tabindex="0">Select File</label>
       <button id="clr" hidden>Clear</button>
       <span class="pio"><button id="pExp" title="Save your unit prices to a file you can send to others">Export Prices</button><label class="fbtn" for="pImp" id="pImpL" tabindex="0" title="Load unit prices from an exported file">Import Prices</label></span>
@@ -2766,7 +2770,16 @@ function scVars(im){
 
 const SCAPI=API?"/api/screen":"";
 let SC=ld("scLast",null);if(!SC||!Array.isArray(SC.items)||!Array.isArray(SC.unk))SC={name:"",items:[],unk:[]};
-let SCD=ld("scDg",[]),DGP=ld("dgPrices",{});if(!Array.isArray(SCD))SCD=[];   // added dungeons [{n, r: runs, p: price per run}], last price per dungeon
+let SCD=ld("scDg",[]),DGP=ld("dgPrices",{}),DGT=ld("dgTimes",{});if(!Array.isArray(SCD))SCD=[];   // added dungeons [{n, r: runs, p: price per run, s: seconds per run}], last price / time per dungeon
+/* "2m30s", "2dk30sn", "2:30", "1:02:30" or plain minutes -> seconds */
+function scSecs(v){
+  v=String(v||"").trim().toLowerCase().replace(",",".");if(!v)return 0;
+  if(/^\d+(:\d+){1,2}$/.test(v))return v.split(":").reduce((a,x)=>a*60+ +x,0);
+  if(/^\d+(\.\d+)?$/.test(v))return Math.round(+v*60);
+  let t=0,ok=false;v.replace(/(\d+(?:\.\d+)?)\s*(saat|sa|h|dk|min|m|sn|sec|s)/g,(_,n,u)=>{ok=true;t+=+n*(/^(h|sa)/.test(u)?3600:/^(dk|min|m)$/.test(u)?60:1)});
+  return ok?Math.round(t):0;
+}
+const scDur=s=>[s>=3600&&Math.floor(s/3600)+"h",s%3600>=60&&Math.floor(s%3600/60)+"m",s%60&&s%60+"s"].filter(Boolean).join(" ");
 let scPrev=[],scRefP=null;   // this visit's pictures; reference pictures (loading or loaded)
 /* reference pictures for recognizing slots */
 function scRefs(){
@@ -2837,7 +2850,8 @@ function drawSc(){
   $("scMats").innerHTML=`<div class="skmg">`+SCD.map((d,j)=>{const en=esc(d.n),dd=dlDun(d.n);
       return `<div class="skm dg" style="--i:${Math.min(k++,20)}" title="${en}"><span class="mpic">${img(dd?dd.ic:d.n)}<i>${en.charAt(0).toUpperCase()}</i></span><span class="mnn">${en}</span>`+
         `<label class="skpi scq"><input data-dr="${j}" value="${d.r}" inputmode="numeric" aria-label="${en} runs"><em>run${d.r===1?"":"s"}</em></label>`+
-        `<label class="skpi"><input data-dp="${j}" value="${d.p?fp(d.p):""}" placeholder="Price / run" inputmode="decimal" aria-label="${en} key price per run"><em>Yang</em></label><span class="ut"></span>`+
+        `<label class="skpi"><input data-dp="${j}" value="${d.p?fp(d.p):""}" placeholder="Price / run" inputmode="decimal" aria-label="${en} key price per run"><em>Yang</em></label>`+
+        `<label class="skpi sct"><input data-ds="${j}" value="${scDur(d.s||0)}" placeholder="Time / run" aria-label="${en} average time per run"></label><span class="ut"></span>`+
         `<button class="xb" data-dx="${j}" aria-label="Remove ${en}">✕</button></div>`}).join("")+it.map(([n,q])=>{const en=esc(n),p=P[n]||0;
       return `<div class="skm" data-n="${en}" style="--i:${Math.min(k++,20)}" title="${en}"><span class="mpic">${img(n)}<i>${en.charAt(0).toUpperCase()}</i></span><span class="mnw"><span class="mnn">${en}</span><span class="dc" title="Drop chance: pieces per dungeon run" hidden></span></span>`+
         `<label class="skpi scq"><input data-sq="${en}" value="${q}" inputmode="numeric" aria-label="${en} count"><em>pcs</em></label>`+
@@ -2859,6 +2873,9 @@ function scTot(){
   $("scMats").querySelectorAll(".skm[data-n] .dc").forEach(e=>{const it=SC.items.find(x=>x[0]===e.closest(".skm").dataset.n),p=it&&runs?it[1]/runs*100:0;
     e.hidden=!p;e.textContent=!p?"":p<=100?(p<10?Math.round(p*10)/10:Math.round(p))+"%":(p<1000?Math.round(p/10)/10:Math.round(p/100))+"/run"});   // more than one a run: pieces per run
   setOut($("scM"),fv(t));setOut($("scK"),neg(k));setOut($("scT"),t-k<0?neg(k-t):fv(t-k));
+  /* per hour: the Total Value over the time of all the runs (runs x average time) */
+  const secs=SCD.reduce((a,d)=>a+d.r*(d.s||0),0),h=secs?(t-k)/secs*3600:0;
+  $("scH").textContent=secs?(h<0?"−"+fv(-h):fv(h))+"/h":"";$("scH").title=secs?"Over "+fdur(secs)+" of dungeon runs":"";
 }
 $("scMats").addEventListener("input",e=>{
   const i=e.target,d=i.dataset;
@@ -2866,20 +2883,24 @@ $("scMats").addEventListener("input",e=>{
   else if(d.sq!==undefined){const it=SC.items.find(x=>x[0]===d.sq);if(it)it[1]=Math.round(parse(i.value));sv("scLast",SC)}
   else if(d.su!==undefined){const u=SC.unk[+d.su];if(u)u.q=Math.round(parse(i.value));sv("scLast",SC)}
   else if(d.dr!==undefined){const g=SCD[+d.dr];if(g){g.r=Math.max(0,Math.round(parse(i.value)));const em=i.nextElementSibling;if(em)em.textContent=g.r===1?"run":"runs";sv("scDg",SCD)}}
+  else if(d.ds!==undefined){const g=SCD[+d.ds];if(g){g.s=scSecs(i.value);DGT[g.n]=g.s;sv("dgTimes",DGT);sv("scDg",SCD)}}
   else if(d.dp!==undefined){const g=SCD[+d.dp];if(g){g.p=Math.max(0,parse(i.value));DGP[g.n]=g.p;sv("dgPrices",DGP);sv("scDg",SCD)}}
   scTot();
 });
 $("scMats").addEventListener("click",e=>{const b=e.target.closest("[data-dx]");if(!b)return;SCD.splice(+b.dataset.dx,1);sv("scDg",SCD);drawSc()});
 /* dungeons: the Loot Tracker's list to pick from, or any name; the last price per run of each is remembered */
 function scDgAdd(){
-  const n=$("scDn").value.trim().replace(/s+/g," ");if(!n)return $("scDn").focus();
+  const n=$("scDn").value.trim().replace(/\s+/g," ");if(!n)return $("scDn").focus();
   const dd=dlDun(n),nm=dd?dd.lb:n;
-  if(!SCD.some(d=>d.n.toLowerCase()===nm.toLowerCase()))SCD.unshift({n:nm,r:1,p:DGP[nm]||0});
-  sv("scDg",SCD);$("scDn").value="";drawSc();
+  const ts=scSecs($("scDt").value)||DGT[nm]||0,had=SCD.find(d=>d.n.toLowerCase()===nm.toLowerCase());
+  if(ts){DGT[nm]=ts;sv("dgTimes",DGT)}
+  if(had){if(scSecs($("scDt").value))had.s=ts}else SCD.unshift({n:nm,r:1,p:DGP[nm]||0,s:ts});
+  sv("scDg",SCD);$("scDn").value="";$("scDt").value="";drawSc();
   const inp=$("scMats").querySelector(`.skm.dg[title="${CSS.escape(esc(nm))}"] input`)||$("scMats").querySelector(".skm.dg input");if(inp){inp.focus();inp.select()}
 }
 $("scDa").onclick=scDgAdd;
 $("scDn").onkeydown=e=>{if(e.key==="Enter"&&!$("scDn").nextElementSibling.querySelector(".act")){e.preventDefault();scDgAdd()}};
+$("scDt").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();scDgAdd()}};
 $("scPick").onchange=()=>scFiles($("scPick").files);
 $("scSel").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("scPick").click()}};
 $("scClr").onclick=()=>{scPrev.forEach(p=>URL.revokeObjectURL(p.url));scPrev=[];SC={name:"",items:[],unk:[]};sv("scLast",SC);$("scMsg").textContent="";drawSc()};
