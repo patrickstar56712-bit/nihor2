@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-01T21:13:33Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-01T21:34:43Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -222,6 +222,8 @@ tr.set:hover td{background:color-mix(in srgb,var(--gold) 14%,var(--hl))}
 tr.pin td:first-child{box-shadow:inset 3px 0 var(--gold)}
 td.v{font-weight:600;color:var(--jade)}
 td.n{font-weight:600}
+tr.cr td{color:var(--mute)}
+.crt{font-style:normal;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-left:8px;padding:1px 6px;border-radius:6px;color:var(--teal);border:1px solid color-mix(in srgb,var(--teal) 45%,transparent);vertical-align:middle}
 td input{width:92px;text-align:right;padding:3px 6px;font-size:13px}
 .pb{border:0;background:none;padding:0 6px 0 0;font-size:16px;line-height:1;color:var(--mute);display:inline-block;transition:transform .2s var(--ease),color .2s}
 .pb:hover{transform:scale(1.25) rotate(-12deg);color:var(--gold)}
@@ -1281,6 +1283,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
     <select id="sort" aria-label="Sort">
       <option value="v">By value</option>
       <option value="q">By quantity</option>
+      <option value="e">By drop count</option>
       <option value="u">By unit price</option>
       <option value="n">By name</option>
     </select>
@@ -1290,7 +1293,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
   </div>
   <div class="wrap">
     <table>
-      <thead><tr><th>Item</th><th class="s" data-s="q" tabindex="0">Qty</th><th class="s" data-s="u" tabindex="0">Unit price (Yang)</th><th class="s" data-s="v" tabindex="0">Total value</th></tr></thead>
+      <thead><tr><th>Item</th><th class="s" data-s="q" tabindex="0">Qty</th><th class="s" data-s="e" tabindex="0">Drops</th><th class="s" data-s="u" tabindex="0">Unit price (Yang)</th><th class="s" data-s="v" tabindex="0">Total value</th></tr></thead>
       <tbody id="rows"></tbody>
     </table>
   </div>
@@ -1693,19 +1696,20 @@ const CHESTS=[
  [/^heroic chest of razadere$/i,"Heroic Razador","Heroic Chest of Razadere"],[/^heroic chest of jatuno$/i,"Heroic Jotun","Heroic Chest of Jatuno"],
  [/^trea?ss?ure of thorns$/i,"Castle","Treasure of Thorns"]];
 const SPL_G=/^greater splinter$/i, SPL_E=/^elite splinter$/i;
+const CR="\u0000c",isCr=n=>n.endsWith(CR),crBase=n=>isCr(n)?n.slice(0,-CR.length):n;   // item key of crafted pieces (alone in their seconds)
 const JOR=/^jewel of retribution$/i, JOR_MIN=1, JOR_MAX=8;   // a Jewel of Retribution drop counts in Content only for 1-8 pieces
 
 function draw(){
   const w=win(),m={},mins=new Set();
   EV.forEach(([t,n,q,e])=>{
     if(t>=w.a&&t<w.b){
-      const x=m[n]||(m[n]=[0,0]);x[0]+=q;x[1]+=e;mins.add(t);
+      const x=m[n]||(m[n]=[0,0]);x[0]+=q;x[1]+=e;if(!isCr(n))mins.add(t);
     }
   });
   pins.forEach(n=>{if(KN.has(n)&&!m[n])m[n]=[0,0]});
 
   let y=0,iv=0;
-  for(const n in m){if(n==="Yang")y=m[n][0];else iv+=m[n][0]*price(n)}
+  for(const n in m){if(n==="Yang")y=m[n][0];else if(!isCr(n))iv+=m[n][0]*price(n)}
   for(const [i,v] of [["yang",y],["itemv",iv],["tot",y+iv]]){const el=$(i);el.dataset.v=v;el.textContent=fv(v)}   // no count-up here
   $("hdur").textContent=fh(w.h);
 
@@ -1738,7 +1742,7 @@ function draw(){
   $("sort").value=SK;
   document.querySelectorAll("th.s").forEach(h=>h.setAttribute("aria-sort",h.dataset.s===SK?(SD>0?"ascending":"descending"):"none"));
   const r=Object.entries(m).filter(([n,v])=>n!=="Yang"&&(v[0]>0||pins.has(n))&&(!t||n.toLowerCase().includes(t))&&(sk?isSk(n):pins.has(n)||!isSk(n))&&(!pr||price(n)>0));
-  const key=(n,v)=>SK==="n"?n:SK==="q"?v[0]:SK==="u"?price(n):v[0]*price(n);
+  const key=(n,v)=>SK==="n"?n:SK==="q"?v[0]:SK==="e"?v[1]:SK==="u"?price(n):v[0]*price(n);
   r.sort((a,b)=>{
     const pd=pinCmp(a[0],b[0]);if(pd)return pd;
     const x=key(a[0],a[1]),y=key(b[0],b[1]);
@@ -1747,10 +1751,12 @@ function draw(){
   });
   const tb=$("rows");
   tb.classList.toggle("calm",calm);calm=false;
-  tb.innerHTML=r.map(([n,[qt]],i)=>{
+  tb.innerHTML=r.map(([n,[qt,e]],i)=>{
     const p=price(n),pn=pins.has(n),en=esc(n);
-    return `<tr class="${p?"set":""}${pn?" pin":""}" style="--i:${Math.min(i,20)}"><td class="n"><button class="pb" data-p="${en}" aria-pressed="${pn}" aria-label="Pin ${en}">★</button>${img(n)}${en}</td><td>${f(qt)}</td><td><input data-n="${en}" value="${p?fp(p):""}" placeholder="0" inputmode="decimal" aria-label="${en} unit price"></td><td class="v">${p?fv(qt*p):"–"}</td></tr>`;
-  }).join("")||`<tr><td class="empty" colspan="4">${EV.length?"No items in this range.":"Add a log file above to get started."}</td></tr>`;
+    if(isCr(n)){const b=esc(crBase(n));   // made at a craft table: shown, not in the values
+      return `<tr class="cr" style="--i:${Math.min(i,20)}"><td class="n"><span class="pb"></span>${img(crBase(n))}${b}<em class="crt" title="Received alone, with no other drop around it: made at a craft table. Not in the values.">Crafted</em></td><td>${f(qt)}</td><td>${f(e)}</td><td>–</td><td class="v">–</td></tr>`}
+    return `<tr class="${p?"set":""}${pn?" pin":""}" style="--i:${Math.min(i,20)}"><td class="n"><button class="pb" data-p="${en}" aria-pressed="${pn}" aria-label="Pin ${en}">★</button>${img(n)}${en}</td><td>${f(qt)}</td><td>${f(e)}</td><td><input data-n="${en}" value="${p?fp(p):""}" placeholder="0" inputmode="decimal" aria-label="${en} unit price"></td><td class="v">${p?fv(qt*p):"–"}</td></tr>`;
+  }).join("")||`<tr><td class="empty" colspan="5">${EV.length?"No items in this range.":"Add a log file above to get started."}</td></tr>`;
 }
 
 /* ---------- loot tracker events ---------- */
@@ -1824,7 +1830,7 @@ async function loadFile(fs){
   /* one "drop" = consecutive log lines whose time stays within GAP seconds of the latest line */
   const flush=()=>{
     if(!cur.length)return;
-    if(cur.length===1&&cur[0][1]!=="Yang"){cur=[];return}   // one item alone in its seconds: a craft, not a drop
+    if(cur.length===1&&cur[0][1]!=="Yang"){const[t,n,q]=cur[0];add(t,n+CR,q);cur=[];return}   // one item alone in its seconds: a craft, listed apart
     const d=dropInfo(cur.map(x=>[x[1],x[2]]));
     if(d.se)sup.push(cur[0][0]);
     for(const [t,n,q] of cur)if(keepDrop(n,q,d.ok)){add(t,n,q);if(JOR.test(n)&&q>=JOR_MIN&&q<=JOR_MAX)jor.push(t)}
