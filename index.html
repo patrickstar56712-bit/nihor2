@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-01T18:06:08Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-01T19:11:35Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -958,7 +958,15 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .scdga{margin-bottom:12px;padding:12px 20px}
 .scdga .bar{margin:0;gap:10px}
 .scdn{flex:0 1 260px}
-.scdt{flex:0 1 150px;min-width:0}
+.scdt{flex:none;width:180px;max-width:100%}
+#v-screen{max-width:1200px}
+#scAcc{overflow:visible}
+.skm:focus-within{position:relative;z-index:6}
+.skm.unk .scun{flex:1;min-width:0}
+.skm.unk .scun input{width:100%;padding:5px 8px;font-size:13px}
+.skm.unk .mpic>b{display:grid;place-items:center;width:100%;height:100%;color:var(--mute);font-size:16px}
+.skm.unk .xb{flex:none;padding:1px 7px}
+.scadd{margin-top:4px}
 .scph:not(:empty)::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--jade);margin-right:6px;vertical-align:middle}
 .skpi.sct{width:96px}
 .scdga:focus-within,.itadd:focus-within{position:relative;z-index:6}
@@ -2843,7 +2851,7 @@ function drawSc(){
   $("scPv").innerHTML=scPrev.map(p=>`<div style="width:${Math.min(p.w*2,1100)}px"><img src="${p.url}" alt="Uploaded screenshot" style="width:100%">`+
     p.box.map(([x,y,s,ok])=>`<i class="${ok?"":"no"}" style="left:${x/p.w*100}%;top:${y/p.h*100}%;width:${s/p.w*100}%;height:${s/p.h*100}%"></i>`).join("")+`</div>`).join("");
   $("scSum").hidden=!scPrev.length;   // the values only beside an uploaded picture
-  $("scAcc").hidden=!has&&!SCD.length;
+  $("scAcc").hidden=!has&&!SCD.length&&!scPrev.length;
   if($("scAcc").hidden){$("scMats").innerHTML="";return}
   $("scAcc").open=true;
   const it=SC.items.slice().sort((a,b)=>(P[b[0]]||0)*b[1]-(P[a[0]]||0)*a[1]||a[0].localeCompare(b[0]));let k=0;
@@ -2856,15 +2864,23 @@ function drawSc(){
       return `<div class="skm" data-n="${en}" style="--i:${Math.min(k++,20)}" title="${en}"><span class="mpic">${img(n)}<i>${en.charAt(0).toUpperCase()}</i></span><span class="mnw"><span class="mnn">${en}</span><span class="dc" title="Drop chance: pieces per dungeon run" hidden></span></span>`+
         `<label class="skpi scq"><input data-sq="${en}" value="${q}" inputmode="numeric" aria-label="${en} count"><em>pcs</em></label>`+
         `<label class="skpi"><input data-pn="${en}" value="${p?fp(p):""}" placeholder="Unit price" inputmode="decimal" aria-label="${en} unit price"><em>Yang</em></label><span class="ut">${fv(p*q)}</span></div>`}).join("")+
-    SC.unk.map((u,j)=>`<div class="skm unk" style="--i:${Math.min(k++,20)}" title="Not recognized"><span class="mpic"><img class="ic scc" src="${u.im}" alt=""></span><span class="mnn">Not recognized</span>`+
-        `<label class="skpi scq"><input data-su="${j}" value="${u.q}" inputmode="numeric" aria-label="Count of the item not recognized"><em>pcs</em></label><span class="ut">–</span></div>`).join("")+`</div>`+
-    (SC.unk.length?`<p class="muted">Items not recognized were sent to the admins; once their picture is added they are read like the others.</p>`:"");
+    SC.unk.map((u,j)=>{const en=esc(u.n||"");   // not recognized (red) or added by hand: name them to count their value
+      return `<div class="skm unk" style="--i:${Math.min(k++,20)}"><span class="mpic">${u.im?`<img class="ic scc" src="${u.im}" alt="">`:u.n?img(u.n)+`<i>${en.charAt(0).toUpperCase()}</i>`:"<b>+</b>"}</span>`+
+        `<div class="scdd scun"><input data-un="${j}" data-cb="items" value="${en}" placeholder="Item name" aria-label="Item name" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list"><ul role="listbox" hidden></ul></div>`+
+        `<label class="skpi scq"><input data-su="${j}" value="${u.q}" inputmode="numeric" aria-label="${en||"Item"} count"><em>pcs</em></label>`+
+        `<label class="skpi"><input data-up="${j}" value="${scUp(u)?fp(scUp(u)):""}" placeholder="Unit price" inputmode="decimal" aria-label="${en||"Item"} unit price"><em>Yang</em></label><span class="ut"></span>`+
+        `<button class="xb" data-ux="${j}" aria-label="Remove">✕</button></div>`}).join("")+`</div>`+
+    `<button class="scadd" id="scAddL">+ Add loot</button>`+
+    (SC.unk.some(u=>u.im)?`<p class="muted">Items not recognized were sent to the admins; once their picture is added they are read like the others.</p>`:"");
   scTot();
 }
 /* materials minus the dungeons' keys / tickets (runs x price per run) */
+const scUp=u=>u.n&&P[u.n]||u.p||0;   // unit price of an item named by hand
 function scTot(){
   let t=0,k=0;const neg=v=>v>0?"−"+fv(v):"0";
   for(const[nm,q]of SC.items)t+=(P[nm]||0)*q;
+  for(const u of SC.unk)t+=scUp(u)*(u.q||0);
+  $("scMats").querySelectorAll(".skm.unk").forEach((r,j)=>{const u=SC.unk[j];if(u)r.querySelector(".ut").textContent=scUp(u)?fv(scUp(u)*(u.q||0)):"–"});
   for(const d of SCD)k+=d.r*d.p;
   $("scMats").querySelectorAll(".skm[data-n]").forEach(r=>{const it=SC.items.find(x=>x[0]===r.dataset.n);if(it)r.querySelector(".ut").textContent=fv((P[it[0]]||0)*it[1])});
   $("scMats").querySelectorAll(".skm.dg").forEach((r,j)=>{const d=SCD[j];if(d)r.querySelector(".ut").textContent=neg(d.r*d.p)});
@@ -2881,13 +2897,27 @@ $("scMats").addEventListener("input",e=>{
   const i=e.target,d=i.dataset;
   if(d.pn!==undefined){const v=parse(i.value);if(v>0)P[d.pn]=v;else delete P[d.pn];sv("lootPrices",P);calm=true;draw()}
   else if(d.sq!==undefined){const it=SC.items.find(x=>x[0]===d.sq);if(it)it[1]=Math.round(parse(i.value));sv("scLast",SC)}
+  else if(d.un!==undefined){scName(i);return}
+  else if(d.up!==undefined){const u=SC.unk[+d.up];if(u){const v=Math.max(0,parse(i.value));if(u.n){if(v>0)P[u.n]=v;else delete P[u.n];sv("lootPrices",P);calm=true;draw()}else u.p=v;sv("scLast",SC)}}
   else if(d.su!==undefined){const u=SC.unk[+d.su];if(u)u.q=Math.round(parse(i.value));sv("scLast",SC)}
   else if(d.dr!==undefined){const g=SCD[+d.dr];if(g){g.r=Math.max(0,Math.round(parse(i.value)));const em=i.nextElementSibling;if(em)em.textContent=g.r===1?"run":"runs";sv("scDg",SCD)}}
   else if(d.ds!==undefined){const g=SCD[+d.ds];if(g){g.s=scSecs(i.value);DGT[g.n]=g.s;sv("dgTimes",DGT);sv("scDg",SCD)}}
   else if(d.dp!==undefined){const g=SCD[+d.dp];if(g){g.p=Math.max(0,parse(i.value));DGP[g.n]=g.p;sv("dgPrices",DGP);sv("scDg",SCD)}}
   scTot();
 });
-$("scMats").addEventListener("click",e=>{const b=e.target.closest("[data-dx]");if(!b)return;SCD.splice(+b.dataset.dx,1);sv("scDg",SCD);drawSc()});
+/* a name typed or picked for an item not recognized / added by hand: its price is the item's price */
+function scName(i){
+  const u=SC.unk[+i.dataset.un];if(!u)return;
+  u.n=i.value.trim().replace(/ +/g," ");
+  if(u.n&&u.p&&!P[u.n]){P[u.n]=u.p;sv("lootPrices",P)}
+  const pi=i.closest(".skm").querySelector("[data-up]");if(pi&&document.activeElement!==pi)pi.value=scUp(u)?fp(scUp(u)):"";
+  sv("scLast",SC);scTot();
+}
+$("scMats").addEventListener("change",e=>{if(e.target.dataset.un!==undefined)scName(e.target)});
+$("scMats").addEventListener("click",e=>{
+  if(e.target.closest("#scAddL")){SC.unk.push({im:"",q:1,n:""});sv("scLast",SC);drawSc();const l=$("scMats").querySelectorAll("[data-un]");l[l.length-1].focus();return}
+  const x=e.target.closest("[data-ux]");if(x){SC.unk.splice(+x.dataset.ux,1);sv("scLast",SC);drawSc();return}
+  const b=e.target.closest("[data-dx]");if(!b)return;SCD.splice(+b.dataset.dx,1);sv("scDg",SCD);drawSc()});
 /* dungeons: the Loot Tracker's list to pick from, or any name; the last price per run of each is remembered */
 function scDgAdd(){
   const n=$("scDn").value.trim().replace(/\s+/g," ");if(!n)return $("scDn").focus();
