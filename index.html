@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-02T15:54:14Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-02T16:02:45Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -130,7 +130,7 @@ main.enter .hero h1{animation:fadeUp .6s var(--ease) both,shine 10s linear infin
 .add{background:var(--panel);border:1px solid var(--line);border-radius:10px;transition:border-color .25s,background-color .35s,box-shadow .25s}
 #up{padding:6px 9px;margin-bottom:9px;border-style:dashed}
 #up.drag{border-color:var(--gold);background:var(--hl);animation:pulse 1.2s ease-in-out infinite}
-#up.loaded{border-style:solid;border-color:var(--jade)}
+#up.loaded{border-style:solid;border-color:var(--gold)}
 #up .bar{margin:0;gap:10px}
 .lt{font-weight:600;font-size:14px}
 .lt small{font-weight:400;color:var(--mute);margin-left:4px}
@@ -481,7 +481,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 #v-dloot h1{font-size:clamp(22px,4.5vw,33px);margin-bottom:12px}
 #dUp{padding:6px 9px;margin-bottom:9px;border-style:dashed}
 #dUp.drag{border-color:var(--gold);background:var(--hl)}
-#dUp.loaded{border-style:solid;border-color:var(--jade)}
+#dUp.loaded{border-style:solid;border-color:var(--gold)}
 #dUp .bar{margin:0;gap:10px}
 #dFname{color:var(--mute);font-size:14px}
 #dClr{padding:4px 10px;font-size:13px}
@@ -1256,6 +1256,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
       <button data-m="today" aria-pressed="false">Today</button>
       <button data-m="1h" aria-pressed="false">1H</button>
       <button data-m="24h" aria-pressed="false">24H</button>
+      <button data-m="week" aria-pressed="false">Week</button>
       <button data-m="all" aria-pressed="true">All</button>
       <button data-m="c" aria-pressed="false">Custom</button>
     </div>
@@ -1265,6 +1266,11 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
       <label>End <input type="time" id="ce"></label>
     </div>
   </div>
+
+  <details class="acc" id="advS">
+    <summary>Advanced Settings</summary>
+    <div class="acc-b"></div>
+  </details>
 
   <section class="ct" id="ctSec" hidden>
     <h2 class="ch">Content</h2>
@@ -1671,7 +1677,7 @@ function rebuild(){
 function win(){
   if(!EV.length)return{ok:0,a:0,b:0,h:0};
   let a=T0,b=T1+1,h=H;
-  const L=({"1h":60,"24h":1440})[mode];
+  const L=({"1h":60,"24h":1440,week:10080})[mode];   // Week = the last 7 days
   if(mode==="today"){a=Math.max(T0,Math.floor(T1/1440)*1440);h=(b-a)/60}
   else if(L){a=Math.max(T0,b-L);h=(b-a)/60}
   else if(mode==="c"){
@@ -1691,9 +1697,9 @@ function fitR(){
   sm.classList.remove("tight");
   if(!fit()){sm.classList.add("tight");fit()}
 }
-/* chest drops -> Content label (left: item name in the log, right: label shown). Counts drop events in the range. */
+/* chest drops -> Content label (item name in the log, label shown, picture name, optional picture override). Counts drop events in the range. */
 const CHESTS=[
- [/^chest of platun$/i,"Platun","Chest of Platun"],[/^taliko'?s riches$/i,"Taliko","Taliko's Riches"],[/^nalantir'?s legacy$/i,"Nalantir","Nalantir's Legacy"],
+ [/^chest of platun$/i,"Platun","Chest of Platun"],[/^taliko'?s riches$/i,"Taliko","Taliko's Riches"],[/^nalantir'?s legacy$/i,"Nalantir","Nalantir's Legacy","Nalantir's Tooth"],
  [/^chest of the owl king$/i,"Owl","Chest of the Owl King"],[/^heroic chest of nemedere$/i,"Heroic Nemere","Heroic Chest of Nemedere"],
  [/^heroic chest of razadere$/i,"Heroic Razador","Heroic Chest of Razadere"],[/^heroic chest of jatuno$/i,"Heroic Jotun","Heroic Chest of Jatuno"],
  [/^trea?ss?ure of thorns$/i,"Castle","Treasure of Thorns"],
@@ -1730,14 +1736,14 @@ function draw(){
   /* content counters: each Greater / Elite Splinter drop = +1 portal */
   const names=[...KN];
   const gName=names.find(n=>SPL_G.test(n)),eName=names.find(n=>SPL_E.test(n));
-  const ch=CHESTS.map(([r,l])=>{const n=names.find(x=>r.test(x));return n?[l,(m[n]||[0,0])[1],n]:null}).filter(Boolean);
+  const ch=CHESTS.map(([r,l,,ic])=>{const n=names.find(x=>r.test(x));return n?[l,(m[n]||[0,0])[1],n,ic||n]:null}).filter(Boolean);
   const se=SUP.filter(t=>t>=w.a&&t<w.b).length,jr=JORT.filter(t=>t>=w.a&&t<w.b).length;
   $("ctSec").hidden=!(gName||eName||SUP.length||ch.length||JORT.length);
   let ci=0;const si=()=>` style="--i:${ci++}"`;
   const ctHtml=
     (gName?`<div class="cbox g"${si()}>${img("greater portal")}<span>Greater Portal</span><b>${f((m[gName]||[0,0])[1])}</b></div>`:"")+
     (SUP.length?`<div class="cbox s"${si()}>${img("super elite")}<span>Super Elite</span><b>${f(se)}</b></div>`:"")+
-    ch.map(([l,c,n])=>`<div class="cbox o"${si()}>${img(n)}<span>${l}</span><b>${f(c)}</b></div>`).join("")+
+    ch.map(([l,c,,ic])=>`<div class="cbox o"${si()}>${img(ic)}<span>${l}</span><b>${f(c)}</b></div>`).join("")+
     (JORT.length?`<div class="cbox j"${si()}>${img("tower sigil")}<span>Tower Sigil Stages</span><b>${f(jr)}</b></div>`:"")+
     (eName?`<div class="cbox e"${si()}>${img("elite portal")}<span>Elite Portal</span><b>${f((m[eName]||[0,0])[1])}</b></div>`:"");
   if($("ctList").dataset.h!==ctHtml){$("ctList").dataset.h=ctHtml;$("ctList").innerHTML=ctHtml}
@@ -1788,8 +1794,8 @@ $("seg").onclick=e=>{
 $("q").oninput=()=>{calm=true;draw()};
 $("sort").onchange=()=>{SK=$("sort").value;SD=SK==="n"?1:-1;draw()};
 function hs(h){if(!h.dataset.s)return;if(SK===h.dataset.s)SD=-SD;else{SK=h.dataset.s;SD=-1}draw()}
-document.querySelector("thead").addEventListener("click",e=>{const h=e.target.closest("th.s");if(h)hs(h)});
-document.querySelector("thead").addEventListener("keydown",e=>{const h=e.target.closest("th.s");if(h&&(e.key==="Enter"||e.key===" ")){e.preventDefault();hs(h)}});
+$("rows").closest("table").tHead.addEventListener("click",e=>{const h=e.target.closest("th.s");if(h)hs(h)});
+$("rows").closest("table").tHead.addEventListener("keydown",e=>{const h=e.target.closest("th.s");if(h&&(e.key==="Enter"||e.key===" ")){e.preventDefault();hs(h)}});
 /* Clear: press and hold 2 seconds (gold bar fills left to right), then everything is reset */
 (()=>{
   const b=$("clrAll");let tm=0;
@@ -2491,7 +2497,7 @@ function dlParse(txt,name){
 function dlKind(it){
   if(it.some(([n])=>SPL_E.test(n)))return{k:"e",lb:"Elite Portal",ic:"elite portal"};
   if(it.some(([n])=>SPL_G.test(n)))return{k:"g",lb:"Greater Portal",ic:"greater portal"};
-  for(const [n] of it){const c=CHESTS.find(([r])=>r.test(n));if(c)return{k:"c:"+c[1],lb:c[1],ic:n}}
+  for(const [n] of it){const c=CHESTS.find(([r])=>r.test(n));if(c)return{k:"c:"+c[1],lb:c[1],ic:c[3]||n}}
   return null;
 }
 function dlWin(){
@@ -2511,7 +2517,7 @@ function dlWin(){
 const dlHi=n=>pins.has(n)||SECAT.some(r=>r.test(n));
 /* dungeons a goal can count: a finished run adds 1 (Platun/Nalantir ... finish with their chest) */
 const DL_DUN=[{lb:"Elite Portal",ic:"elite portal",m:r=>r.k==="e"},{lb:"Super Elite Portal",ic:"super elite",m:r=>r.k==="e"&&r.se},
-  {lb:"Greater Portal",ic:"greater portal",m:r=>r.k==="g"},...CHESTS.map(([,l,n])=>({lb:l,ic:n,m:r=>r.k==="c:"+l}))];
+  {lb:"Greater Portal",ic:"greater portal",m:r=>r.k==="g"},...CHESTS.map(([,l,n,ic])=>({lb:l,ic:ic||n,m:r=>r.k==="c:"+l}))];
 const dlDun=n=>DL_DUN.find(d=>d.lb.toLowerCase()===n.trim().toLowerCase());
 const dlSel=new Set();   // dungeon kinds picked in the Dungeon List; Top Drops then shows only their runs
 let dlOpts=[],dlGa=-1;   // goal picker options and the keyboard-active row
