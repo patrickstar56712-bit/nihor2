@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-02T16:02:45Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-02T16:04:33Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -227,6 +227,16 @@ td input{width:92px;text-align:right;padding:3px 6px;font-size:13px}
 .pb:hover{transform:scale(1.25) rotate(-12deg);color:var(--gold)}
 .pb[aria-pressed=true]{background:none;color:var(--gold);text-shadow:0 0 8px color-mix(in srgb,var(--gold) 60%,transparent)}
 .pb.just{animation:pop .4s var(--ease)}
+.hb{border:0;background:none;padding:0 0 0 8px;color:var(--mute);opacity:.45;vertical-align:middle;line-height:0;transition:opacity .2s,color .2s}
+.hb svg{width:15px;height:15px}
+.hb:hover,.hb:focus-visible{opacity:1;color:var(--gold);background:none}
+tr.hid td{opacity:.45}
+tr.hid .hb{opacity:1;color:var(--gold)}
+.shh{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;cursor:pointer}
+.hidp{font-size:13px;margin:6px 0 10px}
+#hidL{display:flex;flex-wrap:wrap;gap:6px}
+#hidL label{display:flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+#hidL .ic{margin:0;height:20px}
 td.empty{text-align:center;color:var(--mute);padding:28px 8px}
 
 /* upgrade cost: weapons */
@@ -1268,8 +1278,12 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
   </div>
 
   <details class="acc" id="advS">
-    <summary>Advanced Settings</summary>
-    <div class="acc-b"></div>
+    <summary>Advanced Settings <small class="muted" id="advC"></small></summary>
+    <div class="acc-b">
+      <label class="shh"><input type="checkbox" id="shH"> Show hidden drops</label>
+      <p class="muted hidp">Hidden drops still count in every total. Untick one to show it again.</p>
+      <div id="hidL"></div>
+    </div>
   </details>
 
   <section class="ct" id="ctSec" hidden>
@@ -1561,6 +1575,7 @@ function statView(c){
 /* ---------- state ---------- */
 let P=ld("lootPrices",{});                       // unit prices
 let pins=new Set(ld("lootPins",[]));              // pinned items, the latest last
+let hid=new Set(ld("lootHidden",[])),shH=false;   // drops hidden from the Loot Tracker list (still counted); shH: show them anyway
 const pinCmp=(a,b)=>{const l=[...pins];return pins.has(b)-pins.has(a)||l.indexOf(b)-l.indexOf(a)};   // pinned first, the latest pin on top
 let short=ld("lootShort",1)!==0;                  // kk format
 let TH=ld("lootTheme","black");                   // theme (no picker any more): black for everyone, a saved grey is kept
@@ -1754,7 +1769,7 @@ function draw(){
   const t=$("q").value.trim().toLowerCase();
   $("sort").value=SK;
   document.querySelectorAll("th.s").forEach(h=>h.setAttribute("aria-sort",h.dataset.s===SK?(SD>0?"ascending":"descending"):"none"));
-  const r=Object.entries(m).filter(([n,v])=>n!=="Yang"&&(v[0]>0||pins.has(n))&&(!t||n.toLowerCase().includes(t))&&(sk?isSk(n):pins.has(n)||!isSk(n))&&(!pr||price(n)>0));
+  const r=Object.entries(m).filter(([n,v])=>n!=="Yang"&&(shH||!hid.has(n))&&(v[0]>0||pins.has(n))&&(!t||n.toLowerCase().includes(t))&&(sk?isSk(n):pins.has(n)||!isSk(n))&&(!pr||price(n)>0));
   const key=(n,v)=>SK==="n"?n:SK==="q"?v[0]:SK==="e"?v[1]:SK==="u"?price(n):v[0]*price(n);
   r.sort((a,b)=>{
     const pd=pinCmp(a[0],b[0]);if(pd)return pd;
@@ -1766,7 +1781,8 @@ function draw(){
   tb.classList.toggle("calm",calm);calm=false;
   tb.innerHTML=r.map(([n,[qt,e]],i)=>{
     const p=price(n),pn=pins.has(n),en=esc(n);
-    return `<tr class="${p?"set":""}${pn?" pin":""}" style="--i:${Math.min(i,20)}"><td class="n"><button class="pb" data-p="${en}" aria-pressed="${pn}" aria-label="Pin ${en}">★</button>${img(n)}${en}</td><td>${f(qt)}</td><td>${f(e)}</td><td><input data-n="${en}" value="${p?fp(p):""}" placeholder="0" inputmode="decimal" aria-label="${en} unit price"></td><td class="v">${p?fv(qt*p):"–"}</td></tr>`;
+    const h=hid.has(n);
+    return `<tr class="${p?"set":""}${pn?" pin":""}${h?" hid":""}" style="--i:${Math.min(i,20)}"><td class="n"><button class="pb" data-p="${en}" aria-pressed="${pn}" aria-label="Pin ${en}">★</button>${img(n)}${en}<button class="hb" data-h="${en}" title="${h?"Show this drop again":"Hide this drop (it still counts)"}" aria-label="${h?"Show":"Hide"} ${en}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>${h?'<path d="M3 3l18 18"/>':""}</svg></button></td><td>${f(qt)}</td><td>${f(e)}</td><td><input data-n="${en}" value="${p?fp(p):""}" placeholder="0" inputmode="decimal" aria-label="${en} unit price"></td><td class="v">${p?fv(qt*p):"–"}</td></tr>`;
   }).join("")||`<tr><td class="empty" colspan="5">${EV.length?"No items in this range.":"Add a log file above to get started."}</td></tr>`;
 }
 
@@ -1777,7 +1793,18 @@ $("rows").addEventListener("change",e=>{
   if(v>0)P[i.dataset.n]=v;else delete P[i.dataset.n];
   sv("lootPrices",P);calm=true;draw();
 });
+/* hidden drops: the list in Advanced Settings, ticked = hidden */
+function drawHid(){
+  $("shH").checked=shH;
+  $("advC").textContent=hid.size?`(${hid.size} hidden)`:"";
+  $("hidL").innerHTML=[...hid].sort().map(n=>{const en=esc(n);return`<label title="Untick to show ${en} again"><input type="checkbox" data-hd="${en}" checked>${img(n)}${en}</label>`}).join("")||`<p class="muted">No hidden drops. Use the eye button next to an item to hide it.</p>`;
+}
+const setHid=(n,on)=>{on?hid.add(n):hid.delete(n);sv("lootHidden",[...hid]);drawHid();calm=true;draw()};
+$("hidL").addEventListener("change",e=>{const n=e.target.dataset.hd;if(n!==undefined)setHid(n,e.target.checked)});
+$("shH").onchange=()=>{shH=$("shH").checked;drawHid();calm=true;draw()};
+drawHid();
 $("rows").addEventListener("click",e=>{
+  const hb=e.target.closest(".hb");if(hb){setHid(hb.dataset.h,!hid.has(hb.dataset.h));return}
   const b=e.target.closest(".pb");if(!b)return;
   const n=b.dataset.p;pins.has(n)?pins.delete(n):pins.add(n);
   sv("lootPins",[...pins]);calm=true;draw();
