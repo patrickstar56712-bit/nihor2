@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-02T18:24:55Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-02T22:20:44Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1758,17 +1758,19 @@ function draw(){
 
   /* content counters: each Greater / Elite Splinter drop = +1 portal */
   const names=[...KN];
+  /* a box shows only when it counted something in the range (no 0 boxes) */
   const gName=names.find(n=>SPL_G.test(n)),eName=names.find(n=>SPL_E.test(n));
-  const ch=CHESTS.map(([r,l,,ic])=>{const n=names.find(x=>r.test(x));return n?[l,(m[n]||[0,0])[1],n,ic||n]:null}).filter(Boolean);
+  const gc=gName?(m[gName]||[0,0])[1]:0,ec=eName?(m[eName]||[0,0])[1]:0;
+  const ch=CHESTS.map(([r,l,,ic])=>{const n=names.find(x=>r.test(x));return n?[l,(m[n]||[0,0])[1],n,ic||n]:null}).filter(x=>x&&x[1]>0);
   const se=SUP.filter(t=>t>=w.a&&t<w.b).length,jr=JORT.filter(t=>t>=w.a&&t<w.b).length;
-  $("ctSec").hidden=!(gName||eName||SUP.length||ch.length||JORT.length);
+  $("ctSec").hidden=!(gc||ec||se||ch.length||jr);
   let ci=0;const si=()=>` style="--i:${ci++}"`;
   const ctHtml=
-    (gName?`<div class="cbox g"${si()}>${img("greater portal")}<span>Greater Portal</span><b>${f((m[gName]||[0,0])[1])}</b></div>`:"")+
-    (SUP.length?`<div class="cbox s"${si()}>${img("super elite")}<span>Super Elite</span><b>${f(se)}</b></div>`:"")+
+    (gc?`<div class="cbox g"${si()}>${img("greater portal")}<span>Greater Portal</span><b>${f(gc)}</b></div>`:"")+
+    (se?`<div class="cbox s"${si()}>${img("super elite")}<span>Super Elite</span><b>${f(se)}</b></div>`:"")+
     ch.map(([l,c,,ic])=>`<div class="cbox o"${si()}>${img(ic)}<span>${l}</span><b>${f(c)}</b></div>`).join("")+
-    (JORT.length?`<div class="cbox j"${si()}>${img("tower sigil")}<span>Tower Sigil Stages</span><b>${f(jr)}</b></div>`:"")+
-    (eName?`<div class="cbox e"${si()}>${img("elite portal")}<span>Elite Portal</span><b>${f((m[eName]||[0,0])[1])}</b></div>`:"");
+    (jr?`<div class="cbox j"${si()}>${img("tower sigil")}<span>Tower Sigil Stages</span><b>${f(jr)}</b></div>`:"")+
+    (ec?`<div class="cbox e"${si()}>${img("elite portal")}<span>Elite Portal</span><b>${f(ec)}</b></div>`:"");
   if($("ctList").dataset.h!==ctHtml){$("ctList").dataset.h=ctHtml;$("ctList").innerHTML=ctHtml}
 
   $("rngph").textContent=w.ok?fd(w.a)+" – "+fd(w.b):(EV.length?(w.none?"No data in this range":"Invalid range"):"");
