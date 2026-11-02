@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-02T16:52:43Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-02T18:24:55Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1273,7 +1273,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
       <button data-m="today" aria-pressed="false">Today</button>
       <button data-m="1h" aria-pressed="false">1H</button>
       <button data-m="24h" aria-pressed="false">24H</button>
-      <button data-m="week" aria-pressed="false">Week</button>
+      <button data-m="week" aria-pressed="false">7D</button>
       <button data-m="all" aria-pressed="true">All</button>
       <button data-m="c" aria-pressed="false">Custom</button>
     </div>
@@ -1330,7 +1330,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 <main id="v-upgrade" hidden>
   <p class="crumb"><a href="#/">← Main Page</a></p>
   <h1>Upgrade Cost</h1><p class="sub">Pick an item type.</p>
-  <div class="cards"><a class="card" href="#/upgrade/weapons" style="--i:0"><b>Weapons</b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/jewellery" style="--i:1"><b>Jewellery</b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/armour" style="--i:2"><b>Armour</b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/helmets" style="--i:3"><b>Helmets</b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/shields" style="--i:4"><b>Shields</b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/dews" style="--i:5"><b>Dew Upgrade</b><span>+0 to +9 and craft cost of every dew kind.</span></a></div>
+  <div class="cards"><a class="card" href="#/upgrade/weapons" style="--i:0"><b>Weapons<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/jewellery" style="--i:1"><b>Jewellery<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/armour" style="--i:2"><b>Armour<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/helmets" style="--i:3"><b>Helmets<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/shields" style="--i:4"><b>Shields<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/dews" style="--i:5"><b>Dew Upgrade<em class="beta">Soon</em></b><span>+0 to +9 and craft cost of every dew kind.</span></a></div>
 </main>
 
 <main id="v-skills" hidden>
@@ -1699,7 +1699,7 @@ function rebuild(){
 function win(){
   if(!EV.length)return{ok:0,a:0,b:0,h:0};
   let a=T0,b=T1+1,h=H;
-  const L=({"1h":60,"24h":1440,week:10080})[mode];   // Week = the last 7 days
+  const L=({"1h":60,"24h":1440,week:10080})[mode];   // 7D = the last 7 days
   if(mode==="today"){a=Math.max(T0,Math.floor(T1/1440)*1440);h=(b-a)/60}
   else if(L){a=Math.max(T0,b-L);h=(b-a)/60}
   else if(mode==="c"){
@@ -3172,7 +3172,7 @@ const NI={home:nIco('<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 
   upgrade:nIco('<path d="M12 19V5M5 12l7-7 7 7"/>'),
   skills:nIco('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M12 7v6M9 10h6"/>'),
   admin:nIco('<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>')};
-const BETA=new Set(["tools/screen"]),beta=(k,l)=>l+(BETA.has(k)?`<em class="beta">Beta</em>`:"");   // pages still being tried out
+const BETA=new Set(["tools/screen"]),beta=(k,l)=>l+(BETA.has(k)?`<em class="beta">Beta</em>`:k.startsWith("upgrade/")?`<em class="beta">Soon</em>`:"");   // pages still being tried out / not finished
 function renderNav(){
   const k=cur().k;
   const a=(key,label,cls)=>`<a class="${cls}" href="${href(key)}"${key===k?' aria-current="page"':""}>${label}</a>`;
@@ -3205,7 +3205,7 @@ function route(quiet){
   if(c.v==="weapons"){
     loadCat(c.k.split("/")[1]);
     const sg=CATS[CAT][1];
-    $("wTitle").textContent=CATS[CAT][0];
+    $("wTitle").innerHTML=esc(CATS[CAT][0])+`<em class="beta">Soon</em>`;
     $("wLbl").textContent="Select "+(/^[aeiou]/i.test(sg)?"an ":"a ")+sg;
     drawW();
   }
