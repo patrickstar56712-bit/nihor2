@@ -5,7 +5,7 @@
    Item, skill and character shapes are the ones index.html keeps in localStorage. */
 import { client, isAdmin, missing } from "./_db.js";
 
-const CATS = ["weapons", "jewellery", "armour", "helmets", "shields"];
+const CATS = ["weapons", "jewellery", "armour", "helmets", "shields", "dews"];
 const CHARS = { warrior: ["body", "mental"], sura: ["wasu", "masu"], ninja: ["dagger", "archer"], shaman: ["dragon", "heal"] };
 const LV = 9, SKN = 30;
 

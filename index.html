@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-02T15:49:10Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-02T15:54:14Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -785,6 +785,10 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .skb.has::after{content:"";position:absolute;right:5px;top:5px;width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.7}
 .skh{margin:10px 0 0;text-align:center;font-size:13px;color:var(--mute)}
 .tier{flex:none;min-width:96px;padding:9px 10px;border-radius:10px;border:1px solid color-mix(in srgb,var(--c) 55%,var(--line));background:color-mix(in srgb,var(--c) 12%,var(--panel));color:var(--c);font-weight:800;text-align:center}
+.dewt{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:16px 0 4px}
+.dewt button{display:flex;align-items:center;gap:8px;padding:7px 14px 7px 8px;border-radius:10px;font-weight:700}
+.dewt button[aria-pressed=true]{border-color:var(--gold);color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,var(--panel))}
+.dewt img{width:26px;height:26px;object-fit:contain}
 .tier.tM{--c:var(--gold)}.tier.tG{--c:var(--teal)}.tier.tP{--c:var(--vio)}
 #skDets{display:flex;flex-direction:column;gap:4px}
 #skDets .mrow{gap:10px 12px;padding:7px 10px}
@@ -1299,7 +1303,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 <main id="v-upgrade" hidden>
   <p class="crumb"><a href="#/">← Main Page</a></p>
   <h1>Upgrade Cost</h1><p class="sub">Pick an item type.</p>
-  <div class="cards"><a class="card" href="#/upgrade/weapons" style="--i:0"><b>Weapons</b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/jewellery" style="--i:1"><b>Jewellery</b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/armour" style="--i:2"><b>Armour</b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/helmets" style="--i:3"><b>Helmets</b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/shields" style="--i:4"><b>Shields</b><span>+0 to +9 upgrade cost, materials and stats.</span></a></div>
+  <div class="cards"><a class="card" href="#/upgrade/weapons" style="--i:0"><b>Weapons</b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/jewellery" style="--i:1"><b>Jewellery</b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/armour" style="--i:2"><b>Armour</b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/helmets" style="--i:3"><b>Helmets</b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/shields" style="--i:4"><b>Shields</b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/dews" style="--i:5"><b>Dew Upgrade</b><span>+0 to +9 and craft cost of every dew kind.</span></a></div>
 </main>
 
 <main id="v-skills" hidden>
@@ -1360,6 +1364,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
       <input type="range" id="rD" min="0" max="9" step="1" aria-label="Destination level">
       <div class="ticks" id="ticks" aria-hidden="true"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></div>
     </div>
+    <div class="dewt" id="dewT" role="group" aria-label="Dew kind" hidden></div>
     <div class="info" id="info"></div>
   </section>
 
@@ -1927,6 +1932,10 @@ const p50J=n=>({n,y:[1e6,12e5,14e5,16e5,18e5,2e6,22e5,24e5,26e5],
      {n:"Green Taskal",c:[1,1,2,3,4,4,4,5,6]},{n:"Green Uranium",c:[0,0,0,0,0,0,0,2,3]},{n:"Green Owlbile",c:[0,0,0,0,0,1,1,1,2]},
      {n:"Hallowed Tree Gum",c:[1,2,3,4,5,6,7,8,9]}],
   a:[],cr:{y:1e6,m:[{n:"Shard",c:4050},{n:"Zelkoven-Branch",c:9},{n:"Hallowed Tree Gum",c:6},{n:"Fragment of Spirit Stones",c:25}]}});
+/* dews: 6 colours, each in 5 kinds from Normal to Princely (White calls its 2nd kind Enhanced); every kind has its own upgrade and craft cost */
+const DEW_C=["Blue","Green","Orange","Red","White","Yellow"],DEW_T=["Normal","Improved","Mighty","Exalted","Princely"];
+const dewName=(c,t)=>(t?(t===1&&c==="White"?"Enhanced":DEW_T[t])+" ":"")+c+" Dew";
+const dewOf=n=>{for(const c of DEW_C)for(let t=0;t<DEW_T.length;t++)if(dewName(c,t).toLowerCase()===n.trim().toLowerCase())return[c,t];return null};
 /* P50 helmet, armour and shield share one list */
 const p50H=n=>({n,y:[1e6,12e5,14e5,16e5,18e5,2e6,22e5,24e5,26e5],
   m:[{n:"Shard",c:[450,600,750,900,1050,1200,1350,1500,1650]},{n:"Blue Tasman",c:[90,100,110,120,130,140,140,150,160]},
@@ -1944,6 +1953,7 @@ const DEFS={weapons:[{n:"P50 Weapon",y:[1e6,12e5,14e5,16e5,18e5,2e6,22e5,24e5,26
        {n:"Dragonfire Stone",c:[0,0,0,0,0,0,15,20,25]}],
     a:[],cr:{y:25e7,m:[{n:"Shard",c:4500},{n:"Red Meteor splinter",c:35},{n:"Polished red Citrin",c:40},{n:"Talikos Magical Fire",c:20},
       {n:"Midnight Potion",c:150},{n:"Nataraja's Medallion",c:75}]}}],
+  dews:DEW_C.flatMap(c=>DEW_T.map((_,t)=>({n:dewName(c,t),y:Array(LV).fill(0),m:[],a:[],cr:{y:0,m:[]}})))  ,
   helmets:[p50H("P50 Helmet")],armour:[p50H("P50 Armour")],shields:[p50H("P50 Shield")],
   jewellery:[p50J("P50 Necklace"),p50J("P50 Bracelet"),p50J("P50 Earring"),
   {n:"P200 Citrine Earring",y:[36e5,47e5,58e5,69e5,7e6,81e5,92e5,1e7,13e6],
@@ -1963,7 +1973,7 @@ const fixW=w=>{
   w.im=typeof w.im==="string"&&w.im.startsWith("data:image/")?w.im:"";   // uploaded item picture
   return w;
 };
-const CATS={weapons:["Weapons","Weapon"],jewellery:["Jewellery","Jewellery"],armour:["Armour","Armour"],helmets:["Helmets","Helmet"],shields:["Shields","Shield"]};
+const CATS={weapons:["Weapons","Weapon"],jewellery:["Jewellery","Jewellery"],armour:["Armour","Armour"],helmets:["Helmets","Helmet"],shields:["Shields","Shield"],dews:["Dew Upgrade","Dew"]};
 let W,WS,LC,LD,CAT="weapons";
 const K=b=>CAT==="weapons"?b:b+"_"+CAT;   // weapons keep the old storage keys
 let MP=ld("upgPrices",{});
@@ -1992,7 +2002,7 @@ function loadCat(c){
     sv(K("upgW"),W)}
   for(const d of DEFS[CAT]||[]){const i=W.findIndex(x=>x.n.trim().toLowerCase()===d.n.toLowerCase());
     /* "empty" = no Yang and no materials besides the Blessing Scroll every new item starts with */
-    if(i>=0&&!W[i].y.some(Boolean)&&W[i].m.every(m=>m.n==="Blessing Scroll"||!m.c.some(Boolean))&&!W[i].cr.y&&!W[i].cr.m.some(m=>m.c>0)){W[i]=fixW({...JSON.parse(JSON.stringify(d)),n:W[i].n,a:W[i].a,f:W[i].f,im:W[i].im});sv(K("upgW"),W)}}
+    if(i>=0&&(d.y.some(Boolean)||d.m.length)&&!W[i].y.some(Boolean)&&W[i].m.every(m=>m.n==="Blessing Scroll"||!m.c.some(Boolean))&&!W[i].cr.y&&!W[i].cr.m.some(m=>m.c>0)){W[i]=fixW({...JSON.parse(JSON.stringify(d)),n:W[i].n,a:W[i].a,f:W[i].f,im:W[i].im});sv(K("upgW"),W)}}
   if(!W.length)W=[blankW(CATS[CAT][1]+" 1")];
   WS=Math.max(0,Math.min(+ld(K("upgSel"),0)||0,W.length-1));
   const v=ld(K("upgLv"),[0,9]);
@@ -2023,11 +2033,14 @@ const rangeMats=()=>{
   return r;
 };
 
+const selOrd=()=>CAT==="dews"?wOrd().filter(([w])=>{const d=dewOf(w.n);return!d||!d[1]}):wOrd();
 function drawSel(){
+  drawDewT();
   $("wSel").innerHTML=wOrd().map(([w,i])=>`<option value="${i}"${i===WS?" selected":""}>${esc(w.n)}</option>`).join("");
   $("wIc").innerHTML=ico(cw());
   $("wDt").textContent=cw().n;
-  $("wDl").innerHTML=wOrd().map(([w,i],k)=>`<li role="option" tabindex="-1" data-i="${i}" aria-selected="${i===WS}" style="--i:${Math.min(k,12)}">${ico(w)}<span>${esc(w.n)}</span></li>`).join("");
+  const cd=dewOf(cw().n),sel=i=>i===WS||!!cd&&W[i].n===dewName(cd[0],0);
+  $("wDl").innerHTML=selOrd().map(([w,i],k)=>`<li role="option" tabindex="-1" data-i="${i}" aria-selected="${sel(i)}" style="--i:${Math.min(k,12)}">${ico(w)}<span>${esc(w.n)}</span></li>`).join("");
 }
 function setOut(el,v){if(el.textContent!==v){el.textContent=v;el.classList.remove("bump");void el.offsetWidth;el.classList.add("bump")}}
 function drawLv(){
@@ -2199,6 +2212,13 @@ function setLv(c,d){
 }
 
 $("wSel").onchange=()=>{WS=+$("wSel").value;sv(K("upgSel"),WS);drawW()};
+/* dew kinds: Normal ... Princely of the picked colour, under the level picker */
+const dewIdx=n=>W.findIndex(w=>w.n.trim().toLowerCase()===n.toLowerCase());
+function drawDewT(){
+  const d=CAT==="dews"&&dewOf(cw().n),el=$("dewT");el.hidden=!d;if(!d)return;
+  el.innerHTML=DEW_T.map((l,t)=>{const i=dewIdx(dewName(d[0],t));return`<button data-dt="${t}" aria-pressed="${t===d[1]}"${i<0?" disabled":""}>${img(dewName(d[0],t))}<span>${t===1&&d[0]==="White"?"Enhanced":l}</span></button>`}).join("");
+}
+$("dewT").onclick=e=>{const b=e.target.closest("[data-dt]"),d=dewOf(cw().n);if(!b||!d)return;const i=dewIdx(dewName(d[0],+b.dataset.dt));if(i>=0&&i!==WS){WS=i;sv(K("upgSel"),WS);drawW()}};
 /* animated item picker: drives the hidden #wSel so the rest of the code is unchanged */
 let ddTm=0;
 const ddIsOpen=()=>$("wDb").getAttribute("aria-expanded")==="true";
@@ -2210,6 +2230,7 @@ function ddOpen(on){
 }
 function ddPick(i){
   ddOpen(false);$("wDb").focus();
+  const d=CAT==="dews"&&dewOf(cw().n),p=dewOf(W[i].n);if(d&&p){const j=dewIdx(dewName(p[0],d[1]));if(j>=0)i=j}   // a new dew colour keeps the picked kind
   if(i!==WS){$("wSel").value=i;$("wSel").dispatchEvent(new Event("change"))}
 }
 $("wDb").onclick=()=>ddOpen(!ddIsOpen());
@@ -3029,8 +3050,8 @@ document.addEventListener("pointermove",e=>{
 });
 
 /* ---------- sidebar & routing ---------- */
-const V={"":"home",tools:"tools","tools/loot":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons",skills:"skills","tools/dloot":"dloot","tools/screen":"screen","upgrade/skills":"skills"};
-const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"],["tools/screen","Screen Tracker"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"]]]];   // the Control Panel adds its own group
+const V={"":"home",tools:"tools","tools/loot":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons","upgrade/dews":"weapons",skills:"skills","tools/dloot":"dloot","tools/screen":"screen","upgrade/skills":"skills"};
+const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"],["tools/screen","Screen Tracker"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"],["upgrade/dews","Dew Upgrade"]]]];   // the Control Panel adds its own group
 /* addresses: on the website every page has a real path (/upgrade/weapons; vercel.json serves index.html
    for all of them), opened as a file the #/ addresses are used.
    The Control Panel is hidden: its pages live under /31/admin and open nowhere else; once opened,
