@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-02T16:06:09Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-02T16:10:00Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -236,6 +236,9 @@ tr.hid .hb{opacity:1;color:var(--gold)}
 #advS summary{padding:7px 12px;font-size:14px;gap:8px}
 #advS summary::before{font-size:17px}
 #advS .acc-b{padding:2px 12px 12px}
+.lth2 th{white-space:nowrap;padding-top:4px;padding-bottom:4px}
+.shw{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#hidX{padding:3px 10px;font-size:13px}
 .shh{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;cursor:pointer}
 .hidp{font-size:13px;margin:6px 0 10px}
 #hidL{display:flex;flex-wrap:wrap;gap:6px}
@@ -1284,7 +1287,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
   <details class="acc" id="advS">
     <summary>Advanced Settings <small class="muted" id="advC"></small></summary>
     <div class="acc-b">
-      <label class="shh"><input type="checkbox" id="shH"> Show hidden drops</label>
+      <div class="shw"><label class="shh"><input type="checkbox" id="shH"> Show hidden drops</label><button id="hidX" title="Show every hidden drop again">Clear</button></div>
       <p class="muted hidp">Hidden drops still count in every total. Untick one to show it again.</p>
       <div id="hidL"></div>
     </div>
@@ -1318,7 +1321,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
   </div>
   <div class="wrap">
     <table>
-      <thead><tr><th>Item</th><th class="s" data-s="q" tabindex="0">Qty</th><th class="s" data-s="e" tabindex="0">Drops</th><th class="s" data-s="u" tabindex="0">Unit price (Yang)</th><th class="s" data-s="v" tabindex="0">Total value</th></tr></thead>
+      <thead class="lth2"><tr><th>Item</th><th class="s" data-s="q" tabindex="0">Qty</th><th class="s" data-s="e" tabindex="0">Drops</th><th class="s" data-s="u" tabindex="0">Unit price</th><th class="s" data-s="v" tabindex="0">Total value</th></tr></thead>
       <tbody id="rows"></tbody>
     </table>
   </div>
@@ -1801,11 +1804,13 @@ $("rows").addEventListener("change",e=>{
 /* hidden drops: the list in Advanced Settings, ticked = hidden */
 function drawHid(){
   $("shH").checked=shH;
+  $("hidX").hidden=!hid.size;
   $("advC").textContent=hid.size?`(${hid.size} hidden)`:"";
   $("hidL").innerHTML=[...hid].sort().map(n=>{const en=esc(n);return`<label title="Untick to show ${en} again"><input type="checkbox" data-hd="${en}" checked>${img(n)}${en}</label>`}).join("")||`<p class="muted">No hidden drops. Use the eye button next to an item to hide it.</p>`;
 }
 const setHid=(n,on)=>{on?hid.add(n):hid.delete(n);sv("lootHidden",[...hid]);drawHid();calm=true;draw()};
 $("hidL").addEventListener("change",e=>{const n=e.target.dataset.hd;if(n!==undefined)setHid(n,e.target.checked)});
+$("hidX").onclick=()=>{hid.clear();sv("lootHidden",[]);drawHid();calm=true;draw()};
 $("shH").onchange=()=>{shH=$("shH").checked;drawHid();calm=true;draw()};
 drawHid();
 $("rows").addEventListener("click",e=>{
