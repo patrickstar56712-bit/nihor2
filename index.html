@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-01T21:42:52Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-02T15:49:10Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -548,7 +548,6 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .dlse{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--red);color:#fff;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
 .dlse.o{background:none;border:1px solid var(--red);color:var(--red);text-transform:none;font-weight:600}
 .dlft td{white-space:nowrap}
-.dlft td.r{color:var(--gold);font-weight:800}
 .dlft td.y{color:var(--gold)}
 .dltt td:first-child .ic{height:22px;max-width:28px}
 .dlrt td{vertical-align:middle}
@@ -1169,7 +1168,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
     </div>
     <div class="dlv" id="dlv" role="group" aria-label="Show sections">
       <button data-v="goals">Goals</button>
-      <button data-v="fc">Forecast</button>
+      <button data-v="fc">Dungeon List</button>
       <button data-v="sum">Summary</button>
       <button data-v="top">Top Drops</button>
       <button data-v="runs">Dungeons</button>
@@ -1189,9 +1188,9 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
       </form>
     </section>
     <section class="dlc" id="dlFcS">
-      <h2>Dungeon List <small>forecast · <span id="dlFm">15</span> min · click a dungeon to see its drops</small></h2>
+      <h2>Dungeon List <small>click a dungeon to see its drops</small></h2>
       <div class="wrap"><table class="dlft">
-        <thead><tr><th>Dungeon</th><th>Per hour</th><th>Forecast</th><th>Completed</th><th>Ø Time</th><th>Ø Yang/Run</th></tr></thead>
+        <thead><tr><th>Dungeon</th><th>Completed</th><th>Ø Yang/Run</th><th>Total Yang</th></tr></thead>
         <tbody id="dlFc"></tbody>
       </table></div>
     </section>
@@ -1692,7 +1691,13 @@ const CHESTS=[
  [/^chest of platun$/i,"Platun","Chest of Platun"],[/^taliko'?s riches$/i,"Taliko","Taliko's Riches"],[/^nalantir'?s legacy$/i,"Nalantir","Nalantir's Legacy"],
  [/^chest of the owl king$/i,"Owl","Chest of the Owl King"],[/^heroic chest of nemedere$/i,"Heroic Nemere","Heroic Chest of Nemedere"],
  [/^heroic chest of razadere$/i,"Heroic Razador","Heroic Chest of Razadere"],[/^heroic chest of jatuno$/i,"Heroic Jotun","Heroic Chest of Jatuno"],
- [/^trea?ss?ure of thorns$/i,"Castle","Treasure of Thorns"]];
+ [/^trea?ss?ure of thorns$/i,"Castle","Treasure of Thorns"],
+ [/^razador'?s chest$/i,"Razador","Razador's Chest"],[/^nemere'?s chest$/i,"Nemere","Nemere's Chest"],[/^jotun thyrm'?s chest$/i,"Jotun","Jotun Thyrm's Chest"],
+ [/^hardened bounty chest( (heroic))?$/i,"Hardened Bounty","Hardened Bounty Chest (Heroic)"],[/^frosthain bounty chest$/i,"Frosthain Bounty","Frosthain Bounty Chest"],
+ [/^echidna'?s treasure (heroic)$/i,"Heroic Echidna","Echidna's Treasure (Heroic)"],[/^echidna'?s treasure (mythic)$/i,"Mythic Echidna","Echidna's Treasure (Mythic)"],
+ [/^bounty chest (normal)$/i,"Normal Bounty","Bounty Chest (Normal)"],
+ [/^map of etelascil (normal)$/i,"Normal Etelascil","Map of Etelascil (Normal)"],[/^map of etelascil (heroic)$/i,"Heroic Etelascil","Map of Etelascil (Heroic)"],
+ [/^map of etelascil (mythic)$/i,"Mythic Etelascil","Map of Etelascil (Mythic)"],[/^map of etelascil (deadly)$/i,"Deadly Etelascil","Map of Etelascil (Deadly)"]];
 const SPL_G=/^greater splinter$/i, SPL_E=/^elite splinter$/i;
 const JOR=/^jewel of retribution$/i, JOR_MIN=1, JOR_MAX=8;   // a Jewel of Retribution drop counts in Content only for 1-8 pieces
 
@@ -2500,7 +2505,7 @@ function drawDl(){
     if(!$("dCs").value)$("dCs").value="00:00";if(!$("dCe").value)$("dCe").value="23:59";
   }
   $("dlv").querySelectorAll("[data-v]").forEach(b=>b.setAttribute("aria-pressed",String(!!dlV[b.dataset.v])));
-  $("dlFb").textContent=`⏱ ${dlF} min`;$("dlFm").textContent=dlF;$("dlNb").textContent=`Last ${dlN}`;
+  $("dlFb").textContent=`⏱ ${dlF} min`;$("dlNb").textContent=`Last ${dlN}`;
   $("dlGoalsS").hidden=!dlV.goals;$("dlFcS").hidden=!dlV.fc;$("dlSumS").hidden=!dlV.sum;$("dlActS").hidden=!dlV.sum;
   $("dlTopS").hidden=!dlV.top;$("dlRunS").hidden=!dlV.runs;
   const w=dlWin(),cls=w&&w.b>w.a?DL.cl.filter(c=>c.s>=w.a&&c.s<w.b):[],runs=w?DL.runs.filter(r=>r.e>=w.a&&r.e<w.b):[];
@@ -2515,15 +2520,16 @@ function drawDl(){
   $("dAct").textContent=act?fdur(act):"–";
   $("dRng").textContent=w?`${fd(Math.floor(w.a/60))} – ${fd(Math.floor((w.b-1)/60))} · ${runs.length} dungeon${runs.length===1?"":"s"}`:"";
   const empty=t=>`<tr><td class="empty" colspan="9">${t}</td></tr>`,none=DL?"Nothing in this range.":"Add a log file above to get started.";
-  /* forecast */
+  /* dungeon list: Super Elite Portal gets its own row right under Elite Portal */
   const kinds=[...new Map(runs.map(r=>[r.k,r])).values()].sort((a,b)=>(b.k==="e")-(a.k==="e")||(b.k==="g")-(a.k==="g")||a.lb.localeCompare(b.lb));
+  if(runs.some(r=>r.k==="e"&&r.se))kinds.splice(1,0,{k:"se",lb:"Super Elite Portal",ic:"super elite"});
   $("dlFc").innerHTML=kinds.map(({k,lb,ic})=>{
-    const r=runs.filter(x=>x.k===k);
-    const n=r.length,avg=a=>a.reduce((s,v)=>s+v,0)/n,per=ph(n);
+    const r=runs.filter(x=>k==="se"?x.k==="e"&&x.se:x.k===k);
+    const n=r.length,ys=r.reduce((s,x)=>s+x.y,0);
     let se="";
     if(k==="e"){const i=r.map(x=>x.se).lastIndexOf(true);se=i<0?`<span class="dlse o">No Super Elite yet</span>`:`<span class="dlse o">Since last Super Elite: ${n-1-i}</span>`}
     const on=dlSel.has(k);
-    return `<tr class="${on?"sel":""}" data-dk="${esc(k)}" tabindex="0" aria-pressed="${on}" title="${on?"Click again to remove it from Top Drops":"Add the drops of "+esc(lb)+" to Top Drops"}"><td><div class="dlp">${img(ic)}<span>${esc(lb)}</span>${se}</div></td><td class="r">${per?per.toFixed(1).replace(/\.0$/,""):"–"}/h</td><td>${per?(per*dlF/60).toFixed(1).replace(/\.0$/,""):"–"}</td><td>${n}</td><td>${fdur(avg(r.map(x=>x.e-x.s)))}</td><td class="y">${fv(avg(r.map(x=>x.y)))}</td></tr>`;
+    return `<tr class="${on?"sel":""}" data-dk="${esc(k)}" tabindex="0" aria-pressed="${on}" title="${on?"Click again to remove it from Top Drops":"Add the drops of "+esc(lb)+" to Top Drops"}"><td><div class="dlp">${img(ic)}<span>${esc(lb)}</span>${se}</div></td><td>${n}</td><td class="y">${fv(ys/n)}</td><td class="y">${fv(ys)}</td></tr>`;
   }).join("")||empty(DL?"No finished dungeon in this range.":none);
   /* goals */
   $("dlGc").textContent=dlGoals.length?`(${dlGoals.length})`:"";
@@ -2535,8 +2541,8 @@ function drawDl(){
   if(!$("dlGl").hidden)dlGList();
   /* top drops: pinned first, then by value, then by quantity; only the picked dungeons' runs when any are selected */
   let td=tot;
-  if(dlSel.size){td=new Map();for(const r of runs)if(dlSel.has(r.k))r.it.forEach((q,n)=>td.set(n,(td.get(n)||0)+q))}
-  const dlb=k=>k==="e"?"Elite Portal":k==="g"?"Greater Portal":k.replace(/^c:/,"");
+  if(dlSel.size){td=new Map();for(const r of runs)if(dlSel.has(r.k)||(dlSel.has("se")&&r.k==="e"&&r.se))r.it.forEach((q,n)=>td.set(n,(td.get(n)||0)+q))}
+  const dlb=k=>k==="se"?"Super Elite Portal":k==="e"?"Elite Portal":k==="g"?"Greater Portal":k.replace(/^c:/,"");
   $("dlTf").innerHTML=[...dlSel].map(k=>`<span class="dlf">${esc(dlb(k))}<button data-dk="${esc(k)}" aria-label="Remove ${esc(dlb(k))} from Top Drops">✕</button></span>`).join("");
   const top=[...td].sort((a,b)=>pinCmp(a[0],b[0])||(b[1]*price(b[0])-a[1]*price(a[0]))||(b[1]-a[1]));
   $("dlTop").innerHTML=top.map(([n,q],i)=>{const en=esc(n),p=price(n),pn=pins.has(n);
