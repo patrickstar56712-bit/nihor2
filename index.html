@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-02T16:04:33Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-02T16:06:09Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -232,6 +232,10 @@ td input{width:92px;text-align:right;padding:3px 6px;font-size:13px}
 .hb:hover,.hb:focus-visible{opacity:1;color:var(--gold);background:none}
 tr.hid td{opacity:.45}
 tr.hid .hb{opacity:1;color:var(--gold)}
+#advS{margin:0 0 9px;border-radius:10px}
+#advS summary{padding:7px 12px;font-size:14px;gap:8px}
+#advS summary::before{font-size:17px}
+#advS .acc-b{padding:2px 12px 12px}
 .shh{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;cursor:pointer}
 .hidp{font-size:13px;margin:6px 0 10px}
 #hidL{display:flex;flex-wrap:wrap;gap:6px}
@@ -1712,15 +1716,16 @@ function fitR(){
   sm.classList.remove("tight");
   if(!fit()){sm.classList.add("tight");fit()}
 }
+/* the game writes some names with ’ (Nalantir’s Legacy), so the patterns take ' or ’ */
 /* chest drops -> Content label (item name in the log, label shown, picture name, optional picture override). Counts drop events in the range. */
 const CHESTS=[
- [/^chest of platun$/i,"Platun","Chest of Platun"],[/^taliko'?s riches$/i,"Taliko","Taliko's Riches"],[/^nalantir'?s legacy$/i,"Nalantir","Nalantir's Legacy","Nalantir's Tooth"],
+ [/^chest of platun$/i,"Platun","Chest of Platun"],[/^taliko['’]?s riches$/i,"Taliko","Taliko's Riches"],[/^nalantir['’]?s legacy$/i,"Nalantir","Nalantir's Legacy","Nalantir's Tooth"],
  [/^chest of the owl king$/i,"Owl","Chest of the Owl King"],[/^heroic chest of nemedere$/i,"Heroic Nemere","Heroic Chest of Nemedere"],
  [/^heroic chest of razadere$/i,"Heroic Razador","Heroic Chest of Razadere"],[/^heroic chest of jatuno$/i,"Heroic Jotun","Heroic Chest of Jatuno"],
  [/^trea?ss?ure of thorns$/i,"Castle","Treasure of Thorns"],
- [/^razador'?s chest$/i,"Razador","Razador's Chest"],[/^nemere'?s chest$/i,"Nemere","Nemere's Chest"],[/^jotun thyrm'?s chest$/i,"Jotun","Jotun Thyrm's Chest"],
+ [/^razador['’]?s chest$/i,"Razador","Razador's Chest"],[/^nemere['’]?s chest$/i,"Nemere","Nemere's Chest"],[/^jotun thyrm['’]?s chest$/i,"Jotun","Jotun Thyrm's Chest"],
  [/^hardened bounty chest( (heroic))?$/i,"Hardened Bounty","Hardened Bounty Chest (Heroic)"],[/^frosthain bounty chest$/i,"Frosthain Bounty","Frosthain Bounty Chest"],
- [/^echidna'?s treasure (heroic)$/i,"Heroic Echidna","Echidna's Treasure (Heroic)"],[/^echidna'?s treasure (mythic)$/i,"Mythic Echidna","Echidna's Treasure (Mythic)"],
+ [/^echidna['’]?s treasure (heroic)$/i,"Heroic Echidna","Echidna's Treasure (Heroic)"],[/^echidna['’]?s treasure (mythic)$/i,"Mythic Echidna","Echidna's Treasure (Mythic)"],
  [/^bounty chest (normal)$/i,"Normal Bounty","Bounty Chest (Normal)"],
  [/^map of etelascil (normal)$/i,"Normal Etelascil","Map of Etelascil (Normal)"],[/^map of etelascil (heroic)$/i,"Heroic Etelascil","Map of Etelascil (Heroic)"],
  [/^map of etelascil (mythic)$/i,"Mythic Etelascil","Map of Etelascil (Mythic)"],[/^map of etelascil (deadly)$/i,"Deadly Etelascil","Map of Etelascil (Deadly)"]];
