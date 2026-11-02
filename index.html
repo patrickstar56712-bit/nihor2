@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-02T16:10:00Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-02T16:52:43Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1311,7 +1311,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
     <select id="sort" aria-label="Sort">
       <option value="v">By value</option>
       <option value="q">By quantity</option>
-      <option value="e">By drop count</option>
+      <option value="h">By per hour</option>
       <option value="u">By unit price</option>
       <option value="n">By name</option>
     </select>
@@ -1321,7 +1321,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
   </div>
   <div class="wrap">
     <table>
-      <thead class="lth2"><tr><th>Item</th><th class="s" data-s="q" tabindex="0">Qty</th><th class="s" data-s="e" tabindex="0">Drops</th><th class="s" data-s="u" tabindex="0">Unit price</th><th class="s" data-s="v" tabindex="0">Total value</th></tr></thead>
+      <thead class="lth2"><tr><th>Item</th><th class="s" data-s="q" tabindex="0">Qty</th><th class="s" data-s="h" tabindex="0" title="Quantity per hour of Active Time">Per hour</th><th class="s" data-s="u" tabindex="0">Unit price</th><th class="s" data-s="v" tabindex="0">Total value</th></tr></thead>
       <tbody id="rows"></tbody>
     </table>
   </div>
@@ -1778,19 +1778,21 @@ function draw(){
   $("sort").value=SK;
   document.querySelectorAll("th.s").forEach(h=>h.setAttribute("aria-sort",h.dataset.s===SK?(SD>0?"ascending":"descending"):"none"));
   const r=Object.entries(m).filter(([n,v])=>n!=="Yang"&&(shH||!hid.has(n))&&(v[0]>0||pins.has(n))&&(!t||n.toLowerCase().includes(t))&&(sk?isSk(n):pins.has(n)||!isSk(n))&&(!pr||price(n)>0));
-  const key=(n,v)=>SK==="n"?n:SK==="q"?v[0]:SK==="e"?v[1]:SK==="u"?price(n):v[0]*price(n);
+  const key=(n,v)=>SK==="n"?n:SK==="q"||SK==="h"?v[0]:SK==="u"?price(n):v[0]*price(n);   // per hour = qty over the same Active Time
   r.sort((a,b)=>{
     const pd=pinCmp(a[0],b[0]);if(pd)return pd;
+    if(SK==="u"||SK==="v"){const pa=price(a[0])>0,pb=price(b[0])>0;if(pa!==pb)return pb-pa;if(!pa)return b[1][0]-a[1][0]}   // items without a price stay below, by quantity
     const x=key(a[0],a[1]),y=key(b[0],b[1]);
     const c=SK==="n"?x.localeCompare(y):x-y;
     return c?c*SD:b[1][0]-a[1][0];
   });
+  const phr=q=>{if(!(act>0))return"–";const v=q/(act/60);return v<10?v.toFixed(1).replace(/.0$/,""):f(v)};
   const tb=$("rows");
   tb.classList.toggle("calm",calm);calm=false;
   tb.innerHTML=r.map(([n,[qt,e]],i)=>{
     const p=price(n),pn=pins.has(n),en=esc(n);
     const h=hid.has(n);
-    return `<tr class="${p?"set":""}${pn?" pin":""}${h?" hid":""}" style="--i:${Math.min(i,20)}"><td class="n"><button class="pb" data-p="${en}" aria-pressed="${pn}" aria-label="Pin ${en}">★</button>${img(n)}${en}<button class="hb" data-h="${en}" title="${h?"Show this drop again":"Hide this drop (it still counts)"}" aria-label="${h?"Show":"Hide"} ${en}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>${h?'<path d="M3 3l18 18"/>':""}</svg></button></td><td>${f(qt)}</td><td>${f(e)}</td><td><input data-n="${en}" value="${p?fp(p):""}" placeholder="0" inputmode="decimal" aria-label="${en} unit price"></td><td class="v">${p?fv(qt*p):"–"}</td></tr>`;
+    return `<tr class="${p?"set":""}${pn?" pin":""}${h?" hid":""}" style="--i:${Math.min(i,20)}"><td class="n"><button class="pb" data-p="${en}" aria-pressed="${pn}" aria-label="Pin ${en}">★</button>${img(n)}${en}<button class="hb" data-h="${en}" title="${h?"Show this drop again":"Hide this drop (it still counts)"}" aria-label="${h?"Show":"Hide"} ${en}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>${h?'<path d="M3 3l18 18"/>':""}</svg></button></td><td>${f(qt)}</td><td>${phr(qt)}</td><td><input data-n="${en}" value="${p?fp(p):""}" placeholder="0" inputmode="decimal" aria-label="${en} unit price"></td><td class="v">${p?fv(qt*p):"–"}</td></tr>`;
   }).join("")||`<tr><td class="empty" colspan="5">${EV.length?"No items in this range.":"Add a log file above to get started."}</td></tr>`;
 }
 
