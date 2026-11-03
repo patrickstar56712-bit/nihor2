@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-03T18:55:46Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-03T19:18:11Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -704,6 +704,8 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
   background:linear-gradient(var(--panel),var(--panel)) padding-box,linear-gradient(135deg,var(--gold),var(--jade)) border-box;border:1px solid transparent;
   box-shadow:0 6px 18px -10px var(--gold);transition:transform .25s var(--ease),box-shadow .25s,color .2s}
 .flb svg{width:16px;height:16px;transition:transform .3s var(--ease)}
+.fxb{font:inherit;font-size:13px;font-weight:700;cursor:pointer;order:9;margin-left:auto}
+.fxb:hover svg{transform:scale(1.12)}
 .flb:hover{transform:translateY(-2px);box-shadow:0 10px 24px -10px var(--gold);color:var(--jade)}
 .flb:hover svg{transform:translateX(3px)}
 /* material prices: picture tile with the count badge, name beside it */
@@ -1259,7 +1261,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 
 <main id="v-loot" hidden>
   <p class="crumb"><a href="#/tools">← Tools</a></p>
-  <div class="lth"><h1 id="ltH">Loot Tracker</h1><a class="flb" href="#/tools/dloot">Full List<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+  <div class="lth"><h1 id="ltH">Loot Tracker</h1><button class="flb fxb" id="flexB" title="Copy a picture of your priced drops in the picked range">Flex Drops<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button><a class="flb" href="#/tools/dloot">Full List<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
 
   <section class="add" id="up">
     <div class="bar">
@@ -1761,6 +1763,7 @@ function draw(){
   $("act").textContent=act?fh(act/60):"–";
   const rate=act>0?(y+iv)/(act/60):0;
   $("totph").textContent=rate>0?fv(rate)+"/h":"";
+  FX={w,m,y,iv,act,rate};   // for Flex Drops
 
   /* content counters: each Greater / Elite Splinter drop = +1 portal */
   const names=[...KN];
@@ -1871,6 +1874,58 @@ $("bs").onclick=()=>{
 $("b1").onclick=()=>{sk=!sk;$("b1").setAttribute("aria-pressed",sk);draw()};
 $("b2").onclick=()=>{pr=!pr;$("b2").setAttribute("aria-pressed",pr);draw()};
 
+/* ---------- Flex Drops: a picture of the priced drops in the picked range, copied to the clipboard ----------
+   only items with a unit price (hidden ones left out), the totals and the Content boxes; drawn on a canvas in the theme colours */
+let FX=null;
+const fxRows=()=>FX?Object.entries(FX.m).filter(([n,[q]])=>n!=="Yang"&&q>0&&price(n)>0&&!hid.has(n)).map(([n,[q]])=>[n,q,q*price(n)]).sort((a,b)=>b[2]-a[2]):[];
+const fxImg=n=>new Promise(ok=>{const k=slug(n),src=[`png/${k}.png`,`png/${k}.webp`,PICS[k]&&PICS[k][1]].filter(Boolean),im=new Image();let i=0;
+  const next=()=>{if(i<src.length)im.src=src[i++];else ok(null)};im.onload=()=>ok(im);im.onerror=next;next()});
+async function flexPng(rows){
+  const {w,y,iv,act,rate}=FX,cs=getComputedStyle(document.documentElement),cv=(p,d)=>cs.getPropertyValue(p).trim()||d;
+  const C={bg:cv("--bg","#12171f"),pn:cv("--panel","#1a212b"),ink:cv("--ink","#ebe6d8"),mu:cv("--mute","#8d96a3"),ln:cv("--line","#2b3441"),au:cv("--gold","#e5a93d"),jd:cv("--jade","#5fc2a6")};
+  const FF=getComputedStyle(document.body).fontFamily,ft=(wt,px)=>`${wt} ${px}px ${FF}`;
+  const ct=[...$("ctList").querySelectorAll(".cbox")].map(b=>[b.querySelector("span").textContent,b.querySelector("b").textContent]);
+  const [ri,ci]=await Promise.all([Promise.all(rows.map(x=>fxImg(x[0]))),Promise.all(ct.map(x=>fxImg(x[0]==="Nalantir"?"Nalantir's Tooth":x[0])))]);
+  const S=2,W=640,P=24,RH=38,CW=(W-2*P-16)/3,ctH=ct.length?Math.ceil(ct.length/3)*44+6:0;
+  const H=P+40+80+14+ctH+rows.length*RH+P+18;
+  const c=document.createElement("canvas");c.width=W*S;c.height=H*S;const g=c.getContext("2d");g.scale(S,S);g.textBaseline="middle";
+  const box=(x,y,w,h,r,fill,stroke)=>{g.beginPath();g.roundRect?g.roundRect(x,y,w,h,r):g.rect(x,y,w,h);if(fill){g.fillStyle=fill;g.fill()}if(stroke){g.strokeStyle=stroke;g.lineWidth=1;g.stroke()}};
+  const cut=(t,mw)=>{if(g.measureText(t).width<=mw)return t;while(t.length>1&&g.measureText(t+"…").width>mw)t=t.slice(0,-1);return t+"…"};
+  const pic=(im,x,y,sz)=>{if(!im)return;const k=Math.min(sz/im.width,sz/im.height),iw=im.width*k,ih=im.height*k;g.drawImage(im,x+(sz-iw)/2,y+(sz-ih)/2,iw,ih)};
+  g.fillStyle=C.bg;g.fillRect(0,0,W,H);
+  let Y=P+14;
+  g.font=ft(800,22);g.fillStyle=C.au;g.textAlign="left";g.fillText("Nihor Loot",P,Y);
+  g.font=ft(600,13);g.fillStyle=C.mu;g.textAlign="right";g.fillText(fd(w.a)+" – "+fd(w.b),W-P,Y);
+  Y=P+40;box(P,Y,W-2*P,80,12,C.pn,C.ln);
+  const cols=[["Total Value",fv(y+iv),C.au,24],["Yang",fv(y),C.ink,17],["Items",fv(iv),C.ink,17],["Active Time",act?fh(act/60):"–",C.ink,17]],cw=(W-2*P)/4;
+  cols.forEach(([l,v,col,px],i)=>{const x=P+16+i*cw;g.textAlign="left";g.font=ft(600,11);g.fillStyle=C.mu;g.fillText(l.toUpperCase(),x,Y+24);g.font=ft(800,px);g.fillStyle=col;g.fillText(cut(v,cw-20),x,Y+52)});
+  if(rate>0){g.font=ft(600,11);g.fillStyle=C.mu;g.textAlign="left";g.fillText(fv(rate)+"/h",P+16,Y+70)}
+  Y+=94;
+  ct.forEach(([l,n],i)=>{const x=P+(i%3)*(CW+8),yy=Y+Math.floor(i/3)*44;box(x,yy,CW,36,9,C.pn,C.ln);pic(ci[i],x+8,yy+6,24);
+    g.textAlign="right";g.font=ft(800,15);g.fillStyle=C.au;g.fillText(n,x+CW-10,yy+18);const nw=g.measureText(n).width;
+    g.textAlign="left";g.font=ft(600,12);g.fillStyle=C.ink;g.fillText(cut(l,CW-52-nw),x+38,yy+18)});
+  Y+=ctH;
+  rows.forEach(([n,q,v],i)=>{const yy=Y+i*RH;if(i)box(P,yy,W-2*P,1,0,C.ln);pic(ri[i],P+4,yy+6,26);
+    g.textAlign="right";g.font=ft(800,15);g.fillStyle=C.jd;g.fillText(fv(v),W-P-4,yy+RH/2);const vw=g.measureText(fv(v)).width;
+    g.font=ft(600,13);g.fillStyle=C.mu;const qt="× "+f(q),qx=W-P-Math.max(110,vw+24);g.fillText(qt,qx,yy+RH/2);const qw=g.measureText(qt).width;
+    g.textAlign="left";g.font=ft(600,14);g.fillStyle=C.ink;g.fillText(cut(n,qx-qw-P-56),P+40,yy+RH/2)});
+  g.font=ft(600,11);g.fillStyle=C.mu;g.textAlign="right";g.fillText(location.host||"Nihor",W-P,H-P/2-4);
+  return new Promise(ok=>c.toBlob(ok,"image/png"));
+}
+let fxTm=0;
+const fxSay=t=>{const b=$("flexB");b.firstChild.textContent=t;clearTimeout(fxTm);fxTm=setTimeout(()=>{b.firstChild.textContent="Flex Drops"},2600)};
+$("flexB").onclick=async()=>{
+  if(!EV.length||!FX||!FX.w.ok){fxSay(EV.length?"No data in this range":"Add a log file first");return}
+  const rows=fxRows();if(!rows.length){fxSay("No priced drops here");return}
+  const png=flexPng(rows);   // handed to the clipboard as a promise, so the click still counts as the user's
+  try{
+    if(!navigator.clipboard||!window.ClipboardItem)throw 0;
+    await navigator.clipboard.write([new ClipboardItem({"image/png":png})]);fxSay("Copied · Ctrl+V");
+  }catch(e){
+    const bl=await png;if(!bl)return;const a=document.createElement("a");a.href=URL.createObjectURL(bl);a.download="nihor-drops.png";a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),5000);fxSay("Downloaded");
+  }
+};
 /* ---------- log files (one or more at a time, read together; their loot lines are kept for the admins) ---------- */
 const RX=/^\[(\d\d)\/(\d\d)\/(\d\d)\] \[(\d\d):(\d\d):(\d\d)\]: You receive (\d+) (.+?)\.\s*$/;
 async function loadFile(fs,quiet){
