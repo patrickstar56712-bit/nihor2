@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-02T22:20:44Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-03T16:18:58Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -132,6 +132,11 @@ main.enter .hero h1{animation:fadeUp .6s var(--ease) both,shine 10s linear infin
 #up.drag{border-color:var(--gold);background:var(--hl);animation:pulse 1.2s ease-in-out infinite}
 #up.loaded{border-style:solid;border-color:var(--gold)}
 #up .bar{margin:0;gap:10px}
+.lvb{display:flex;align-items:center;gap:8px;min-width:0}
+#lvSt{font-size:13px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#lvSt.on{color:var(--gold);font-weight:700}
+#lvSt.on::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:currentColor;margin-right:6px;vertical-align:1px;animation:lvP 1.6s ease-in-out infinite}
+@keyframes lvP{50%{opacity:.25}}
 .lt{font-weight:600;font-size:14px}
 .lt small{font-weight:400;color:var(--mute);margin-left:4px}
 .fbtn{display:inline-block;padding:3px 10px;font-size:13px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer;transition:border-color .2s,transform .15s var(--ease),background-color .2s}
@@ -1120,7 +1125,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 
 <main id="v-tools" hidden>
   <h1>Tools</h1><p class="sub">Pick a tool.</p>
-  <div class="cards"><a class="card" href="#/tools/loot" style="--i:0"><b>Loot Tracker</b><span>Drop list, values and hourly income from your log file.</span></a><a class="card" href="#/tools/dloot" style="--i:1"><b>Loot Tracker (Detailed)</b><span>Dungeon runs, Super Elites, goals and forecasts from your log file.</span></a><a class="card" href="#/tools/screen" style="--i:2"><b>Screen Tracker<em class="beta">Beta</em></b><span>Upload an inventory screenshot, see the items, their counts and value.</span></a></div>
+  <div class="cards"><a class="card" href="#/tools/loot" style="--i:0"><b>Loot Tracker</b><span>Drop list, values and hourly income from your log file.</span></a><a class="card" href="#/tools/live" style="--i:1"><b>Live Loot Tracker<em class="beta">Beta</em></b><span>Pick your log file once, the Loot Tracker follows it while you play.</span></a><a class="card" href="#/tools/dloot" style="--i:1"><b>Loot Tracker (Detailed)</b><span>Dungeon runs, Super Elites, goals and forecasts from your log file.</span></a><a class="card" href="#/tools/screen" style="--i:2"><b>Screen Tracker<em class="beta">Beta</em></b><span>Upload an inventory screenshot, see the items, their counts and value.</span></a></div>
 </main>
 
 <main id="v-screen" hidden>
@@ -1254,12 +1259,13 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 
 <main id="v-loot" hidden>
   <p class="crumb"><a href="#/tools">← Tools</a></p>
-  <div class="lth"><h1>Loot Tracker</h1><a class="flb" href="#/tools/dloot">Full List<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+  <div class="lth"><h1 id="ltH">Loot Tracker</h1><a class="flb" href="#/tools/dloot">Full List<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
 
   <section class="add" id="up">
     <div class="bar">
-      <span class="lt">Add new log file</span>
+      <span class="lt" id="ltT">Add new log file</span>
       <label class="fbtn" for="pick" id="selBtn" tabindex="0">Select File</label>
+      <span class="lvb" id="lvBar" hidden><button id="lvGo">Connect log file</button><button id="lvStop" hidden>Stop</button><span id="lvSt" role="status"></span></span>
       <button id="clr" hidden>Clear</button>
       <span class="pio"><button id="pExp" title="Save your unit prices to a file you can send to others">Export Prices</button><label class="fbtn" for="pImp" id="pImpL" tabindex="0" title="Load unit prices from an exported file">Import Prices</label></span>
     </div>
@@ -1867,7 +1873,7 @@ $("b2").onclick=()=>{pr=!pr;$("b2").setAttribute("aria-pressed",pr);draw()};
 
 /* ---------- log files (one or more at a time, read together; their loot lines are kept for the admins) ---------- */
 const RX=/^\[(\d\d)\/(\d\d)\/(\d\d)\] \[(\d\d):(\d\d):(\d\d)\]: You receive (\d+) (.+?)\.\s*$/;
-async function loadFile(fs){
+async function loadFile(fs,quiet){
   fs=fs?fs.length===undefined?[fs]:[...fs]:[];if(!fs.length)return;   // one file or a list of them
   /* several files: their loot lines are merged in time order, so a drop split over two files stays one */
   const key=l=>{const m=RX.exec(l.trim());return m?Date.UTC(2000+ +m[3],+m[2]-1,+m[1],+m[4],+m[5],+m[6]):null},ln=[];
@@ -1897,10 +1903,9 @@ async function loadFile(fs){
   }
   flush();
   $("pick").value="";$("dPick").value="";
-  if(!c){$("msg").textContent=$("dMsg").textContent=fl.name+": no readable loot lines found.";return}
+  if(!c){if(!quiet)$("msg").textContent=$("dMsg").textContent=fl.name+": no readable loot lines found.";return}
   X={name:fl.name,from,to,items,rows:Object.values(mp),sup,jor};
-  statHit({up:lastV==="dloot"?"dloot":"loot",n:c});
-  logKeep(txt,fl.name,c,from,to);
+  if(!quiet){statHit({up:lastV==="dloot"?"dloot":"loot",n:c});logKeep(txt,fl.name,c,from,to)}   // a live re-read is not a new upload
   $("msg").textContent=$("dMsg").textContent="";
   dlParse(txt,fl.name);
   rebuild();draw();drawDl();
@@ -1928,6 +1933,55 @@ function dropInfo(list){
 }
 const keepDrop=(n,q,ok)=>n!=="Yang"||(ok&&q<=YMAX);   // trades / lone Yang are not farming
 $("pick").onchange=()=>loadFile($("pick").files);
+/* ---------- live loot tracker: the picked log file is read again whenever the game writes to it (Chrome / Edge) ----------
+   the file handle is kept in IndexedDB, so after a reload one click (the browser asks again) picks it up */
+const LVOK=typeof window.showOpenFilePicker==="function",LVMS=3000;
+let lvH=null,lvTm=0,lvSz=-1,lvMt=0,lvAt=0,lvBusy=false,lvErr="";
+const lvDb=(mode,fn)=>new Promise((ok,no)=>{const q=indexedDB.open("nihorLive",1);q.onupgradeneeded=()=>q.result.createObjectStore("h");
+  q.onerror=()=>no(q.error);q.onsuccess=()=>{const t=q.result.transaction("h",mode),st=t.objectStore("h"),x=fn(st);t.oncomplete=()=>ok(x&&x.result);t.onerror=()=>no(t.error)}});
+const lvSave=h=>lvDb("readwrite",st=>st.put(h,"log")).catch(()=>{});
+const lvLoad=()=>lvDb("readonly",st=>st.get("log")).catch(()=>null);
+function lvShow(){
+  const on=!!lvTm,st=$("lvSt");
+  $("lvStop").hidden=!on;
+  $("lvGo").textContent=on?"Change file":lvH?"Reconnect "+lvH.name:"Connect log file";
+  st.className=on?"on":"";
+  st.textContent=!LVOK?"Live needs Chrome or Edge on a computer.":lvErr&&!on?lvErr:on?"Live · "+lvH.name+(lvAt?" · updated "+new Date(lvAt).toLocaleTimeString("en-GB"):""):"";
+}
+async function lvTick(){
+  if(!lvH||lvBusy)return;lvBusy=true;
+  try{
+    const f=await lvH.getFile();
+    if(f.size!==lvSz||f.lastModified!==lvMt){lvSz=f.size;lvMt=f.lastModified;calm=true;await loadFile(f,true);lvAt=Date.now()}
+  }catch(e){lvErr="The file could not be read any more. Connect it again.";lvStop()}
+  lvBusy=false;lvShow();
+}
+function lvStop(){clearInterval(lvTm);lvTm=0;lvShow()}
+async function lvStart(h){
+  if((await h.queryPermission({mode:"read"}))!=="granted"&&(await h.requestPermission({mode:"read"}))!=="granted")return;
+  lvStop();lvH=h;lvSz=-1;lvErr="";lvSave(h);
+  const f=await h.getFile();lvSz=f.size;lvMt=f.lastModified;await loadFile(f);lvAt=Date.now();   // the first read counts as an upload
+  lvTm=setInterval(lvTick,LVMS);lvShow();
+}
+$("lvGo").onclick=async()=>{
+  if(!LVOK)return;
+  try{
+    if(lvH&&!lvTm&&$("lvGo").textContent.startsWith("Reconnect")){await lvStart(lvH);return}
+    const [h]=await showOpenFilePicker({types:[{description:"Log file",accept:{"text/plain":[".txt",".log"]}}]});
+    if(h)await lvStart(h);
+  }catch(e){}   // the picker was closed
+};
+$("lvStop").onclick=lvStop;
+$("clr").addEventListener("click",()=>{if(lvTm)lvStop()});   // Clear also ends the live reading
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&lvTm)lvTick()});   // a background tab is slowed down: catch up at once
+let lvInit=false;
+function liveUI(on){
+  $("ltH").innerHTML=on?`Live Loot Tracker<em class="beta">Beta</em>`:"Loot Tracker";
+  $("ltT").textContent=on?"Live log file":"Add new log file";
+  $("lvBar").hidden=!on;$("selBtn").hidden=on;
+  if(on&&!lvInit){lvInit=true;$("lvGo").disabled=!LVOK;if(LVOK)lvLoad().then(h=>{if(h&&!lvH){lvH=h;lvShow()}})}
+  lvShow();
+}
 $("clr").onclick=()=>{X=null;DL=null;$("msg").textContent=$("dMsg").textContent="";rebuild();draw();drawDl()};
 $("selBtn").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("pick").click()}};
 /* unit prices to and from a file, to share them with others; an imported price replaces the same item's own */
@@ -3097,8 +3151,8 @@ document.addEventListener("pointermove",e=>{
 });
 
 /* ---------- sidebar & routing ---------- */
-const V={"":"home",tools:"tools","tools/loot":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons","upgrade/dews":"weapons",skills:"skills","tools/dloot":"dloot","tools/screen":"screen","upgrade/skills":"skills"};
-const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"],["tools/screen","Screen Tracker"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"],["upgrade/dews","Dew Upgrade"]]]];   // the Control Panel adds its own group
+const V={"":"home",tools:"tools","tools/loot":"loot","tools/live":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons","upgrade/dews":"weapons",skills:"skills","tools/dloot":"dloot","tools/screen":"screen","upgrade/skills":"skills"};
+const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/live","Live Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"],["tools/screen","Screen Tracker"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"],["upgrade/dews","Dew Upgrade"]]]];   // the Control Panel adds its own group
 /* addresses: on the website every page has a real path (/upgrade/weapons; vercel.json serves index.html
    for all of them), opened as a file the #/ addresses are used.
    The Control Panel is hidden: its pages live under /31/admin and open nowhere else; once opened,
@@ -3174,7 +3228,7 @@ const NI={home:nIco('<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 
   upgrade:nIco('<path d="M12 19V5M5 12l7-7 7 7"/>'),
   skills:nIco('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M12 7v6M9 10h6"/>'),
   admin:nIco('<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>')};
-const BETA=new Set(["tools/screen"]),beta=(k,l)=>l+(BETA.has(k)?`<em class="beta">Beta</em>`:k.startsWith("upgrade/")?`<em class="beta">Soon</em>`:"");   // pages still being tried out / not finished
+const BETA=new Set(["tools/screen","tools/live"]),beta=(k,l)=>l+(BETA.has(k)?`<em class="beta">Beta</em>`:k.startsWith("upgrade/")?`<em class="beta">Soon</em>`:"");   // pages still being tried out / not finished
 function renderNav(){
   const k=cur().k;
   const a=(key,label,cls)=>`<a class="${cls}" href="${href(key)}"${key===k?' aria-current="page"':""}>${label}</a>`;
@@ -3214,6 +3268,7 @@ function route(quiet){
   if(c.v==="skills"){skP=null;drawSk(!quiet)}
   if(c.v==="login")drawLogin();
   if(CPL)cpRoute(c,quiet);   // the Control Panel's pages
+  if(c.v==="loot")liveUI(c.k==="tools/live");
   if(c.v==="screen"){drawSc();scRefs()}   // the item pictures start loading before the first upload
   statView(c);
   if(c.v==="dloot"){if(lastV!=="dloot")$("dlBack").hidden=lastV!=="loot";drawDl()}   // Go Back only when opened from the Loot Tracker
