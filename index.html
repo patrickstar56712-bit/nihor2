@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-03T19:18:11Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-03T19:47:39Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1878,16 +1878,19 @@ $("b2").onclick=()=>{pr=!pr;$("b2").setAttribute("aria-pressed",pr);draw()};
    only items with a unit price (hidden ones left out), the totals and the Content boxes; drawn on a canvas in the theme colours */
 let FX=null;
 const fxRows=()=>FX?Object.entries(FX.m).filter(([n,[q]])=>n!=="Yang"&&q>0&&price(n)>0&&!hid.has(n)).map(([n,[q]])=>[n,q,q*price(n)]).sort((a,b)=>b[2]-a[2]):[];
-const fxImg=n=>new Promise(ok=>{const k=slug(n),src=[`png/${k}.png`,`png/${k}.webp`,PICS[k]&&PICS[k][1]].filter(Boolean),im=new Image();let i=0;
+/* a box picture: its png/ file may not have loaded yet (lazy), so png -> webp -> Control Panel picture again */
+const fxSrc=u=>{const k=(/png\/([a-z0-9]+)\.(png|webp)/.exec(u||"")||[])[1];return k?fxK(k):new Promise(ok=>{if(!u)return ok(null);const im=new Image();im.onload=()=>ok(im);im.onerror=()=>ok(null);im.src=u})};
+const fxImg=n=>fxK(slug(n));
+const fxK=k=>new Promise(ok=>{const src=[`png/${k}.png`,`png/${k}.webp`,PICS[k]&&PICS[k][1]].filter(Boolean),im=new Image();let i=0;
   const next=()=>{if(i<src.length)im.src=src[i++];else ok(null)};im.onload=()=>ok(im);im.onerror=next;next()});
 async function flexPng(rows){
   const {w,y,iv,act,rate}=FX,cs=getComputedStyle(document.documentElement),cv=(p,d)=>cs.getPropertyValue(p).trim()||d;
   const C={bg:cv("--bg","#12171f"),pn:cv("--panel","#1a212b"),ink:cv("--ink","#ebe6d8"),mu:cv("--mute","#8d96a3"),ln:cv("--line","#2b3441"),au:cv("--gold","#e5a93d"),jd:cv("--jade","#5fc2a6")};
   const FF=getComputedStyle(document.body).fontFamily,ft=(wt,px)=>`${wt} ${px}px ${FF}`;
-  const ct=[...$("ctList").querySelectorAll(".cbox")].map(b=>[b.querySelector("span").textContent,b.querySelector("b").textContent]);
-  const [ri,ci]=await Promise.all([Promise.all(rows.map(x=>fxImg(x[0]))),Promise.all(ct.map(x=>fxImg(x[0]==="Nalantir"?"Nalantir's Tooth":x[0])))]);
+  const ct=[...$("ctList").querySelectorAll(".cbox")].map(b=>{const i=b.querySelector("img");return[b.querySelector("span").textContent,b.querySelector("b").textContent,i&&(i.currentSrc||i.src)]});   // the picture the box itself shows
+  const [ri,ci]=await Promise.all([Promise.all(rows.map(x=>fxImg(x[0]))),Promise.all(ct.map(x=>fxSrc(x[2])))]);
   const S=2,W=640,P=24,RH=38,CW=(W-2*P-16)/3,ctH=ct.length?Math.ceil(ct.length/3)*44+6:0;
-  const H=P+40+80+14+ctH+rows.length*RH+P+18;
+  const SH=96,H=P+40+SH+14+ctH+rows.length*RH+P+18;
   const c=document.createElement("canvas");c.width=W*S;c.height=H*S;const g=c.getContext("2d");g.scale(S,S);g.textBaseline="middle";
   const box=(x,y,w,h,r,fill,stroke)=>{g.beginPath();g.roundRect?g.roundRect(x,y,w,h,r):g.rect(x,y,w,h);if(fill){g.fillStyle=fill;g.fill()}if(stroke){g.strokeStyle=stroke;g.lineWidth=1;g.stroke()}};
   const cut=(t,mw)=>{if(g.measureText(t).width<=mw)return t;while(t.length>1&&g.measureText(t+"…").width>mw)t=t.slice(0,-1);return t+"…"};
@@ -1895,12 +1898,22 @@ async function flexPng(rows){
   g.fillStyle=C.bg;g.fillRect(0,0,W,H);
   let Y=P+14;
   g.font=ft(800,22);g.fillStyle=C.au;g.textAlign="left";g.fillText("Nihor Loot",P,Y);
-  g.font=ft(600,13);g.fillStyle=C.mu;g.textAlign="right";g.fillText(fd(w.a)+" – "+fd(w.b),W-P,Y);
-  Y=P+40;box(P,Y,W-2*P,80,12,C.pn,C.ln);
-  const cols=[["Total Value",fv(y+iv),C.au,24],["Yang",fv(y),C.ink,17],["Items",fv(iv),C.ink,17],["Active Time",act?fh(act/60):"–",C.ink,17]],cw=(W-2*P)/4;
-  cols.forEach(([l,v,col,px],i)=>{const x=P+16+i*cw;g.textAlign="left";g.font=ft(600,11);g.fillStyle=C.mu;g.fillText(l.toUpperCase(),x,Y+24);g.font=ft(800,px);g.fillStyle=col;g.fillText(cut(v,cw-20),x,Y+52)});
-  if(rate>0){g.font=ft(600,11);g.fillStyle=C.mu;g.textAlign="left";g.fillText(fv(rate)+"/h",P+16,Y+70)}
-  Y+=94;
+  /* the four boxes of the Loot Tracker: Total Value (with per hour), Yang Drop, Material Values, Time Range (with Active Time) */
+  Y=P+40;const gap=9,u=(W-2*P-3*gap)/4.5,bw=[u,u,u,1.5*u];let bx=P;
+  const lab=(t,x)=>{g.textAlign="left";g.font=ft(600,11);g.fillStyle=C.mu;g.fillText(t,x,Y+18)};
+  const rg=fd(w.a)+" – "+(fd(w.a).slice(0,10)===fd(w.b).slice(0,10)?fd(w.b).slice(11):fd(w.b));   // same day: the date once
+  const val=(t,x,px,mw)=>{g.textAlign="left";g.font=ft(800,px);g.fillStyle=C.au;g.fillText(cut(t,mw),x,Y+42)};
+  bw.forEach((bwi,i)=>{
+    if(i===0){const gr=g.createLinearGradient(bx,Y,bx+bwi,Y+SH);gr.addColorStop(0,C.au);gr.addColorStop(.55,C.ln);box(bx,Y,bwi,SH,10,C.pn,gr)}else box(bx,Y,bwi,SH,10,C.pn,C.ln);
+    const x=bx+11,mw=bwi-22;
+    if(i===0){lab("Total Value",x);val(fv(y+iv),x,20,mw);if(rate>0){g.font=ft(600,11);g.fillStyle=C.mu;g.fillText(cut(fv(rate)+"/h",mw),x,Y+66)}}
+    else if(i===1){lab("Yang Drop",x);val(fv(y),x,17,mw)}
+    else if(i===2){lab("Material Values",x);val(fv(iv),x,17,mw)}
+    else{lab("Time Range",x);val(fh(w.h),x,17,mw);g.font=ft(700,10.5);g.fillStyle=C.ink;g.fillText(cut(rg,mw),x,Y+64);
+      g.font=ft(600,11);g.fillStyle=C.mu;const at="Active Time: ";g.fillText(at,x,Y+82);const aw=g.measureText(at).width;g.font=ft(800,11);g.fillStyle=C.au;g.fillText(act?fh(act/60):"–",x+aw,Y+82)}
+    bx+=bwi+gap;
+  });
+  Y+=SH+14;
   ct.forEach(([l,n],i)=>{const x=P+(i%3)*(CW+8),yy=Y+Math.floor(i/3)*44;box(x,yy,CW,36,9,C.pn,C.ln);pic(ci[i],x+8,yy+6,24);
     g.textAlign="right";g.font=ft(800,15);g.fillStyle=C.au;g.fillText(n,x+CW-10,yy+18);const nw=g.measureText(n).width;
     g.textAlign="left";g.font=ft(600,12);g.fillStyle=C.ink;g.fillText(cut(l,CW-52-nw),x+38,yy+18)});
