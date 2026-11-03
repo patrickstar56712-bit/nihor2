@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-03T16:18:58Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-03T16:54:37Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1775,7 +1775,7 @@ function draw(){
     (gc?`<div class="cbox g"${si()}>${img("greater portal")}<span>Greater Portal</span><b>${f(gc)}</b></div>`:"")+
     (se?`<div class="cbox s"${si()}>${img("super elite")}<span>Super Elite</span><b>${f(se)}</b></div>`:"")+
     ch.map(([l,c,,ic])=>`<div class="cbox o"${si()}>${img(ic)}<span>${l}</span><b>${f(c)}</b></div>`).join("")+
-    (jr?`<div class="cbox j"${si()}>${img("tower sigil")}<span>Tower Sigil Stages</span><b>${f(jr)}</b></div>`:"")+
+    (jr?`<div class="cbox j"${si()}>${img("tower sigil")}<span>Tower of Infinity Stages</span><b>${f(jr)}</b></div>`:"")+
     (ec?`<div class="cbox e"${si()}>${img("elite portal")}<span>Elite Portal</span><b>${f(ec)}</b></div>`:"");
   if($("ctList").dataset.h!==ctHtml){$("ctList").dataset.h=ctHtml;$("ctList").innerHTML=ctHtml}
 
@@ -1935,7 +1935,10 @@ const keepDrop=(n,q,ok)=>n!=="Yang"||(ok&&q<=YMAX);   // trades / lone Yang are 
 $("pick").onchange=()=>loadFile($("pick").files);
 /* ---------- live loot tracker: the picked log file is read again whenever the game writes to it (Chrome / Edge) ----------
    the file handle is kept in IndexedDB, so after a reload one click (the browser asks again) picks it up */
-const LVOK=typeof window.showOpenFilePicker==="function",LVMS=3000;
+const LVOK=typeof window.showOpenFilePicker==="function",LVMS=1000;
+/* the live file has its own data: the Loot Tracker and the Detailed page keep the uploaded file (slot "n"), Live shows slot "l" */
+let AS="n";const SL={n:{X:null,DL:null},l:{X:null,DL:null}};
+function slotTo(k){if(k===AS)return;SL[AS]={X,DL};AS=k;({X,DL}=SL[k]);rebuild();draw();drawDl()}
 let lvH=null,lvTm=0,lvSz=-1,lvMt=0,lvAt=0,lvBusy=false,lvErr="";
 const lvDb=(mode,fn)=>new Promise((ok,no)=>{const q=indexedDB.open("nihorLive",1);q.onupgradeneeded=()=>q.result.createObjectStore("h");
   q.onerror=()=>no(q.error);q.onsuccess=()=>{const t=q.result.transaction("h",mode),st=t.objectStore("h"),x=fn(st);t.oncomplete=()=>ok(x&&x.result);t.onerror=()=>no(t.error)}});
@@ -1949,7 +1952,7 @@ function lvShow(){
   st.textContent=!LVOK?"Live needs Chrome or Edge on a computer.":lvErr&&!on?lvErr:on?"Live · "+lvH.name+(lvAt?" · updated "+new Date(lvAt).toLocaleTimeString("en-GB"):""):"";
 }
 async function lvTick(){
-  if(!lvH||lvBusy)return;lvBusy=true;
+  if(!lvH||lvBusy||AS!=="l")return;lvBusy=true;   // read only while the Live page is open; opening it catches up
   try{
     const f=await lvH.getFile();
     if(f.size!==lvSz||f.lastModified!==lvMt){lvSz=f.size;lvMt=f.lastModified;calm=true;await loadFile(f,true);lvAt=Date.now()}
@@ -1972,7 +1975,7 @@ $("lvGo").onclick=async()=>{
   }catch(e){}   // the picker was closed
 };
 $("lvStop").onclick=lvStop;
-$("clr").addEventListener("click",()=>{if(lvTm)lvStop()});   // Clear also ends the live reading
+$("clr").addEventListener("click",()=>{if(lvTm&&AS==="l")lvStop()});   // Clear on the Live page also ends the live reading
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&lvTm)lvTick()});   // a background tab is slowed down: catch up at once
 let lvInit=false;
 function liveUI(on){
@@ -1980,7 +1983,7 @@ function liveUI(on){
   $("ltT").textContent=on?"Live log file":"Add new log file";
   $("lvBar").hidden=!on;$("selBtn").hidden=on;
   if(on&&!lvInit){lvInit=true;$("lvGo").disabled=!LVOK;if(LVOK)lvLoad().then(h=>{if(h&&!lvH){lvH=h;lvShow()}})}
-  lvShow();
+  lvShow();if(on&&lvTm)lvTick();
 }
 $("clr").onclick=()=>{X=null;DL=null;$("msg").textContent=$("dMsg").textContent="";rebuild();draw();drawDl()};
 $("selBtn").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("pick").click()}};
@@ -3268,6 +3271,7 @@ function route(quiet){
   if(c.v==="skills"){skP=null;drawSk(!quiet)}
   if(c.v==="login")drawLogin();
   if(CPL)cpRoute(c,quiet);   // the Control Panel's pages
+  slotTo(c.v==="loot"&&c.k==="tools/live"?"l":"n");
   if(c.v==="loot")liveUI(c.k==="tools/live");
   if(c.v==="screen"){drawSc();scRefs()}   // the item pictures start loading before the first upload
   statView(c);
