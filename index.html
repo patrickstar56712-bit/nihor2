@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-06T17:26:24Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-06T17:29:56Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -881,11 +881,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .skcb{position:absolute;right:34px;top:6px;width:46px;height:46px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:800;border-radius:8px}
 .skcb[aria-pressed=true]{color:var(--gold);border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--panel))}
 #skDets .tier.crt{font-size:12px}
-#skCrM{display:flex;flex-direction:column;gap:12px}
-#skCrM .skcmg{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
-#skCrM .skcm{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--soft)}
-#skCrM .skcm .skdh{border:0;padding:0 0 8px}
-#skCrM .skcmi{display:flex;flex-wrap:wrap;gap:6px}
+#skCrM{display:flex;flex-direction:column;gap:8px}
 #skCrM .skrg{white-space:nowrap}
 .skbx .skg{gap:4px}
 .skbx .skr{grid-template-columns:repeat(10,minmax(0,1fr));gap:3px}
@@ -2551,17 +2547,23 @@ const skCr=new Set(ld("skCraft",[]));
 const SKCRM={"Compressed energy":[["Shard",250],["Horn of Razador",3],["Magma Ring",3],["Fire Potion",3]],
   "Writings of Nature":[["Shard",250],["Zelkoven-Branch",3],["Heaven and Hell",3],["Hallowed Tree Gum",3]],
   "Book page of the Ice King":[["Shard",250],["Horn of Nemere",3],["Magic Iceblock",3],["Structure of Ice",3]]};
-/* Craft Materials: the craft materials of every skill with Craft on, and what they are made of */
+/* a price in the Skill Booster: the typed one, else for a craft material what its parts cost */
+const skPr=n=>MP[n]||(SKCRM[n]?SKCRM[n].reduce((a,[m,x])=>a+x*(MP[m]||0),0):0);
+const skCrV=(n,q)=>(SKCRM[n]||[]).reduce((a,[m,x])=>a+x*q*(MP[m]||0),0);
+/* one material row with its unit price box (Material Prices and Craft Materials) */
+const skmRow=(n,c,lbl,k,cls="")=>{const en=esc(n),p=MP[n]||0,d=skPr(n);
+  return `<div class="skm${cls}" data-q="${c}" data-n="${en}" style="--i:${Math.min(k,20)}" title="${en}"><span class="mpic">${img(n)}<i>${en.charAt(0).toUpperCase()}</i><b>${f(c)}</b></span>`+
+    `<span class="mnn">${lbl}</span><label class="skpi"><input data-pn="${en}" value="${p?fp(p):""}" placeholder="${!p&&d?"≈ "+fv(d):"Unit price"}" inputmode="decimal" aria-label="${en} unit price"><em>Yang</em></label><span class="ut">${fv(d*c)}</span></div>`};
+/* Craft Materials: the craft materials of every skill with Craft on, what they are made of and their prices */
 function drawSkCr(){
   const k=chSkills().filter(t=>skCr.has(t)).length;
   $("skCrS").hidden=!k;if(!k){$("skCrM").innerHTML="";return}
-  const all=new Map(),out=[];
-  out.push(`<div class="skcmg">`);
-  for(const [n,c] of SKCR){const q=c*k,rec=SKCRM[n]||[];
+  const all=new Map(),out=[];let i=0,tot=0;
+  for(const [n,c] of SKCR){const q=c*k,rec=SKCRM[n]||[],v=skCrV(n,q);tot+=v;
     rec.forEach(([m,x])=>all.set(m,(all.get(m)||0)+x*q));
-    out.push(`<div class="skcm"><div class="skdh"><span class="skbi">${img(n)}</span><b>${esc(n)}</b><span class="skrg">× ${f(q)}</span></div><div class="skcmi">${rec.map(([m,x])=>`<span class="skti" title="${f(x)} per piece">${img(m)}<span>${esc(m)}</span><b>${f(x*q)}</b></span>`).join("")}</div></div>`)}
-  out.push(`</div>`);
-  out.push(`<div class="sktot"><small>Total for ${k} skill${k===1?"":"s"}</small>${[...all].map(([n,c])=>`<span class="skti">${img(n)}<span>${esc(n)}</span><b>${f(c)}</b></span>`).join("")}</div>`);
+    out.push(`<div class="skdh"><span class="skbi">${img(n)}</span><b>${esc(n)}</b><span class="skrg">× ${f(q)}</span><span class="sksub">Total <b data-crt="${esc(n)}" data-q="${q}">${fv(v)}</b></span></div>`+
+      `<div class="skmg">${rec.map(([m,x])=>skmRow(m,x*q,esc(m),i++)).join("")}</div>`)}
+  out.push(`<div class="sktot"><small>Total for ${k} skill${k===1?"":"s"}</small>${[...all].map(([n,c])=>`<span class="skti">${img(n)}<span>${esc(n)}</span><b>${f(c)}</b></span>`).join("")}<span class="skti y"><span>Craft cost</span><b id="skCrT">${fv(tot)}</b></span></div>`);
   $("skCrM").innerHTML=out.join("");
 }
 /* everything a skill costs: its picked levels plus, when Craft is on, the craft materials */
@@ -2626,9 +2628,8 @@ function drawSkMats(hint){
   chSkills().forEach((t,ti)=>{const g=skRg(t);if(!g&&!skCr.has(t))return;
     const {r:m}=skTot(t);
     out.push(skHead(t,`<span class="sksub">Total <b id="sks${ti}">0</b></span>`));
-    out.push(!m.length?`<p class="muted">No materials for these levels yet.</p>`:`<div class="skmg">`+m.map(([n,c])=>{const en=esc(n),p=MP[n]||0,bk=t&&(n===t||n===skGP(t));
-      return `<div class="skm${bk?" skbk":""}" data-q="${c}" style="--i:${Math.min(k++,20)}" title="${en}"><span class="mpic">${img(n)}<i>${en.charAt(0).toUpperCase()}</i><b>${f(c)}</b></span>`+
-        `<span class="mnn">${bk?(n===t?"M-G":"G-P")+" Skill Book":en}</span><label class="skpi"><input data-pn="${en}" value="${p?fp(p):""}" placeholder="Unit price" inputmode="decimal" aria-label="${en} unit price"><em>Yang</em></label><span class="ut">${fv(p*c)}</span></div>`}).join("")+`</div>`);
+    out.push(!m.length?`<p class="muted">No materials for these levels yet.</p>`:`<div class="skmg">`+m.map(([n,c])=>{const bk=t&&(n===t||n===skGP(t));
+      return skmRow(n,c,bk?(n===t?"M-G":"G-P")+" Skill Book":esc(n),k++,bk?" skbk":"")}).join("")+`</div>`);
   });
   $("skMats").innerHTML=out.join("")||hint;
 }
@@ -2636,7 +2637,7 @@ function drawSkMats(hint){
 function drawSkCost(anim){
   let y=0,m=0;
   chSkills().forEach((t,ti)=>{const g=skRg(t);if(!g&&!skCr.has(t))return;
-    const s=skTot(t),v=s.r.reduce((a,[n,c])=>a+c*(MP[n]||0),0);y+=s.y;m+=v;
+    const s=skTot(t),v=s.r.reduce((a,[n,c])=>a+c*skPr(n),0);y+=s.y;m+=v;   // a craft material without its own price costs its parts
     const el=$("sks"+ti);if(el)el.textContent=fv(s.y+v);
   });
   const put=(el,v)=>{if(anim)num(el,v);else{cancelAnimationFrame(TW.get(el));el.dataset.v=v;el.textContent=fv(v)}};
@@ -2655,15 +2656,21 @@ $("skBoxes").addEventListener("click",e=>{
 });
 $("skDets").addEventListener("toggle",e=>{const d=e.target;if(!d.matches||!d.matches(".skdd"))return;
   const t=d.dataset.t;if(d.open){skOpen.add(t);skShut.delete(t)}else{skOpen.delete(t);skShut.add(t)}},true);
-$("skMats").addEventListener("input",e=>{
+/* a typed price: every row that shows it, and the craft materials made from it, follow at once */
+function skPrice(e){
   const t=e.target,n=t.dataset.pn;if(n===undefined)return;
   const v=parse(t.value);
   if(v>0)MP[n]=v;else delete MP[n];
   sv("upgPrices",MP);
-  $("skMats").querySelectorAll('[data-pn="'+CSS.escape(n)+'"]').forEach(i=>{if(i!==t)i.value=v?fp(v):"";
-    const row=i.closest(".skm");row.querySelector(".ut").textContent=fv(v*(+row.dataset.q||0))});
+  document.querySelectorAll("#skMats .skm,#skCrM .skm").forEach(row=>{const rn=row.dataset.n,i=row.querySelector("input");
+    if(rn===n&&i!==t)i.value=v?fp(v):"";
+    if(rn===n||SKCRM[rn]){const p=MP[rn]||0,d=skPr(rn);if(SKCRM[rn])i.placeholder=!p&&d?"≈ "+fv(d):"Unit price";row.querySelector(".ut").textContent=fv(d*(+row.dataset.q||0))}});
+  let tot=0;$("skCrM").querySelectorAll("[data-crt]").forEach(b=>{const x=skCrV(b.dataset.crt,+b.dataset.q);tot+=x;b.textContent=fv(x)});
+  if($("skCrT"))$("skCrT").textContent=fv(tot);
   drawSkCost();
-});
+}
+$("skMats").addEventListener("input",skPrice);
+$("skCrM").addEventListener("input",skPrice);
 $("chB").onclick=()=>chOpen(!chIsOpen());
 $("chL").onclick=e=>{const b=e.target.closest("[data-g]");if(!b)return;
   const same=chSel.c===b.dataset.c&&chSel.g===b.dataset.g;
