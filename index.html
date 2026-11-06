@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-06T17:23:28Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-06T17:25:19Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -881,6 +881,12 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .skcb{position:absolute;right:34px;top:6px;padding:1px 8px;font-size:11px;font-weight:700;border-radius:6px}
 .skcb[aria-pressed=true]{color:var(--gold);border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--panel))}
 #skDets .tier.crt{font-size:12px}
+#skCrM{display:flex;flex-direction:column;gap:12px}
+#skCrM .skcmg{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+#skCrM .skcm{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--soft)}
+#skCrM .skcm .skdh{border:0;padding:0 0 8px}
+#skCrM .skcmi{display:flex;flex-wrap:wrap;gap:6px}
+#skCrM .skrg{white-space:nowrap}
 .skbx .skg{gap:4px}
 .skbx .skr{grid-template-columns:repeat(10,minmax(0,1fr));gap:3px}
 .skbx .skb{padding:5px 0;font-size:9.5px;font-weight:800;border-radius:6px;letter-spacing:-.02em}
@@ -1362,6 +1368,11 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
   <details class="acc" open style="--i:1">
     <summary>Upgrade Details</summary>
     <div class="acc-b"><div id="skDets"></div></div>
+  </details>
+
+  <details class="acc" id="skCrS" open style="--i:2" hidden>
+    <summary>Craft Materials</summary>
+    <div class="acc-b"><div id="skCrM"></div></div>
   </details>
 
   <details class="acc" open style="--i:2">
@@ -2536,6 +2547,23 @@ function skSum(a,b,s){
 /* crafting a skill book: the same materials for every skill; ticked per skill with its Craft button */
 const SKCR=[["Compressed energy",3],["Writings of Nature",3],["Book page of the Ice King",3]];
 const skCr=new Set(ld("skCraft",[]));
+/* what one craft material is made of (per piece) */
+const SKCRM={"Compressed energy":[["Shard",250],["Horn of Razador",3],["Magma Ring",3],["Fire Potion",3]],
+  "Writings of Nature":[["Shard",250],["Zelkoven-Branch",3],["Heaven and Hell",3],["Hallowed Tree Gum",3]],
+  "Book page of the Ice King":[["Shard",250],["Horn of Nemere",3],["Magic Iceblock",3],["Structure of Ice",3]]};
+/* Craft Materials: the craft materials of every skill with Craft on, and what they are made of */
+function drawSkCr(){
+  const k=chSkills().filter(t=>skCr.has(t)).length;
+  $("skCrS").hidden=!k;if(!k){$("skCrM").innerHTML="";return}
+  const all=new Map(),out=[];
+  out.push(`<div class="skcmg">`);
+  for(const [n,c] of SKCR){const q=c*k,rec=SKCRM[n]||[];
+    rec.forEach(([m,x])=>all.set(m,(all.get(m)||0)+x*q));
+    out.push(`<div class="skcm"><div class="skdh"><span class="skbi">${img(n)}</span><b>${esc(n)}</b><span class="skrg">× ${f(q)}</span></div><div class="skcmi">${rec.map(([m,x])=>`<span class="skti" title="${f(x)} per piece">${img(m)}<span>${esc(m)}</span><b>${f(x*q)}</b></span>`).join("")}</div></div>`)}
+  out.push(`</div>`);
+  out.push(`<div class="sktot"><small>Total for ${k} skill${k===1?"":"s"}</small>${[...all].map(([n,c])=>`<span class="skti">${img(n)}<span>${esc(n)}</span><b>${f(c)}</b></span>`).join("")}</div>`);
+  $("skCrM").innerHTML=out.join("");
+}
 /* everything a skill costs: its picked levels plus, when Craft is on, the craft materials */
 function skTot(t){
   const g=skRg(t),s=g?skSum(...skSt(g),t):{y:0,r:[]};
@@ -2590,7 +2618,7 @@ function drawSk(anim){
   }
   const hint=`<p class="muted">${T.length?"Pick the levels above, or press Craft.":"Select a character and one or more skills above."}</p>`;
   $("skDets").innerHTML=rows.join("")||hint;
-  drawSkMats(hint);drawSkCost(anim);
+  drawSkCr();drawSkMats(hint);drawSkCost(anim);
 }
 /* material prices: one block per skill; its own M-G / G-P books have their own price, other materials share one price */
 function drawSkMats(hint){
