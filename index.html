@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-06T17:29:56Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-06T17:32:01Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1864,7 +1864,8 @@ $("rows").closest("table").tHead.addEventListener("keydown",e=>{const h=e.target
     if(tm)return;
     b.classList.add("hold");
     tm=setTimeout(()=>{
-      tm=0;P={};pins=new Set();sv("lootPrices",P);sv("lootPins",[]);
+      tm=0;for(const k in P)delete P[k];pins=new Set();sv("lootPrices",P);   // in place: MP is the same list
+      sv("lootPins",[]);
       X=null;DL=null;$("msg").textContent=$("dMsg").textContent="";rebuild();draw();drawDl();
       b.classList.remove("hold");b.classList.add("done");setTimeout(()=>b.classList.remove("done"),600);
     },2000);
@@ -2158,7 +2159,10 @@ const fixW=w=>{
 const CATS={weapons:["Weapons","Weapon"],jewellery:["Jewellery","Jewellery"],armour:["Armour","Armour"],helmets:["Helmets","Helmet"],shields:["Shields","Shield"],dews:["Dew Upgrade","Dew"]};
 let W,WS,LC,LD,CAT="weapons";
 const K=b=>CAT==="weapons"?b:b+"_"+CAT;   // weapons keep the old storage keys
-let MP=ld("upgPrices",{});
+/* one price list for the whole site: the Loot Tracker, Upgrade Cost and Skill Booster read and write P ("lootPrices").
+   The old Upgrade Cost list ("upgPrices", kept as it was) is merged in once; the Loot Tracker price wins when both have one. */
+if(!ld("prMerged",false)){for(const [k,v] of Object.entries(ld("upgPrices",{})||{}))if(+v>0&&!(P[k]>0))P[k]=+v;sv("lootPrices",P);sv("prMerged",true)}
+const MP=P;
 let crOn=ld("upgCrOn",false)===true;
 let mEd=false,aEd=false,renaming=false,delTm=0;
 function loadCat(c){
@@ -2476,7 +2480,7 @@ $("mats").addEventListener("input",e=>{
   if(t.dataset.pn!==undefined){
     const v=parse(t.value),n=t.dataset.pn;
     if(v>0)MP[n]=v;else delete MP[n];
-    sv("upgPrices",MP);
+    sv("lootPrices",P);
     document.querySelectorAll('#mats [data-pn="'+CSS.escape(n)+'"]').forEach(i=>{if(i!==t){i.value=v?fp(v):""}});const row=t.closest(".mrow");row.querySelector(".uu").textContent=fv(v);row.querySelector(".ut").textContent=fv(v*(+row.dataset.q||0));
   }else if(!matInput(t,w))return;
   drawCost();
@@ -2661,7 +2665,7 @@ function skPrice(e){
   const t=e.target,n=t.dataset.pn;if(n===undefined)return;
   const v=parse(t.value);
   if(v>0)MP[n]=v;else delete MP[n];
-  sv("upgPrices",MP);
+  sv("lootPrices",P);
   document.querySelectorAll("#skMats .skm,#skCrM .skm").forEach(row=>{const rn=row.dataset.n,i=row.querySelector("input");
     if(rn===n&&i!==t)i.value=v?fp(v):"";
     if(rn===n||SKCRM[rn]){const p=MP[rn]||0,d=skPr(rn);if(SKCRM[rn])i.placeholder=!p&&d?"≈ "+fv(d):"Unit price";row.querySelector(".ut").textContent=fv(d*(+row.dataset.q||0))}});
@@ -3390,7 +3394,7 @@ function route(quiet){
   if(c.v==="login")drawLogin();
   if(CPL)cpRoute(c,quiet);   // the Control Panel's pages
   slotTo(c.v==="loot"&&c.k==="tools/live"?"l":"n");
-  if(c.v==="loot")liveUI(c.k==="tools/live");
+  if(c.v==="loot"){liveUI(c.k==="tools/live");calm=true;draw()}   // prices may have changed on another page
   if(c.v==="screen"){drawSc();scRefs()}   // the item pictures start loading before the first upload
   statView(c);
   if(c.v==="dloot"){if(lastV!=="dloot")$("dlBack").hidden=lastV!=="loot";drawDl()}   // Go Back only when opened from the Loot Tracker
