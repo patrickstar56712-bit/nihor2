@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-06T17:49:47Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-06T17:50:09Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -873,7 +873,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .skcb{position:absolute;left:calc(50% + 36px);top:24px;width:28px;height:28px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:8.5px;letter-spacing:-.02em;font-weight:800;border-radius:8px}
 .skcb[aria-pressed=true]{color:var(--gold);border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--panel))}
 #skCrM{display:flex;flex-direction:column;gap:8px}
-#skCrM .skmg+.skdh{margin-top:16px}
+#skCrM .skmg+.skdh,#skCrM .sktot+.skdh{margin-top:16px}
 #skCrM .sksub{white-space:nowrap}
 #skCrM .skrg{white-space:nowrap}
 .skbx .skg{gap:4px}
@@ -2573,7 +2573,7 @@ function drawSkCr(){
     rec.forEach(([m,x])=>all.set(m,(all.get(m)||0)+x*q));
     out.push(`<div class="skdh"><span class="skbi">${img(n)}</span><b>${esc(n)}</b><span class="skrg">${f(q)}</span><span class="sksub">Total <b data-crt="${esc(n)}" data-q="${q}">${fv(v)}</b></span></div>`+
       `<div class="skmg">${rec.map(([m,x])=>skmRow(m,x*q,esc(m),i++)).join("")}</div>`)}
-  out.push(`<div class="sktot"><small>Total for ${k} skill${k===1?"":"s"}</small>${[...all].map(([n,c])=>`<span class="skti">${img(n)}<span>${esc(n)}</span><b>${f(c)}</b></span>`).join("")}<span class="skti y"><span>Craft cost</span><b id="skCrT">${fv(tot)}</b></span></div>`);
+  out.unshift(`<div class="sktot"><small>Total for ${k} skill${k===1?"":"s"}</small>${[...all].map(([n,c])=>`<span class="skti">${img(n)}<span>${esc(n)}</span><b>${f(c)}</b></span>`).join("")}<span class="skti y"><span>Craft cost</span><b id="skCrT">${fv(tot)}</b></span></div>`);
   $("skCrM").innerHTML=out.join("");
 }
 /* everything a skill costs: its picked levels plus, when Craft is on, the craft materials */
