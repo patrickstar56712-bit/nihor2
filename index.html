@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-06T17:45:21Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-06T17:48:00Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -882,6 +882,8 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .skcb[aria-pressed=true]{color:var(--gold);border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--panel))}
 #skDets .tier.crt{font-size:12px}
 #skCrM{display:flex;flex-direction:column;gap:8px}
+#skCrM .skmg+.skdh{margin-top:16px}
+#skCrM .sksub{white-space:nowrap}
 #skCrM .skrg{white-space:nowrap}
 .skbx .skg{gap:4px}
 .skbx .skr{grid-template-columns:repeat(10,minmax(0,1fr));gap:3px}
@@ -917,7 +919,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .skm .ut{flex:none;min-width:54px;text-align:right;font-weight:800;color:var(--gold);font-size:13px}
 .skdh{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:15px}
 .skdh+.skdh,.mrow+.skdh,.skgh+.skdh,p+.skdh{margin-top:18px}
-#skDets .skdh,#skMats .skdh{padding-bottom:6px;border-bottom:1px solid color-mix(in srgb,var(--gold) 40%,var(--line))}
+#skDets .skdh,#skMats .skdh,#skCrM .skdh{padding-bottom:6px;border-bottom:1px solid color-mix(in srgb,var(--gold) 40%,var(--line))}
 .skbi{display:grid;place-items:center;width:30px;height:30px;flex:none}
 .skbi .ic{max-width:30px;max-height:30px;margin:0}
 #skMats .skdh{font-size:17px;gap:12px}
@@ -2589,7 +2591,7 @@ function drawSkCr(){
   const all=new Map(),out=[];let i=0,tot=0;
   for(const [n,c] of SKCR){const q=c*k,rec=SKCRM[n]||[],v=skCrV(n,q);tot+=v;
     rec.forEach(([m,x])=>all.set(m,(all.get(m)||0)+x*q));
-    out.push(`<div class="skdh"><span class="skbi">${img(n)}</span><b>${esc(n)}</b><span class="skrg">× ${f(q)}</span><span class="sksub">Total <b data-crt="${esc(n)}" data-q="${q}">${fv(v)}</b></span></div>`+
+    out.push(`<div class="skdh"><span class="skbi">${img(n)}</span><b>${esc(n)}</b><span class="skrg">${f(q)}</span><span class="sksub">Total <b data-crt="${esc(n)}" data-q="${q}">${fv(v)}</b></span></div>`+
       `<div class="skmg">${rec.map(([m,x])=>skmRow(m,x*q,esc(m),i++)).join("")}</div>`)}
   out.push(`<div class="sktot"><small>Total for ${k} skill${k===1?"":"s"}</small>${[...all].map(([n,c])=>`<span class="skti">${img(n)}<span>${esc(n)}</span><b>${f(c)}</b></span>`).join("")}<span class="skti y"><span>Craft cost</span><b id="skCrT">${fv(tot)}</b></span></div>`);
   $("skCrM").innerHTML=out.join("");
