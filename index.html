@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-06T17:32:01Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-06T17:34:53Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3282,7 +3282,10 @@ const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/live","Liv
    for all of them), opened as a file the #/ addresses are used.
    The Control Panel is hidden: its pages live under /31/admin and open nowhere else; once opened,
    its menu stays in this tab's sidebar. A local file shows it too. */
-const HIST=location.protocol!=="file:",CPB="31/";
+/* real paths (/skills) only on the website: a file, or a local test server (Live Server ...) that has no rewrite to index.html,
+   uses #/ routes so a reload never ends in "Cannot GET /skills" */
+const LOCALSV=/^(localhost|127\.|\[::1\]|0\.0\.0\.0|192\.168\.|10\.)/.test(location.hostname);
+const HIST=location.protocol!=="file:"&&!LOCALSV,CPB="31/";
 const isCp=k=>k==="admin"||k.startsWith("admin/")||k==="tools/items";
 const href=k=>HIST?"/"+(isCp(k)?CPB:"")+k:"#/"+k;
 const onCp=()=>!HIST||/^\/31\/admin(\/|$)/.test(location.pathname);
