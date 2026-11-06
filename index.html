@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-06T17:48:47Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-06T17:49:47Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -814,14 +814,6 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .dewt button[aria-pressed=true]{border-color:var(--gold);color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,var(--panel))}
 .dewt img{width:26px;height:26px;object-fit:contain}
 .tier.tM{--c:var(--gold)}.tier.tG{--c:var(--teal)}.tier.tP{--c:var(--vio)}
-#skDets{display:flex;flex-direction:column;gap:4px}
-#skDets .mrow{gap:10px 12px;padding:7px 10px}
-#skDets .tier{min-width:56px;padding:7px 8px}
-.skgh{display:flex;align-items:center;gap:10px;margin:10px 0 2px;font-size:14px;font-weight:800;color:var(--c)}
-.skgh:first-child{margin-top:4px}
-.skgh::after{content:"";flex:1;height:1px;background:color-mix(in srgb,var(--c) 40%,var(--line))}
-.skgh.tM{--c:var(--gold)}.skgh.tG{--c:var(--teal)}.skgh.tP{--c:var(--vio)}
-.skgh .skgt{order:2;font-size:12px;font-weight:700;color:var(--ink);opacity:.85;white-space:nowrap}
 .sktot{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0 4px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--gold) 45%,var(--line));border-radius:10px;background:color-mix(in srgb,var(--gold) 7%,transparent)}
 .sktot small{flex-basis:100%;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
 .skti{display:inline-flex;align-items:center;gap:7px;padding:5px 11px 5px 6px;border-radius:8px;background:var(--soft);border:1px solid var(--line);font-size:13px}
@@ -880,7 +872,6 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .skbh .xb{position:absolute;right:6px;top:6px;padding:0 6px;font-size:11px}
 .skcb{position:absolute;left:calc(50% + 36px);top:24px;width:28px;height:28px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:8.5px;letter-spacing:-.02em;font-weight:800;border-radius:8px}
 .skcb[aria-pressed=true]{color:var(--gold);border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--panel))}
-#skDets .tier.crt{font-size:12px}
 #skCrM{display:flex;flex-direction:column;gap:8px}
 #skCrM .skmg+.skdh{margin-top:16px}
 #skCrM .sksub{white-space:nowrap}
@@ -893,14 +884,8 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .skbx .skh{margin:6px 0 4px;font-size:11px;min-height:15px}
 @media (max-width:560px){.skbx .skr{grid-template-columns:repeat(10,minmax(0,1fr))}}
 /* skill booster redraws on every click: entry animations only play when the page opens */
-#v-skills.calm :is(.skt,.skbx,.mrow,.skm,.skgh){animation:none}
+#v-skills.calm :is(.skt,.skbx,.mrow,.skm){animation:none}
 /* upgrade details: a fold per skill */
-.skdd{border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:color-mix(in srgb,var(--ink) 2%,transparent)}
-.skdd>summary{list-style:none;cursor:pointer;padding:8px 12px}
-.skdd>summary::-webkit-details-marker{display:none}
-.skdd>summary .skdh{margin:0;padding:0!important;border:0!important}
-.skdd>summary:hover{background:color-mix(in srgb,var(--gold) 6%,transparent);border-radius:12px}
-.skddb{padding:0 10px 8px}
 .skmg{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:6px 10px;margin-bottom:6px}
 .skm{display:flex;align-items:center;gap:10px;padding:7px 10px 7px 8px;border-radius:10px;border:1px solid var(--line);background:var(--soft);animation:rowIn .3s calc(var(--i,0) * .03s) var(--ease) both}
 .skm.skbk{border-color:color-mix(in srgb,var(--gold) 55%,var(--line))}
@@ -918,8 +903,8 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .skpi em{font-style:normal;font-size:11px;color:var(--mute);padding-right:7px}
 .skm .ut{flex:none;min-width:54px;text-align:right;font-weight:800;color:var(--gold);font-size:13px}
 .skdh{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:15px}
-.skdh+.skdh,.mrow+.skdh,.skgh+.skdh,p+.skdh{margin-top:18px}
-#skDets .skdh,#skMats .skdh,#skCrM .skdh{padding-bottom:6px;border-bottom:1px solid color-mix(in srgb,var(--gold) 40%,var(--line))}
+.skdh+.skdh,.mrow+.skdh,p+.skdh{margin-top:18px}
+#skMats .skdh,#skCrM .skdh{padding-bottom:6px;border-bottom:1px solid color-mix(in srgb,var(--gold) 40%,var(--line))}
 .skbi{display:grid;place-items:center;width:30px;height:30px;flex:none}
 .skbi .ic{max-width:30px;max-height:30px;margin:0}
 #skMats .skdh,#skCrM .skdh{font-size:17px;gap:12px}
@@ -1387,10 +1372,6 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
     <div class="skbxs" id="skBoxes"></div>
   </section>
 
-  <details class="acc" open style="--i:1">
-    <summary>Upgrade Details</summary>
-    <div class="acc-b"><div id="skDets"></div></div>
-  </details>
 
   <details class="acc" id="skCrS" open style="--i:2" hidden>
     <summary>Craft Materials</summary>
@@ -2551,7 +2532,6 @@ const chSkills=()=>{const l=CSK[chSel.c+"/"+chSel.g]||[];return chSel.s.filter(n
 const skR=(v=>v&&typeof v==="object"&&!Array.isArray(v)?v:{})(ld("skRng",{}));
 if(!skR[""]){const o=ld("skSel",null);if(Array.isArray(o))skR[""]=[Math.min(+o[0]||0,+o[1]||0),Math.max(+o[0]||0,+o[1]||0)]}
 let skP=null;   // the skill whose start level was clicked and waits for the end click
-const skOpen=new Set(),skShut=new Set();   // Upgrade Details folds the user opened / closed (a single skill starts open)
 const skRg=t=>{const r=skR[t];return Array.isArray(r)&&r.length===2?r:null};
 /* level i holds the cost of going from i to i+1, so M1 – M5 pays M1..M4; one picked level pays its own step */
 const skSt=r=>r[1]>r[0]?[r[0],r[1]-1]:[r[0],r[0]];
@@ -2628,28 +2608,7 @@ function drawSk(anim){
       `<div class="skg">${SKT.map((L,k)=>`<div class="skr" role="group" aria-label="${L} levels">${[...Array(10)].map((_,j)=>{const i=k*10+j,on=!!r&&i>=r[0]&&i<=r[1],end=on&&(i===r[0]||i===r[1]);
         return `<button class="skb t${L}${on?" in":""}${end?" end":""}${p&&r&&i===r[0]?" pend":""}${skHas(i)?" has":""}" data-k="${i}" aria-pressed="${on}">${skL(i)}</button>`}).join("")}</div>`).join("")}</div>`+
       `<p class="skh">${p?`Start <b>${skL(r[0])}</b> set — click the end level.`:r?"Click a level to start a new range.":"Click a start level, then an end level."}</p></div>`}).join("");
-  /* upgrade details: one fold per skill (closed unless opened), inside per tier one row per level */
-  const rows=[];let k=0;
-  for(const t of T){const g=skRg(t),cr=skCr.has(t);if(!g&&!cr)continue;
-    const r=g&&skSt(g),s=skTot(t);
-    /* totals written out in full: "Shard 27,000", the skill's own books, Yang */
-    const tot=(x,y)=>x.map(([n,c])=>`<span class="skti">${img(n)}<span>${esc(n===t?"M-G Skill Book":n===skGP(t)?"G-P Skill Book":n)}</span><b>${f(c)}</b></span>`).join("")+
-      (y?`<span class="skti y"><span>Yang</span><b>${f(y)}</b></span>`:"");
-    rows.push(`<details class="skdd" data-t="${esc(t)}"${skOpen.has(t)||T.length===1&&!skShut.has(t)?" open":""}><summary>`+
-      skHead(t,`<span class="sksub">${s.r.length} material${s.r.length===1?"":"s"} · <b>${fk(s.y)}</b> Yang</span>`)+`</summary><div class="skddb">`+
-      (s.r.length||s.y?`<div class="sktot"><small>Total ${[skRt(g),cr?"Craft":""].filter(Boolean).join(" + ")}</small>${tot(s.r,s.y)}</div>`:""));
-    if(cr)rows.push(`<div class="mrow" style="--i:${Math.min(k++,20)}"><div class="tier crt">Craft</div><div class="dchips">${SKCR.map(([n,c])=>mchip(n,c)).join("")}</div><div class="ycol"></div></div>`);
-    if(g)SKT.forEach((L,ti)=>{
-      const a=Math.max(r[0],ti*10),b=Math.min(r[1],ti*10+9);if(a>b)return;
-      const st=skSum(a,b,t);
-      rows.push(`<div class="skgh t${L}"><span>${a===b?skL(a):skL(a)+" – "+skL(b)}</span><span class="skgt">${st.r.map(([n,c])=>`${f(c)} ${esc(n===t?"M-G":n===skGP(t)?"G-P":n)}`).join(" · ")}${st.y?` · ${fk(st.y)} Yang`:""}</span></div>`);
-      for(let i=a;i<=b;i++){const ch=skSum(i,i,t).r.map(([n,c])=>mchip(n,c)).join("");
-        rows.push(`<div class="mrow" style="--i:${Math.min(k++,20)}"><div class="tier t${L}" title="${skL(i)} → ${i<SKN-1?skL(i+1):"max"}">${skL(i)}</div><div class="dchips">${ch||`<span class="muted">No materials entered for ${skL(i)}.</span>`}</div><div class="ycol">${yChip(SB.y[i])}</div></div>`)}
-    });
-    rows.push(`</div></details>`);
-  }
   const hint=`<p class="muted">${T.length?"Pick the levels above, or press Craft.":"Select a character and one or more skills above."}</p>`;
-  $("skDets").innerHTML=rows.join("")||hint;
   drawSkCr();drawSkMats(hint);drawSkCost(anim);
 }
 /* material prices: one block per skill; its own M-G / G-P books have their own price, other materials share one price */
@@ -2684,8 +2643,6 @@ $("skBoxes").addEventListener("click",e=>{
   else{skR[t]=[i,i];skP=t}
   sv("skRng",skR);drawSk();
 });
-$("skDets").addEventListener("toggle",e=>{const d=e.target;if(!d.matches||!d.matches(".skdd"))return;
-  const t=d.dataset.t;if(d.open){skOpen.add(t);skShut.delete(t)}else{skOpen.delete(t);skShut.add(t)}},true);
 /* a typed price: every row that shows it, and the craft materials made from it, follow at once */
 function skPrice(e){
   const t=e.target,n=t.dataset.pn;if(n===undefined)return;
