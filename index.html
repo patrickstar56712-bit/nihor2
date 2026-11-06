@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-06T17:25:19Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-06T17:25:54Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -878,7 +878,8 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .skbh b{font-size:13px;line-height:1.2}
 .skbh .skrg{font-size:12px}
 .skbh .xb{position:absolute;right:6px;top:6px;padding:0 6px;font-size:11px}
-.skcb{position:absolute;right:34px;top:6px;padding:1px 8px;font-size:11px;font-weight:700;border-radius:6px}
+.skcb{position:absolute;right:34px;top:6px;width:46px;height:46px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10.5px;font-weight:800;border-radius:8px}
+.skcb svg{width:18px;height:18px}
 .skcb[aria-pressed=true]{color:var(--gold);border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--panel))}
 #skDets .tier.crt{font-size:12px}
 #skCrM{display:flex;flex-direction:column;gap:12px}
@@ -2592,7 +2593,7 @@ function drawSk(anim){
   /* one level picker per skill */
   $("skBoxes").innerHTML=T.map((t,ti)=>{const r=skRg(t),p=skP===t;
     return `<div class="skbx" data-t="${esc(t)}" style="--i:${ti}"><div class="skbh">${t?`<span class="skbi">${img(skGP(t))}</span>`:""}<b>${esc(skName(t))}</b><span class="skrg">${skRt(r)||"–"}</span>`+
-      `${t?`<button class="skcb" data-cr="${esc(t)}" aria-pressed="${skCr.has(t)}" title="Add the materials to craft this skill book">Craft</button><button class="xb" data-rm="${esc(t)}" aria-label="Remove ${esc(skName(t))}" title="Remove this skill">✕</button>`:""}</div>`+
+      `${t?`<button class="skcb" data-cr="${esc(t)}" aria-pressed="${skCr.has(t)}" title="Add the materials to craft this skill book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 6 4 4M3 21l9-9M12.5 5.5l2-2a1.4 1.4 0 0 1 2 0l4 4a1.4 1.4 0 0 1 0 2l-2 2z"/></svg>Craft</button><button class="xb" data-rm="${esc(t)}" aria-label="Remove ${esc(skName(t))}" title="Remove this skill">✕</button>`:""}</div>`+
       `<div class="skg">${SKT.map((L,k)=>`<div class="skr" role="group" aria-label="${L} levels">${[...Array(10)].map((_,j)=>{const i=k*10+j,on=!!r&&i>=r[0]&&i<=r[1],end=on&&(i===r[0]||i===r[1]);
         return `<button class="skb t${L}${on?" in":""}${end?" end":""}${p&&r&&i===r[0]?" pend":""}${skHas(i)?" has":""}" data-k="${i}" aria-pressed="${on}">${skL(i)}</button>`}).join("")}</div>`).join("")}</div>`+
       `<p class="skh">${p?`Start <b>${skL(r[0])}</b> set — click the end level.`:r?"Click a level to start a new range.":"Click a start level, then an end level."}</p></div>`}).join("");
