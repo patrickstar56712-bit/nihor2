@@ -1,8 +1,8 @@
 /* Control Panel: sent by /api/admin to a logged-in browser only, then run on top of index.html (it uses the page's functions and data).
    Its pages are in panel.html, its styles stay in index.html. */
 "use strict";
-Object.assign(V,{admin:"admin","admin/items":"items","admin/upgrade":"cpup","admin/skills":"cpsk","admin/stats":"cpst","admin/screen":"cpsc","admin/keys":"cpdk","admin/loot":"cplt"});
-GROUPS.push(["admin","Control Panel",[["admin/items","Items"],["admin/upgrade","Upgrade Cost"],["admin/skills","Skill Booster"],["admin/stats","Statistics"],["admin/screen","Screen Tracker"],["admin/keys","Dungeon Keys"],["admin/loot","Loot Tracker"]]]);
+Object.assign(V,{admin:"admin","admin/items":"items","admin/upgrade":"cpup","admin/skills":"cpsk","admin/stats":"cpst","admin/screen":"cpsc","admin/keys":"cpdk","admin/loot":"cplt","admin/divine":"cpdv"});
+GROUPS.push(["admin","Control Panel",[["admin/items","Items"],["admin/upgrade","Upgrade Cost"],["admin/skills","Skill Booster"],["admin/stats","Statistics"],["admin/screen","Screen Tracker"],["admin/keys","Dungeon Keys"],["admin/loot","Loot Tracker"],["admin/divine","Divine Simulator"]]]);
 /* called by route() for every page */
 function cpRoute(c,quiet){
   if(c.v==="admin")drawDb();
@@ -13,7 +13,29 @@ function cpRoute(c,quiet){
   if(c.v==="cpsc"&&!quiet)drawScA();
   if(c.v==="cpdk"&&!quiet)drawDk();
   if(c.v==="cplt"&&!quiet)drawLt();
+  if(c.v==="cpdv")dvLoad().then(drawCpDv,()=>{$("cdvBody").innerHTML=`<tr><td colspan="4" class="err">The bonus list could not be loaded.</td></tr>`});
 }
+
+/* ---------- Divine Simulator: switch bonus rows off (DVOFF, saved as meta 'dvOff') ---------- */
+const CDV_POOLS=["Normal","6/7","Exalted","Exalted 6/7","Divine","Divine 6/7","Exalted + Divine","Exalted + Divine 6/7"];   // the pools the simulator uses
+let cdvP="Exalted";
+function drawCpDv(){
+  if(!DVB)return;
+  const it=$("cdvIt"),sel=it.value,q=$("cdvQ").value.trim().toLowerCase();
+  if(!it.options.length)it.innerHTML='<option value="">All items</option>'+DVB.items.map((n,i)=>`<option value="${i}">${esc(n)}</option>`).join("");
+  $("cdvPool").innerHTML=CDV_POOLS.map(p=>{const off=(DVB.pools[p]||[]).filter(r=>DVOFF.has(p+"|"+r[0])).length;
+    return `<button data-p="${esc(p)}" aria-pressed="${p===cdvP}">${esc(p)}${off?` <small>(${off} off)</small>`:""}</button>`}).join("");
+  const rows=(DVB.pools[cdvP]||[]).filter(r=>(sel===""||r[1].includes(+sel))&&(!q||r[0].toLowerCase().includes(q)));
+  $("cdvCnt").textContent=`${DVOFF.size} switched off`;
+  $("cdvBody").innerHTML=rows.map((r,i)=>{const k=cdvP+"|"+r[0],on=!DVOFF.has(k);
+    return `<tr class="${on?"":"off"}" style="--i:${Math.min(i,30)}"><td><b>${esc(r[0])}</b></td><td class="it">${r[1].map(x=>esc(DVB.items[x])).join(", ")}</td><td class="tr">${r[2].map(esc).join(" / ")}</td>`+
+      `<td><label><input type="checkbox" data-k="${esc(k)}"${on?" checked":""}> ${on?"On":"Off"}</label></td></tr>`}).join("")||`<tr><td colspan="4" class="muted">No attribute in this pool for these filters.</td></tr>`;
+}
+const cdvSave=()=>{sv("dvOff",[...DVOFF]);dbQueue("dvOff");drawCpDv()};
+$("cdvPool").onclick=e=>{const b=e.target.closest("[data-p]");if(b){cdvP=b.dataset.p;drawCpDv()}};
+$("cdvIt").onchange=drawCpDv;$("cdvQ").oninput=drawCpDv;
+$("cdvBody").addEventListener("change",e=>{const k=e.target.dataset.k;if(k===undefined)return;e.target.checked?DVOFF.delete(k):DVOFF.add(k);cdvSave()});
+$("cdvAll").onclick=()=>{for(const k of [...DVOFF])if(k.startsWith(cdvP+"|"))DVOFF.delete(k);cdvSave()};
 
 /* ---------- Loot Tracker: the logs visitors loaded (api/logs.js) ---------- */
 async function drawLt(){
@@ -525,5 +547,5 @@ $("dbUp").onclick=()=>{
   if(!b.classList.contains("armed")){b.classList.add("armed");b.textContent="Click again to overwrite the database";setTimeout(()=>{b.classList.remove("armed");b.textContent="Upload this browser's data"},4000);return}
   b.classList.remove("armed");b.textContent="Upload this browser's data";
   const cur=CAT;for(const c of Object.keys(CATS))loadCat(c);loadCat(cur);   // every category gets its saved list (with the built-in items)
-  dbPush([...Object.keys(CATS),"skills","chars"]);
+  dbPush([...Object.keys(CATS),"skills","chars","dvOff"]);
 };

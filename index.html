@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T08:06:28Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T08:09:31Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -709,6 +709,9 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .top #setB i{display:none}
 #topR #setP{position:absolute;right:0;top:100%}
 @media (max-width:760px){#topNav a span,.top #setB span{display:none}#topNav a{padding:7px 10px}.tb #topNav{margin-left:6px}}
+/* logged in (one more menu entry): a tighter menu on mid-size screens so it does not run into the links on the right */
+@media (min-width:761px) and (max-width:1320px){.tb:has(.tn[data-g=admin]) #topNav{gap:0}.tb:has(.tn[data-g=admin]) #topNav a{padding:7px 9px;font-size:14px;gap:6px}.tb:has(.tn[data-g=admin]) #topNav .tn>a .beta{display:none}}
+@media (min-width:761px) and (max-width:1100px){.tb:has(.tn[data-g=admin]) #topNav a span{display:none}}
 /* small phones: logo without the name, tighter menu, so all five sections fit next to the links on the right */
 @media (max-width:480px){.tb .brand{font-size:0;gap:0}.tb #topNav{gap:0;margin-left:4px}#topNav a{padding:7px 8px}#topNav .tn>a i{display:none}.tb #topR{gap:5px}#topR .ilk{width:32px;height:32px}}
 .flb{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;font-size:13px;font-weight:700;text-decoration:none;color:var(--gold);
@@ -1018,6 +1021,13 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .ltt{width:100%;border-collapse:collapse;font-size:13px}
 .ltt th{text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);padding:6px 8px;border-bottom:1px solid var(--line)}
 .ltt td{padding:7px 8px;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent);vertical-align:middle}
+.cpdvf{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.cpdvf .seg{flex-wrap:wrap}.cpdvf select,.cpdvf input{padding:6px 8px}
+.cpdvt th,.cpdvt td{text-align:left}
+.cpdvt td.tr{font-size:12px;color:var(--mute);max-width:420px}
+.cpdvt td.it{font-size:12px;max-width:260px}
+.cpdvt tr.off td{opacity:.45}.cpdvt tr.off td:last-child{opacity:1}
+.cpdvt label{display:flex;align-items:center;gap:6px;font-weight:700;font-size:12px;white-space:nowrap}
 .ltt tr{animation:rowIn .3s calc(var(--i,0) * .02s) var(--ease) both}
 .ltt tbody tr:hover{background:var(--hl)}
 .ltt .ltf{font-weight:600;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1625,7 +1635,8 @@ function drawDb(){
 /* database rows replace the Control Panel data kept in this browser (fail times stay per browser);
    a part the database has nothing for is left as it is */
 function dbApply(d,force){
-  const snap=()=>JSON.stringify([Object.keys(CATS).map(c=>ld(UPG(c),[])),SB,CSK]),was=snap();
+  const snap=()=>JSON.stringify([Object.keys(CATS).map(c=>ld(UPG(c),[])),SB,CSK,[...DVOFF]]),was=snap();
+  if(Array.isArray(d.dvOff)){DVOFF=new Set(d.dvOff);sv("dvOff",d.dvOff)}
   const done=ld("defAdded",[]);
   for(const c of Object.keys(CATS)){
     const l=d.items&&d.items[c];if(!Array.isArray(l)||!l.length)continue;
@@ -1656,6 +1667,7 @@ async function dbPush(parts){
   for(const p of parts){
     if(p==="skills")body.skills=SB;
     else if(p==="chars")body.chars=CSK;
+    else if(p==="dvOff")body.dvOff=[...DVOFF];
     else{const l=p===CAT?W:ld(UPG(p),null);if(Array.isArray(l)&&l.length)(body.items??={})[p]=l.map(({f,...w})=>w)}
   }
   if(!Object.keys(body).length)return;
@@ -2850,6 +2862,8 @@ $("pgTot").addEventListener("input",e=>{
    Data: divine-bonuses.json from the game's bonus list. Not in the guides, so SAMPLES: every tier is equally likely, and a
    Chaos Orb keeps an exalted attribute exalted half of the time. */
 let DVB=null;
+/* bonus rows switched off in Control Panel -> Divine Simulator ("pool|attribute"); the database decides for everyone */
+let DVOFF=new Set(ld("dvOff",[]));
 const dvLoad=()=>DVB?Promise.resolve(DVB):fetch("divine-bonuses.json").then(r=>r.json()).then(d=>DVB=d);
 const DV_CHAOS_EX=.5;   // chance a re-rolled exalted attribute stays exalted (sample)
 const DV_EXMAX={Weapon:3};   // exalted attributes an item can hold in slots 1-5 (5 unless named here)
@@ -2870,7 +2884,7 @@ const DV_ORBS={fund:[
 let dvIt="",dvS=Array(8).fill(null),dvCat="fund",dvO=0,dvQn=1,dvLogL=[],dvSpent=0,dvAnn=0,dvPot=82;
 const dvTier=n=>1+Math.floor(Math.random()*n);
 const dvAt=i=>dvS[i]&&dvS[i].n?dvS[i]:null;
-const dvRows=p=>{if(!DVB)return[];const i=DVB.items.indexOf(dvIt);return(DVB.pools[p]||[]).filter(r=>r[1].includes(i))};
+const dvRows=p=>{if(!DVB)return[];const i=DVB.items.indexOf(dvIt);return(DVB.pools[p]||[]).filter(r=>r[1].includes(i)&&!DVOFF.has(p+"|"+r[0]))};
 const dvOwn=skip=>new Set(dvS.filter((s,i)=>s&&s.n&&i!==skip).map(s=>s.n));
 /* a random attribute for slot i from the normal or the exalted pool, not already on the item */
 function dvRoll(i,ex){const p=(ex?"Exalted":i<5?"Normal":"6/7")+(ex&&i>=5?" 6/7":""),own=dvOwn(i),rows=dvRows(p).filter(r=>!own.has(r[0]));
