@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T08:10:56Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T08:13:05Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -708,10 +708,10 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .top #setB{display:flex;width:auto;height:34px;padding:0 12px;gap:8px}
 .top #setB i{display:none}
 #topR #setP{position:absolute;right:0;top:100%}
-@media (max-width:760px){#topNav a span,.top #setB span{display:none}#topNav a{padding:7px 10px}.tb #topNav{margin-left:6px}}
-/* logged in (one more menu entry): a tighter menu on mid-size screens so it does not run into the links on the right */
-@media (min-width:761px) and (max-width:1320px){.tb:has(.tn[data-g=admin]) #topNav{gap:0}.tb:has(.tn[data-g=admin]) #topNav a{padding:7px 9px;font-size:14px;gap:6px}.tb:has(.tn[data-g=admin]) #topNav .tn>a .beta{display:none}}
-@media (min-width:761px) and (max-width:1100px){.tb:has(.tn[data-g=admin]) #topNav a span{display:none}}
+@media (max-width:1020px){#topNav a span,.top #setB span{display:none}#topNav a{padding:7px 10px}.tb #topNav{margin-left:6px}}   /* below this the five menu names do not fit: icons only */
+/* logged in: one more menu entry (Control Panel), so the bar gets more room instead of smaller items; below that width the menu shows its icons only */
+.tb:has(.tn[data-g=admin]) .top .in{max-width:1180px}
+@media (min-width:761px) and (max-width:1179px){.tb:has(.tn[data-g=admin]) #topNav a span{display:none}.tb:has(.tn[data-g=admin]) #topNav a{padding:7px 10px}}
 /* small phones: logo without the name, tighter menu, so all five sections fit next to the links on the right */
 @media (max-width:480px){.tb .brand{font-size:0;gap:0}.tb #topNav{gap:0;margin-left:4px}#topNav a{padding:7px 8px}#topNav .tn>a i{display:none}.tb #topR{gap:5px}#topR .ilk{width:32px;height:32px}}
 .flb{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;font-size:13px;font-weight:700;text-decoration:none;color:var(--gold);
