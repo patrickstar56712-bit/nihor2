@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T12:34:47Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T19:14:32Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -396,6 +396,20 @@ main.enter .panel,main.enter .acc{animation:fadeUp .55s calc(.12s + var(--i,0) *
 .costbox b.bump{animation:bump .45s var(--ease)}
 .costbox .tt{border-top:1px solid var(--line);padding-top:6px;font-size:17px}
 .costbox .cbadd{grid-column:1/-1;margin-top:6px;font-weight:800;color:var(--gold);border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}
+.eqw{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:start}
+.eqg{display:grid;grid-template-columns:repeat(4,58px);grid-template-rows:repeat(5,58px);gap:6px;padding:10px;border-radius:10px;border:1px solid #4a3d2c;background:linear-gradient(180deg,#1a1611,#100e0b)}
+.eqs{position:relative;display:grid;place-items:center;padding:0;border:1px solid #5d4c35;border-radius:4px;background:radial-gradient(circle at 50% 40%,#211c16,#0d0b09);box-shadow:inset 0 0 0 1px rgba(0,0,0,.6);cursor:pointer;min-width:0}
+.eqs .ic{position:absolute;inset:0;margin:auto;height:42px;max-width:48px;object-fit:contain;background:#100d0a}.eqs.tall .ic{height:96px;max-width:50px}   /* over the name: the name shows only when there is no picture */
+.eqs b{position:absolute;left:4px;bottom:2px;font-size:11.5px;font-weight:800;color:#fff;text-shadow:0 0 3px #000,0 0 2px #000}
+.eqs small{padding:0 3px;word-break:break-word;font-size:10px;color:#8d7c63;text-align:center;line-height:1.1}
+.eqs:hover{border-color:#a8875a}.eqs[aria-pressed=true]{background:radial-gradient(circle at 50% 40%,#2a2318,#0d0b09);color:inherit;border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),inset 0 0 12px color-mix(in srgb,var(--gold) 25%,transparent)}
+.eqs.off{opacity:.35;cursor:default}
+.eqed{min-width:0}.eqed .skdh{display:flex;align-items:center;justify-content:space-between}
+.eqsh{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:12px 0 6px}
+.eqit{display:flex;flex-wrap:wrap;gap:6px}.eqit button{display:flex;align-items:center;gap:8px;padding:5px 10px;font-size:13px}.eqit .ic{height:26px;max-width:26px;margin:0}
+.eqit button[aria-pressed=true],.eqlv button[aria-pressed=true]{border-color:var(--gold);color:var(--gold);background:color-mix(in srgb,var(--gold) 10%,var(--panel))}
+.eqlv{display:flex;flex-wrap:wrap;gap:5px}.eqlv button{min-width:42px;padding:5px 8px;font-weight:700}
+@media(max-width:640px){.eqw{grid-template-columns:1fr}.eqg{justify-self:center;grid-template-columns:repeat(4,52px);grid-template-rows:repeat(5,52px)}.eqs.tall .ic{height:84px}}
 .pgtop{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.pgtop h1{margin:0}#pgClr{margin-left:auto}#pgClr.armed{color:var(--red);border-color:var(--red)}
 #pgList{display:flex;flex-direction:column;gap:10px;margin-top:14px}
 .pge{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px 12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);animation:fadeUp .35s calc(var(--i,0) * .04s) var(--ease) both}
@@ -687,7 +701,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .tb #side,.tb #showSb,.tb #bd{display:none!important}
 .tb .top{background:color-mix(in srgb,var(--bg) 42%,transparent)}
 .tb .top .in{gap:16px}   /* same 980px centred width as the pages, so Nihor lines up with them */
-@media (min-width:1020px){.tb .top .in{padding:0}}
+@media (min-width:1140px){.tb .top .in{padding:0}}
 .tb #topNav{display:flex;flex:1;gap:2px;margin-left:10px;min-width:0}
 .tn{position:relative}
 #topNav .tn>a i{font-style:normal;font-size:12px;line-height:1;margin:-5px 0 0 -2px;color:var(--mute);transition:transform .2s,color .2s}
@@ -708,10 +722,12 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .top #setB{display:flex;width:auto;height:34px;padding:0 12px;gap:8px}
 .top #setB i{display:none}
 #topR #setP{position:absolute;right:0;top:100%}
-@media (max-width:1020px){#topNav a span,.top #setB span{display:none}#topNav a{padding:7px 10px}.tb #topNav{margin-left:6px}}   /* below this the five menu names do not fit: icons only */
+/* six menu names: the bar is wider than the pages (1120px) */
+.tb .top .in{max-width:1120px}
+@media (max-width:1139px){#topNav a span,.top #setB span{display:none}#topNav a{padding:7px 10px}.tb #topNav{margin-left:6px}}   /* below this the menu names do not fit: icons only */
 /* logged in: one more menu entry (Control Panel), so the bar gets more room instead of smaller items; below that width the menu shows its icons only */
-.tb:has(.tn[data-g=admin]) .top .in{max-width:1180px}
-@media (min-width:761px) and (max-width:1179px){.tb:has(.tn[data-g=admin]) #topNav a span{display:none}.tb:has(.tn[data-g=admin]) #topNav a{padding:7px 10px}}
+.tb:has(.tn[data-g=admin]) .top .in{max-width:1320px}
+@media (min-width:761px) and (max-width:1339px){.tb:has(.tn[data-g=admin]) #topNav a span{display:none}.tb:has(.tn[data-g=admin]) #topNav a{padding:7px 10px}}
 /* small phones: logo without the name, tighter menu, so all five sections fit next to the links on the right */
 @media (max-width:480px){.tb .brand{font-size:0;gap:0}.tb #topNav{gap:0;margin-left:4px}#topNav a{padding:7px 8px}#topNav .tn>a i{display:none}.tb #topR{gap:5px}#topR .ilk{width:32px;height:32px}}
 .flb{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;font-size:13px;font-weight:700;text-decoration:none;color:var(--gold);
@@ -779,6 +795,8 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .dim label svg{width:20px;height:20px}
 .dim label img~svg{display:none}   /* placeholder shows only when the png/ picture is missing */
 .dim input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.dim>span{position:relative;display:grid;place-items:center;width:100%;height:100%;border-radius:10px;border:1px solid color-mix(in srgb,var(--gold) 60%,var(--line));background:var(--soft);overflow:hidden}
+.dim>span img{position:absolute;inset:0;width:100%;height:100%;max-width:none;margin:0;padding:4px;object-fit:contain}   /* the picture is shown only, not uploaded */
 .dim b{position:absolute;right:-8px;bottom:-7px;z-index:1;background:var(--gold);color:#fff;font-size:11px;padding:1px 5px;border-radius:6px;pointer-events:none}
 .dim .dx{position:absolute;left:-7px;top:-7px;z-index:1;width:18px;height:18px;padding:0;border-radius:50%;font-size:12px;line-height:1;opacity:0;transition:opacity .2s}
 .dim:hover .dx,.dim .dx:focus-visible{opacity:1}
@@ -1241,7 +1259,8 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
     <a class="card" href="#/tools/loot" style="--i:0"><b>Loot Tracker</b><span>Upload a log file, see drop values and hourly income.</span></a>
     <a class="card" href="#/upgrade" style="--i:1"><b>Upgrade Cost</b><span>Yang and material cost of +0 to +9 upgrades.</span></a>
     <a class="card" href="#/skills" style="--i:2"><b>Skill Booster</b><span>M1 to P10 skill level cost and materials.</span></a>
-    <a class="card" href="#/divine" style="--i:3"><b>Divine Simulator</b><span>The crafting bench: orbs, attributes and tiers.</span></a>
+    <a class="card" href="#/progress" style="--i:3"><b>Progress</b><span>Your equipment and what it still needs to +9.</span></a>
+    <a class="card" href="#/divine" style="--i:4"><b>Divine Simulator</b><span>The crafting bench: orbs, attributes and tiers.</span></a>
   </div>
 </main>
 
@@ -1500,10 +1519,11 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 </main>
 
 <main id="v-progress" hidden>
-  <p class="crumb"><a href="#/upgrade">← Upgrade Cost</a></p>
+  <p class="crumb"><a href="#/">← Main Page</a></p>
   <div class="pgtop"><h1>Progress</h1><span class="muted" id="pgCnt"></span><button id="pgClr" hidden>Clear all</button></div>
-  <p class="sub">Everything you added with + Add progress, and what it all needs together.</p>
-  <section class="panel" id="pgTot" style="--i:0"></section>
+  <p class="sub">Click a box and put your item in it with its level: what it still needs to +9 is added up below, together with everything you added with + Add progress.</p>
+  <section class="panel eqw" style="--i:0"><div class="eqg" id="eqG" role="group" aria-label="Equipment"></div><div class="eqed" id="eqEd"></div></section>
+  <section class="panel" id="pgTot" style="--i:1"></section>
   <div id="pgList"></div>
   <div class="costbox" aria-live="polite">
     <span>Yang Cost :</span><b id="pY">0</b>
@@ -1544,7 +1564,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
     <span>Yang Cost :</span><b id="sY">0</b>
     <span>Material Cost :</span><b id="sM">0</b>
     <span class="tt">Total Cost :</span><b class="tt" id="sT">0</b>
-    <button class="cbadd" id="pgAddS" title="Save these skills to Upgrade Cost → Progress">+ Add progress</button>
+    <button class="cbadd" id="pgAddS" title="Save these skills to Progress">+ Add progress</button>
   </div>
 </main>
 
@@ -1593,7 +1613,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
     <span>Yang Cost :</span><b id="cY">0</b>
     <span>Material Cost :</span><b id="cM">0</b>
     <span class="tt">Total Cost :</span><b class="tt" id="cT">0</b>
-    <button class="cbadd" id="pgAddW" title="Save this item to Upgrade Cost → Progress">+ Add progress</button>
+    <button class="cbadd" id="pgAddW" title="Save this item to Progress">+ Add progress</button>
   </div>
 </main>
 
@@ -2528,8 +2548,8 @@ const yChip=y=>y>0?`<small>Yang</small><span class="chip y"><b>${fk(y)}</b><span
 const detYang=i=>yChip(cw().y[i]*(1+cw().f[i]));
 function drawDet(){
   const w=cw(),el=$("dets"),rows=[];
-  const pic=w.im?`<img src="${w.im}" alt="">`:img(w.n)+`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>`;
-  for(let i=LC;i<LD;i++)rows.push(`<div class="mrow" style="--i:${i-LC}"><div class="dim${w.im?" has":""}"><label title="${w.im?"Change":"Upload"} picture for ${esc(w.n)}">${pic}<input type="file" accept="image/*" data-im aria-label="Upload picture for ${esc(w.n)} +${i}"></label><b>+${i+1}</b>${w.im?`<button class="dx" data-imx aria-label="Remove picture" title="Remove picture">×</button>`:""}</div><div class="dchips" id="dc${i}">${detChips(i)}</div><div class="ycol" id="dy${i}">${detYang(i)}</div>`+
+  const pic=w.im?`<img src="${w.im}" alt="">`:img(w.n);   // shown only: pictures are not uploaded here
+  for(let i=LC;i<LD;i++)rows.push(`<div class="mrow" style="--i:${i-LC}"><div class="dim${w.im?" has":""}"><span>${pic}</span><b>+${i+1}</b></div><div class="dchips" id="dc${i}">${detChips(i)}</div><div class="ycol" id="dy${i}">${detYang(i)}</div>`+
     `<div class="fst"><small>Fail times</small><div><button data-fs="${i}" data-s="-1" aria-label="One less fail at +${i}"${w.f[i]?"":" disabled"}>−</button><input data-f="${i}" value="${w.f[i]||""}" placeholder="0" inputmode="numeric" aria-label="Fail times at +${i}"><button data-fs="${i}" data-s="1" aria-label="One more fail at +${i}">+</button></div></div></div>`);
   if(rows.length){
     const cm=w.cr.m.filter(m=>m.n.trim()&&m.c>0).map(m=>mchip(m.n.trim(),m.c)).join("");
@@ -2550,18 +2570,7 @@ $("dets").addEventListener("input",e=>{
   const t=e.target,i=t.dataset.f;if(i===undefined)return;
   setFail(i,parse(t.value));
 });
-function setPic(im){
-  const w=cw(),old=w.im;w.im=im;
-  if(!saveW()){w.im=old;alert("Picture could not be saved, browser storage is full.");return}
-  drawSel();drawInfo();drawDet();
-}
-const picFile=f=>{if(f&&/^image\//.test(f.type))shrinkImg(f,setPic)};
-$("dets").addEventListener("change",e=>{if(e.target.matches("[data-im]"))picFile(e.target.files[0])});
-$("dets").addEventListener("dragover",e=>{const d=e.target.closest(".dim");if(!d)return;e.preventDefault();d.classList.add("drag")});
-$("dets").addEventListener("dragleave",e=>{const d=e.target.closest(".dim");if(d&&!d.contains(e.relatedTarget))d.classList.remove("drag")});
-$("dets").addEventListener("drop",e=>{const d=e.target.closest(".dim");if(!d)return;e.preventDefault();d.classList.remove("drag");picFile(e.dataTransfer.files[0])});
 $("dets").addEventListener("click",e=>{
-  if(e.target.closest("[data-imx]")){setPic("");return}
   const b=e.target.closest("button[data-fs]");if(!b)return;
   const i=b.dataset.fs,v=setFail(i,(cw().f[i]||0)+ +b.dataset.s);
   $("dets").querySelector(`input[data-f="${i}"]`).value=v||"";
@@ -2864,14 +2873,47 @@ function pgBtn(b,n){
 }
 $("pgAddW").onclick=e=>pgBtn(e.currentTarget,pgFromW());
 $("pgAddS").onclick=e=>pgBtn(e.currentTarget,pgFromSk());
-const pgTotal=()=>{const r=new Map();let y=0;for(const e of PG){y+=e.y;for(const [n,c] of e.m)r.set(n,(r.get(n)||0)+c)}
+/* the equipment: the boxes of the game's inventory (bag and emblem left out); each box takes an item of its Upgrade Cost list and its level */
+const EQ=[["weapon","weapons","Weapon",1,1,2],["helmet","helmets","Helmet",2,1,1],["armour","armour","Armour",2,2,2],["shield","shields","Shield",3,2,1],
+  ["earring","jewellery","Earrings",4,2,1,/earring/i],["bracelet","jewellery","Bracelet",3,3,1,/bracelet/i],["necklace","jewellery","Necklace",1,3,1,/necklace/i]];
+const EQ_NONE=[[3,1],[4,1],[4,3],[1,4],[2,4],[3,4],[1,5],[2,5]];   // boxes with no upgrade cost yet
+let EQS=(v=>v&&typeof v==="object"&&!Array.isArray(v)?v:{})(ld("pgEq",{})),eqSel="";
+const eqSave=()=>sv("pgEq",EQS);
+const eqList=c=>{const l=c===CAT?W:(ld(UPG(c),[])||[]).map(fixW);return l.length?l:(DEFS[c]||[]).map(d=>fixW(JSON.parse(JSON.stringify(d))))};
+const eqItems=d=>{const l=eqList(d[1]).filter(w=>w.y.some(Boolean)||w.m.length),m=d[6]?l.filter(w=>d[6].test(w.n)):l;return m.length?m:l};
+/* what a box still needs from its level to +9 */
+function eqNeed(d){const e=EQS[d[0]];if(!e)return null;const w=eqList(d[1]).find(x=>x.n===e.n);if(!w)return null;
+  let y=0;const m=new Map();for(let i=e.l;i<LV;i++){y+=w.y[i]||0;for(const x of w.m)if(x.c[i]>0)m.set(x.n,(m.get(x.n)||0)+x.c[i])}
+  return{k:d[2],n:w.n,s:`+${e.l} → +${LV}`,y,m:[...m]}}
+const eqEntries=()=>EQ.map(eqNeed).filter(x=>x&&(x.y||x.m.length));
+function drawEq(){
+  $("eqG").innerHTML=EQ.map(d=>{const e=EQS[d[0]];
+    return `<button class="eqs${d[5]>1?" tall":""}" data-eq="${d[0]}" style="grid-area:${d[4]}/${d[3]}/span ${d[5]}" aria-pressed="${eqSel===d[0]}" title="${esc(d[2])}${e?": "+esc(e.n)+" +"+e.l:" · click to put an item in"}">${e?`<small>${esc(e.n)}</small>`+img(e.n)+`<b>+${e.l}</b>`:`<small>${esc(d[2])}</small>`}</button>`}).join("")+
+    EQ_NONE.map(([c,r])=>`<span class="eqs off" style="grid-area:${r}/${c}" title="No upgrade cost for this box yet"></span>`).join("");
+  const d=EQ.find(x=>x[0]===eqSel);
+  if(!d){$("eqEd").innerHTML=`<p class="muted">Click a box on the left and pick the item you wear there and its level.</p>`;return}
+  const e=EQS[d[0]],it=eqItems(d),nd=eqNeed(d);
+  $("eqEd").innerHTML=`<div class="skdh"><b>${esc(d[2])}</b>${e?`<button class="xb" data-eqx aria-label="Empty this box" title="Empty this box">✕</button>`:""}</div>`+
+    `<div class="eqsh">Item</div><div class="eqit">${it.map(w=>`<button data-eqn="${esc(w.n)}" aria-pressed="${!!e&&e.n===w.n}">${img(w.n)}<span>${esc(w.n)}</span></button>`).join("")||`<span class="muted">No item in Upgrade Cost for this box yet.</span>`}</div>`+
+    `<div class="eqsh">Its level now</div><div class="eqlv">${Array.from({length:LV+1},(_,l)=>`<button data-eql="${l}" aria-pressed="${!!e&&e.l===l}"${e?"":" disabled"}>+${l}</button>`).join("")}</div>`+
+    (nd?`<div class="eqsh">Still needs (${nd.s})</div><div class="dchips">${nd.m.map(([n,c])=>mchip(n,c)).join("")}${nd.y?`<span class="chip y"><b>${fk(nd.y)}</b><span>Yang</span></span>`:""}${!nd.y&&!nd.m.length?`<span class="muted">Nothing: it is at +${LV}.</span>`:""}</div>`:"");
+}
+$("eqG").onclick=e=>{const b=e.target.closest("[data-eq]");if(!b)return;eqSel=eqSel===b.dataset.eq?"":b.dataset.eq;drawEq()};
+$("eqEd").onclick=e=>{const d=EQ.find(x=>x[0]===eqSel);if(!d)return;const t=e.target.closest("button");if(!t)return;
+  if(t.dataset.eqn!==undefined)EQS[d[0]]={n:t.dataset.eqn,l:EQS[d[0]]?EQS[d[0]].l:0};
+  else if(t.dataset.eql!==undefined&&EQS[d[0]])EQS[d[0]].l=+t.dataset.eql;
+  else if(t.dataset.eqx!==undefined)delete EQS[d[0]];
+  else return;
+  eqSave();drawPg()};
+const pgTotal=()=>{const r=new Map();let y=0;for(const e of [...eqEntries(),...PG]){y+=e.y;for(const [n,c] of e.m)r.set(n,(r.get(n)||0)+c)}
   return{y,r:[...r].sort((a,b)=>b[1]*skPr(b[0])-a[1]*skPr(a[0])||b[1]-a[1])}};
 function pgCost(){const {y,r}=pgTotal(),m=r.reduce((a,[n,c])=>a+c*skPr(n),0);
   for(const [id,v] of [["pY",y],["pM",m],["pT",y+m]]){const el=$(id);el.dataset.v=v;el.textContent=fv(v)}}
 function drawPg(){
-  const {y,r}=pgTotal();
+  drawEq();
+  const {y,r}=pgTotal(),any=PG.length||eqEntries().length;
   $("pgClr").hidden=!PG.length;$("pgCnt").textContent=PG.length?`${PG.length} item${PG.length===1?"":"s"}`:"";
-  $("pgTot").innerHTML=!PG.length?`<p class="muted">Nothing added yet. Press <b>+ Add progress</b> under the cost on an Upgrade Cost page or in the Skill Booster.</p>`
+  $("pgTot").innerHTML=!any?`<p class="muted">Nothing yet. Put your items in the boxes above, or press <b>+ Add progress</b> under the cost on an Upgrade Cost page or in the Skill Booster.</p>`
     :`<div class="skdh"><b>All together</b><span class="sksub">${f(r.length)} material${r.length===1?"":"s"}${y?` · <b>${fk(y)}</b> Yang`:""}</span></div>`+
      (r.length?`<div class="skmg">${r.map(([n,c],i)=>skmRow(n,c,esc(n),i)).join("")}</div>`:"");
   $("pgList").innerHTML=PG.map((e,i)=>`<div class="pge" style="--i:${Math.min(i,12)}"><span class="pgi"><i>${esc((e.n.trim()[0]||"?").toUpperCase())}</i>${e.im?`<img class="ic" src="${e.im}" alt="">`:img(e.ic)}</span>`+
@@ -3616,8 +3658,8 @@ document.addEventListener("pointermove",e=>{
 });
 
 /* ---------- sidebar & routing ---------- */
-const V={"":"home",tools:"tools","tools/loot":"loot","tools/live":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons","upgrade/dews":"weapons","upgrade/progress":"progress",skills:"skills",divine:"divine","tools/dloot":"dloot","tools/screen":"screen","upgrade/skills":"skills"};
-const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/live","Live Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"],["tools/screen","Screen Tracker"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"],["upgrade/dews","Dew Upgrade"],["upgrade/progress","Progress"]]]];   // the Control Panel adds its own group
+const V={"":"home",tools:"tools","tools/loot":"loot","tools/live":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons","upgrade/dews":"weapons","upgrade/progress":"progress",progress:"progress",skills:"skills",divine:"divine","tools/dloot":"dloot","tools/screen":"screen","upgrade/skills":"skills"};
+const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/live","Live Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"],["tools/screen","Screen Tracker"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"],["upgrade/dews","Dew Upgrade"]]]];   // the Control Panel adds its own group
 /* addresses: on the website every page has a real path (/upgrade/weapons; vercel.json serves index.html
    for all of them), opened as a file the #/ addresses are used.
    The Control Panel is hidden: its pages live under /31/admin and open nowhere else; once opened,
@@ -3695,9 +3737,10 @@ const NI={home:nIco('<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 
   tools:nIco('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>'),
   upgrade:nIco('<path d="M12 19V5M5 12l7-7 7 7"/>'),
   skills:nIco('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M12 7v6M9 10h6"/>'),
+  progress:nIco('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'),
   divine:nIco('<path d="M12 3l2.2 5.6L20 9.5l-4.5 3.8L17 19l-5-3-5 3 1.5-5.7L4 9.5l5.8-.9z"/>'),
   admin:nIco('<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>')};
-const BETA=new Set(["tools/screen","tools/live"]),beta=(k,l)=>l+(BETA.has(k)?`<em class="beta">Beta</em>`:k.startsWith("upgrade/")&&k!=="upgrade/progress"?`<em class="beta">Soon</em>`:"");   // pages still being tried out / not finished
+const BETA=new Set(["tools/screen","tools/live"]),beta=(k,l)=>l+(BETA.has(k)?`<em class="beta">Beta</em>`:k.startsWith("upgrade/")?`<em class="beta">Soon</em>`:"");   // pages still being tried out / not finished
 function renderNav(){
   const k=cur().k;
   const a=(key,label,cls)=>`<a class="${cls}" href="${href(key)}"${key===k?' aria-current="page"':""}>${label}</a>`;
@@ -3708,10 +3751,12 @@ function renderNav(){
     `<nav aria-label="Menu">`+a("",NI.home+"<span>Main Page</span>","si")+
     GROUPS.filter(g=>g[0]!=="admin").map(grp).join("")+
     a("skills",NI.skills+"<span>Skill Booster</span>","si")+
+    a("progress",NI.progress+"<span>Progress</span>","si")+
+    a("divine",NI.divine+"<span>Divine Simulator</span>","si")+
     GROUPS.filter(g=>g[0]==="admin"&&ADM).map(grp).join("")+
     `</nav>`;
   /* top bar: each heading opens its pages on hover / keyboard focus */
-  $("topNav").innerHTML=[["tools","Tools"],["upgrade","Upgrade Cost"],["skills","Skill Booster"],["divine","Divine Simulator"],...ADM?[["admin","Control Panel"]]:[]].map(([g,l])=>{
+  $("topNav").innerHTML=[["tools","Tools"],["upgrade","Upgrade Cost"],["skills","Skill Booster"],["progress","Progress"],["divine","Divine Simulator"],...ADM?[["admin","Control Panel"]]:[]].map(([g,l])=>{
     const kids=(GROUPS.find(x=>x[0]===g)||[])[2]||[];
     return `<div class="tn${tnShut===g?" shut":""}" data-g="${g}"><a href="${href(g)}"${k===g||k.startsWith(g+"/")?' aria-current="page"':""}>${NI[g]}<span>${l}</span>${kids.length?'<i aria-hidden="true">⌄</i>':""}</a>`+
       (kids.length?`<div class="tdd"><div>${kids.map(([kk,kl])=>`<a href="${href(kk)}"${kk===k?' aria-current="page"':""}>${beta(kk,kl)}</a>`).join("")}</div></div>`:"")+`</div>`}).join("");
