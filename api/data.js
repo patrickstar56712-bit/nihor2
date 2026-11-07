@@ -1,7 +1,7 @@
 /* Shared site data on Turso (see schema.sql).
    GET  /api/data  -> everything the Control Panel manages, for every visitor (pics: pictures saved in Control Panel -> Screen Tracker)
    POST /api/data  -> admin cookie (api/admin.js), body with any of
-                      { check: true } | { items: { weapons: [...], ... } } | { skills: {...} } | { chars: {...} } | { dvOff: ["pool|attribute", ...] }
+                      { check: true } | { items: { weapons: [...], ... } } | { skills: {...} } | { chars: {...} } | { dvOff: ["pool|attribute", ...] } | { dvChaos: 25 }
    Item, skill and character shapes are the ones index.html keeps in localStorage. */
 import { client, isAdmin, missing } from "./_db.js";
 
@@ -14,7 +14,7 @@ const int = v => Math.max(0, Math.min(Math.round(+v || 0), 1e15));
 
 /* ---------- read ---------- */
 async function readAll() {
-  const [items, steps, mats, stats, lv, smats, chars, meta, dvm] = await client().batch([
+  const [items, steps, mats, stats, lv, smats, chars, meta, dvm, dvc] = await client().batch([
     "SELECT id, category, name, image, craft_yang FROM items ORDER BY id",
     "SELECT item_id, step, yang FROM item_steps",
     "SELECT item_id, step, material, count FROM item_materials ORDER BY item_id, position, step",
@@ -23,7 +23,8 @@ async function readAll() {
     "SELECT level, material, count FROM skill_materials ORDER BY position, level",
     "SELECT character, grp, skill FROM character_skills ORDER BY character, grp, position",
     "SELECT value FROM meta WHERE key = 'updated'",
-    "SELECT value FROM meta WHERE key = 'dvOff'"   // Divine Simulator bonus rows switched off in the Control Panel
+    "SELECT value FROM meta WHERE key = 'dvOff'",   // Divine Simulator bonus rows switched off in the Control Panel
+    "SELECT value FROM meta WHERE key = 'dvChaos'"   // chance in % a Chaos Orb gives one normal attribute
   ], "read");
 
   const byId = new Map(), out = Object.fromEntries(CATS.map(c => [c, []]));
@@ -64,7 +65,7 @@ async function readAll() {
 
   const empty = !items.rows.length && !lv.rows.length && !smats.rows.length && !chars.rows.length;
   let dvOff = [];try { dvOff = JSON.parse(dvm.rows[0]?.value || "[]") } catch (e) {}
-  return { empty, updated: meta.rows[0]?.value || null, items: out, skills: sk, chars: ch, pics, dvOff: Array.isArray(dvOff) ? dvOff : [] };
+  return { empty, updated: meta.rows[0]?.value || null, items: out, skills: sk, chars: ch, pics, dvOff: Array.isArray(dvOff) ? dvOff : [], ...(dvc.rows[0] ? { dvChaos: +dvc.rows[0].value || 0 } : {}) };
 }
 
 /* ---------- write: each part replaces what the database holds for it ---------- */
@@ -145,6 +146,7 @@ export default async function handler(req, res) {
     if (b.skills) st.push(...skillStmts(b.skills));
     if (b.chars) st.push(...charStmts(b.chars));
     if (Array.isArray(b.dvOff)) st.push({ sql: "INSERT OR REPLACE INTO meta (key, value) VALUES ('dvOff', ?)", args: [JSON.stringify([...new Set(b.dvOff.map(v => txt(v, 160)).filter(Boolean))].slice(0, 3000))] });
+    if (typeof b.dvChaos === "number" && isFinite(b.dvChaos)) st.push({ sql: "INSERT OR REPLACE INTO meta (key, value) VALUES ('dvChaos', ?)", args: [String(Math.max(0, Math.min(100, b.dvChaos)))] });
     if (!st.length) return res.status(400).json({ error: "Nothing to save" });
     st.push("INSERT OR REPLACE INTO meta (key, value) VALUES ('updated', strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))");
     await client().batch(st, "write");

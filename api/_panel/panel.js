@@ -27,6 +27,7 @@ function drawCpDv(){
     return `<button data-p="${esc(p)}" aria-pressed="${p===cdvP}">${esc(p)}${off?` <small>(${off} off)</small>`:""}</button>`}).join("");
   const rows=(DVB.pools[cdvP]||[]).filter(r=>(sel===""||r[1].includes(+sel))&&(!q||r[0].toLowerCase().includes(q)));
   $("cdvCnt").textContent=`${DVOFF.size} switched off`;
+  if(document.activeElement!==$("cdvCh"))$("cdvCh").value=DVCH;
   /* the picked pool: switch every attribute shown (the item / search filters count) on or off at once */
   const ks=rows.map(r=>cdvP+"|"+r[0]),on=ks.filter(k=>!DVOFF.has(k)).length,flt=sel!==""||q;
   $("cdvBar").innerHTML=`<span class="muted"><b>${esc(cdvP)}</b> · ${on} of ${ks.length} on${flt?" (filtered)":""}</span><button data-all="1"${on===ks.length?" disabled":""}>Turn ${flt?"shown":"all"} on</button><button data-all="0"${!on?" disabled":""}>Turn ${flt?"shown":"all"} off</button>`;
@@ -37,6 +38,7 @@ function drawCpDv(){
 }
 const cdvSave=()=>{sv("dvOff",[...DVOFF]);dbQueue("dvOff");drawCpDv()};
 $("cdvPool").onclick=e=>{const b=e.target.closest("[data-p]");if(b){cdvP=b.dataset.p;drawCpDv()}};
+$("cdvCh").onchange=()=>{const v=parse($("cdvCh").value);DVCH=isFinite(v)?Math.max(0,Math.min(100,v)):DVCH;$("cdvCh").value=DVCH;sv("dvChaos",DVCH);dbQueue("dvChaos")};
 $("cdvIt").onchange=drawCpDv;$("cdvQ").oninput=drawCpDv;
 $("cdvBody").addEventListener("change",e=>{const k=e.target.dataset.k;if(k===undefined)return;e.target.checked?DVOFF.delete(k):DVOFF.add(k);cdvSave()});
 $("cdvBar").onclick=e=>{const b=e.target.closest("[data-all]");if(!b)return;for(const k of cdvKs)b.dataset.all==="1"?DVOFF.delete(k):DVOFF.add(k);cdvSave()};
@@ -551,5 +553,5 @@ $("dbUp").onclick=()=>{
   if(!b.classList.contains("armed")){b.classList.add("armed");b.textContent="Click again to overwrite the database";setTimeout(()=>{b.classList.remove("armed");b.textContent="Upload this browser's data"},4000);return}
   b.classList.remove("armed");b.textContent="Upload this browser's data";
   const cur=CAT;for(const c of Object.keys(CATS))loadCat(c);loadCat(cur);   // every category gets its saved list (with the built-in items)
-  dbPush([...Object.keys(CATS),"skills","chars","dvOff"]);
+  dbPush([...Object.keys(CATS),"skills","chars","dvOff","dvChaos"]);
 };

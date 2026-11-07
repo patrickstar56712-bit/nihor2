@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T10:34:02Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T10:37:59Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1028,7 +1028,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .cpdvt td.it{font-size:12px;max-width:260px}
 .cpdvt tr.off td{opacity:.45}.cpdvt tr.off td:last-child{opacity:1}
 .cpdvp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;margin:0 0 10px;border:1px solid var(--line);border-radius:10px;background:var(--soft)}
-.cpdvp b{color:var(--gold)}.cpdvp .muted{margin-right:auto}
+.cpdvp input{width:64px;text-align:right}.cpdvp b{color:var(--gold)}.cpdvp .muted{margin-right:auto}
 .cpdvt label{display:flex;align-items:center;gap:6px;font-weight:700;font-size:12px;white-space:nowrap}
 .ltt tr{animation:rowIn .3s calc(var(--i,0) * .02s) var(--ease) both}
 .ltt tbody tr:hover{background:var(--hl)}
@@ -1660,6 +1660,7 @@ function drawDb(){
 function dbApply(d,force){
   const snap=()=>JSON.stringify([Object.keys(CATS).map(c=>ld(UPG(c),[])),SB,CSK,[...DVOFF]]),was=snap();
   if(Array.isArray(d.dvOff)){DVOFF=new Set(d.dvOff);sv("dvOff",d.dvOff)}
+  if(typeof d.dvChaos==="number"){DVCH=d.dvChaos;sv("dvChaos",DVCH)}
   const done=ld("defAdded",[]);
   for(const c of Object.keys(CATS)){
     const l=d.items&&d.items[c];if(!Array.isArray(l)||!l.length)continue;
@@ -1694,6 +1695,7 @@ async function dbPush(parts){
     if(p==="skills")body.skills=SB;
     else if(p==="chars")body.chars=CSK;
     else if(p==="dvOff")body.dvOff=[...DVOFF];
+    else if(p==="dvChaos")body.dvChaos=DVCH;
     else{const l=p===CAT?W:ld(UPG(p),null);if(Array.isArray(l)&&l.length)(body.items??={})[p]=l.map(({f,...w})=>w)}
   }
   if(!Object.keys(body).length)return;
@@ -2899,7 +2901,8 @@ let DVB=null;
 /* bonus rows switched off in Control Panel -> Divine Simulator ("pool|attribute"); the database decides for everyone */
 let DVOFF=new Set(ld("dvOff",[]));
 const dvLoad=()=>DVB?Promise.resolve(DVB):fetch("divine-bonuses.json").then(r=>r.json()).then(d=>DVB=d);
-const DV_CHAOS_NORMAL=.28;   // chance a Chaos Orb turns one of its attributes into a normal one (sample)
+/* chance in % that a Chaos Orb turns one (only one) of its attributes into a normal one; set in Control Panel -> Divine Simulator */
+let DVCH=+ld("dvChaos",25);
 const DV_EXALT_EX=.5;   // chance an Exalted Orb gives an exalted (not a normal) attribute (sample)
 /* exalted when wanted and the item still takes one (a weapon holds at most 3 in slots 1-5), else normal */
 const dvExOk=i=>!DV_NOEX.has(dvIt)&&(i>=5||dvExCount()<dvExMax());
@@ -2965,7 +2968,7 @@ function dvUse(o){
   if(o.v==="Annul"){const i=live[Math.floor(Math.random()*live.length)],old=dvS[i];dvS[i]={p:1};dvAnn++;return[`<b>${esc(o.n)}</b> removed ${esc(old.n)} from slot ${i+1}`,[i]]}
   if(o.v==="Exalt"){const i=idx.find(dvFree),s=dvPick(i,Math.random()<DV_EXALT_EX);if(!s)return["Nothing left to roll",[]];dvS[i]=s;return[`<b>${esc(o.n)}</b>: slot ${i+1} ${esc(dvLine(s))} ${dvTags(s)}`,[i]]}
   if(o.v==="Chaos"){for(const i of live)dvS[i]={p:1};for(const i of live)dvS[i]=dvPick(i,true);   // emptied first, so the exalted limit counts only what stays
-    let nm="";if(Math.random()<DV_CHAOS_NORMAL){const i=live[Math.floor(Math.random()*live.length)],n=dvRoll(i,false);if(n){dvS[i]=n;nm=` · slot ${i+1} came out normal`}}
+    let nm="";if(Math.random()*100<DVCH){const i=live[Math.floor(Math.random()*live.length)],n=dvRoll(i,false);if(n){dvS[i]=n;nm=` · slot ${i+1} came out normal`}}
     return[`<b>${esc(o.n)}</b> re-rolled slot${live.length>1?"s":""} ${live.map(i=>i+1).join(", ")}${nm}`,live]}
   for(const i of live){const s=dvS[i],r=dvRows((s.ex?"Exalted + Divine":"Divine")+(i>=5?" 6/7":"")).find(x=>x[0]===s.n);if(r){s.v=r[2];s.dv=1;s.t=dvTier(r[2].length)}}
   return[`<b>${esc(o.n)}</b> re-rolled ${live.map(i=>`${i+1}: T${dvS[i].t}`).join(", ")}`,live];
