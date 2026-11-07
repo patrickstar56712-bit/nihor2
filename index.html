@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T19:14:32Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T19:17:23Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -404,6 +404,21 @@ main.enter .panel,main.enter .acc{animation:fadeUp .55s calc(.12s + var(--i,0) *
 .eqs small{padding:0 3px;word-break:break-word;font-size:10px;color:#8d7c63;text-align:center;line-height:1.1}
 .eqs:hover{border-color:#a8875a}.eqs[aria-pressed=true]{background:radial-gradient(circle at 50% 40%,#2a2318,#0d0b09);color:inherit;border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),inset 0 0 12px color-mix(in srgb,var(--gold) 25%,transparent)}
 .eqs.off{opacity:.35;cursor:default}
+.eqbag{display:flex;gap:6px;align-items:flex-start}
+.eqtabs{display:flex;flex-direction:column;gap:4px;padding-top:10px}
+.eqtabs button{width:30px;height:26px;padding:0;font-size:11.5px;font-weight:800;font-family:Georgia,serif;color:#cdbb98;border:1px solid #5d4c35;border-radius:4px;background:linear-gradient(180deg,#2a231a,#15110d)}
+.eqtabs button[aria-selected=true]{color:#fff;border-color:var(--gold);background:linear-gradient(180deg,#5a4526,#2a1f12)}
+.eqg.eqabs{display:block;position:relative;width:270px;height:334px;box-sizing:border-box}
+.eqabs .eqs.off{opacity:1;border-color:#4a3d2c}.eqabs .eqs.lk{color:#6f6250}.eqabs .eqs.lk svg{width:18px;height:18px}
+.eqabs .eqs.rg{border-radius:10px}.eqabs .eqs.rd{border-radius:10px;border-color:#a8875a}
+.eqfig{width:100%;height:100%;fill:none;stroke:#6f6250;stroke-width:1.2}
+.eqdiv{position:absolute;left:134px;top:10px;bottom:10px;border-left:1px solid #4a3d2c}
+.eqln{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke:#7a6243;stroke-width:1.4}
+.eqmid{position:absolute;left:111px;top:143px;width:48px;height:48px;display:grid;place-items:center;border-radius:50%;border:2px solid #a8875a;background:#1a140d;color:#e8d7b0;font-size:12px;font-weight:800}
+.eqcol{position:absolute;left:105px;top:30px;width:60px;height:250px;display:flex;flex-direction:column;align-items:center;justify-content:space-around;border:2px solid #5d4c35;border-radius:12px;background:#0f0c09}
+.eqcol i{width:30px;height:30px;border-radius:50%;border:2px solid #7a6243;background:radial-gradient(circle,#2b3550 35%,#0d0b09 40%)}
+.eqcol b{width:40px;height:12px;border:1px solid #7a6243;border-radius:2px}
+.eqman{position:absolute;left:90px;top:294px;width:90px;height:26px;display:grid;place-items:center;border:1px solid #4d6b8a;border-radius:4px;background:linear-gradient(180deg,#2c4866,#18283b);color:#d6e4f3;font-size:12px;font-weight:700;opacity:.8}
 .eqed{min-width:0}.eqed .skdh{display:flex;align-items:center;justify-content:space-between}
 .eqsh{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:12px 0 6px}
 .eqit{display:flex;flex-wrap:wrap;gap:6px}.eqit button{display:flex;align-items:center;gap:8px;padding:5px 10px;font-size:13px}.eqit .ic{height:26px;max-width:26px;margin:0}
@@ -1522,7 +1537,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
   <p class="crumb"><a href="#/">← Main Page</a></p>
   <div class="pgtop"><h1>Progress</h1><span class="muted" id="pgCnt"></span><button id="pgClr" hidden>Clear all</button></div>
   <p class="sub">Click a box and put your item in it with its level: what it still needs to +9 is added up below, together with everything you added with + Add progress.</p>
-  <section class="panel eqw" style="--i:0"><div class="eqg" id="eqG" role="group" aria-label="Equipment"></div><div class="eqed" id="eqEd"></div></section>
+  <section class="panel eqw" style="--i:0"><div class="eqbag"><div class="eqtabs" id="eqT" role="tablist" aria-label="Inventory pages"></div><div class="eqg" id="eqG" role="group" aria-label="Equipment"></div></div><div class="eqed" id="eqEd"></div></section>
   <section class="panel" id="pgTot" style="--i:1"></section>
   <div id="pgList"></div>
   <div class="costbox" aria-live="polite">
@@ -2886,7 +2901,29 @@ function eqNeed(d){const e=EQS[d[0]];if(!e)return null;const w=eqList(d[1]).find
   let y=0;const m=new Map();for(let i=e.l;i<LV;i++){y+=w.y[i]||0;for(const x of w.m)if(x.c[i]>0)m.set(x.n,(m.get(x.n)||0)+x.c[i])}
   return{k:d[2],n:w.n,s:`+${e.l} → +${LV}`,y,m:[...m]}}
 const eqEntries=()=>EQ.map(eqNeed).filter(x=>x&&(x.y||x.m.length));
+/* the inventory's pages I-VI; only Equipment takes items for now, the others show the game's layout */
+const EQT=[["eq","Equipment"],["co","Costumes"],["ss","Spiritstones"],["sb","Skill Booster"],["sg","Sigils"],["ta","Talismans"]],ROM=["I","II","III","IV","V","VI"];
+let eqTab=EQT.some(t=>t[0]===ld("pgTab","eq"))?ld("pgTab","eq"):"eq";
+/* a box at x, y (px inside the 270 x 334 page), w x h */
+const eqB=(x,y,w,h,c="",t="")=>`<span class="eqs off ${c}" style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px">${t}</span>`;
+const EQ_LOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+const eqRing=(n,R,a0=-90)=>Array.from({length:n},(_,k)=>{const a=(a0+k*360/n)*Math.PI/180;return[135+R*Math.cos(a),167+R*Math.sin(a)]});
+function eqPage(t){
+  if(t==="co"){const fig='<svg class="eqfig" viewBox="0 0 60 100" aria-hidden="true"><circle cx="30" cy="12" r="8"/><path d="M18 26h24l6 30h-8l-3-18v58h-8V64h-2v32h-8V38l-3 18h-8z"/></svg>';
+    return [10,74,138,202].map(y=>eqB(10,y,58,58)+eqB(202,y,58,58)).join("")+`<div style="position:absolute;left:75px;top:70px;width:120px;height:190px">${fig}</div>`+eqB(106,10,58,58)+eqB(106,266,58,58)}
+  if(t==="ss")return [10,64,154,208].map((x,ci)=>[0,1,2,3,4].map(k=>eqB(x,10+54*k,48,48,ci>1?"lk":k===4?"rg":"",ci>1?EQ_LOCK:"")).join("")).join("")+'<i class="eqdiv"></i>';
+  if(t==="sb"){const p=eqRing(5,105);
+    return `<svg class="eqln" viewBox="0 0 270 334" aria-hidden="true">${p.map(([x,y])=>`<line x1="135" y1="167" x2="${x}" y2="${y}"/>`).join("")}<circle cx="135" cy="167" r="105"/></svg>`+p.map(([x,y])=>eqB(x-27,y-27,54,54,"rd")).join("")+'<span class="eqmid">0/5</span>'}
+  if(t==="sg")return [40,135,230].map(y=>eqB(14,y,64,64)+eqB(192,y,64,64)).join("")+'<span class="eqcol"><i></i><i></i><i></i><b></b></span><span class="eqman">Manage</span>';
+  if(t==="ta"){const p=eqRing(6,110),tri=k=>[0,2,4].map(j=>p[(j+k)%6].join(",")).join(" ");
+    return `<svg class="eqln" viewBox="0 0 270 334" aria-hidden="true"><polygon points="${tri(0)}"/><polygon points="${tri(1)}"/><circle cx="135" cy="167" r="62"/></svg>`+p.map(([x,y])=>eqB(x-27,y-27,54,54)).join("")+'<span class="eqmid">0/6</span>'}
+  return "";
+}
 function drawEq(){
+  $("eqT").innerHTML=EQT.map(([k,n],i)=>`<button role="tab" data-eqt="${k}" aria-selected="${k===eqTab}" title="${n}">${ROM[i]}</button>`).join("");
+  $("eqG").classList.toggle("eqabs",eqTab!=="eq");$("eqG").setAttribute("aria-label",EQT.find(t=>t[0]===eqTab)[1]);
+  if(eqTab!=="eq"){$("eqG").innerHTML=eqPage(eqTab);const n=EQT.find(t=>t[0]===eqTab)[1];
+    $("eqEd").innerHTML=`<div class="skdh"><b>${n}</b></div><p class="muted">${eqTab==="co"?"Costumes are not opened here.":"Only the game's layout for now: these boxes have no upgrade cost here yet."}</p>`;return}
   $("eqG").innerHTML=EQ.map(d=>{const e=EQS[d[0]];
     return `<button class="eqs${d[5]>1?" tall":""}" data-eq="${d[0]}" style="grid-area:${d[4]}/${d[3]}/span ${d[5]}" aria-pressed="${eqSel===d[0]}" title="${esc(d[2])}${e?": "+esc(e.n)+" +"+e.l:" · click to put an item in"}">${e?`<small>${esc(e.n)}</small>`+img(e.n)+`<b>+${e.l}</b>`:`<small>${esc(d[2])}</small>`}</button>`}).join("")+
     EQ_NONE.map(([c,r])=>`<span class="eqs off" style="grid-area:${r}/${c}" title="No upgrade cost for this box yet"></span>`).join("");
@@ -2898,6 +2935,7 @@ function drawEq(){
     `<div class="eqsh">Its level now</div><div class="eqlv">${Array.from({length:LV+1},(_,l)=>`<button data-eql="${l}" aria-pressed="${!!e&&e.l===l}"${e?"":" disabled"}>+${l}</button>`).join("")}</div>`+
     (nd?`<div class="eqsh">Still needs (${nd.s})</div><div class="dchips">${nd.m.map(([n,c])=>mchip(n,c)).join("")}${nd.y?`<span class="chip y"><b>${fk(nd.y)}</b><span>Yang</span></span>`:""}${!nd.y&&!nd.m.length?`<span class="muted">Nothing: it is at +${LV}.</span>`:""}</div>`:"");
 }
+$("eqT").onclick=e=>{const b=e.target.closest("[data-eqt]");if(!b)return;eqTab=b.dataset.eqt;sv("pgTab",eqTab);drawEq()};
 $("eqG").onclick=e=>{const b=e.target.closest("[data-eq]");if(!b)return;eqSel=eqSel===b.dataset.eq?"":b.dataset.eq;drawEq()};
 $("eqEd").onclick=e=>{const d=EQ.find(x=>x[0]===eqSel);if(!d)return;const t=e.target.closest("button");if(!t)return;
   if(t.dataset.eqn!==undefined)EQS[d[0]]={n:t.dataset.eqn,l:EQS[d[0]]?EQS[d[0]].l:0};
