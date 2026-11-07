@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T08:53:29Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T08:56:44Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1152,7 +1152,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 @keyframes dvSweep{0%{transform:translateX(-120%)}55%,100%{transform:translateX(300%)}}
 .dv.noanim .dvsl::after{display:none}
 /* element attributes in their element's colour */
-.dvsl .gl.el-fire,.dvsl.d6 .gl.el-fire{color:#ff6a3d}.dvsl .gl.el-bolt,.dvsl.d6 .gl.el-bolt{color:#5cc8ff}.dvsl .gl.el-poison,.dvsl.d6 .gl.el-poison{color:#5cd65c}.dvsl .gl.el-curse,.dvsl.d6 .gl.el-curse{color:#b58cff}
+.dvsl .gl.el-fire,.dvsl.d6 .gl.el-fire{color:#ff6a3d}.dvsl .gl.el-bolt,.dvsl.d6 .gl.el-bolt{color:#5cc8ff}.dvsl .gl.el-poison,.dvsl.d6 .gl.el-poison{color:#5cd65c}.dvsl .gl.el-curse,.dvsl.d6 .gl.el-curse{color:#b58cff}.dvsl .gl.el-magic,.dvsl.d6 .gl.el-magic{color:#3fe0f0}
 .dvch{flex:none;display:flex;align-items:center;gap:5px}
 .dvch em{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.03em;padding:2px 7px;border-radius:4px;border:1px solid;white-space:nowrap;line-height:1.2}
 .dvch .cx{color:#e9b04a;border-color:color-mix(in srgb,#e9b04a 70%,transparent);background:rgba(0,0,0,.25)}
@@ -2921,8 +2921,8 @@ function dvNum(s){const raw=s.v[s.t-1];if(!s.ex)return raw;
 function dvLine(s){const v=dvNum(s),b=/^(.+) Break$/.exec(s.n);
   return b?`Ignores ${v} of the enemy's ${b[1]} resistance`:s.n.replace(/ \((AVG|SD)\)$/,"")+" +"+v}
 /* the tags after it: [T4] or [D-T8], then [Exalted] [Divined] */
-/* element damage attributes: their colour class (Burn = fire, Lightning, Poison, Curse) */
-const dvEl=n=>/^Burn Damage/.test(n)?"el-fire":/^Lightning Damage/.test(n)?"el-bolt":/^Poison Damage/.test(n)?"el-poison":/^Curse Damage/.test(n)?"el-curse":"";   // element damage only; the Breaks keep the normal colour
+/* element attributes: their colour class (Burn = fire, Lightning, Poison, Curse, Magical Power = magic) */
+const dvEl=n=>/^Burn Damage/.test(n)?"el-fire":/^Lightning Damage/.test(n)?"el-bolt":/^Poison Damage/.test(n)?"el-poison":/^Curse Damage/.test(n)?"el-curse":/^Magical Power/.test(n)?"el-magic":"";   // element damage only; the Breaks keep the normal colour
 const dvTags=s=>(s.dv?"[D-T"+s.t+"]":"[T"+s.t+"]")+(s.ex?" [Exalted]":"")+(s.dv?"[Divined]":"");
 const dvOrb=()=>(DV_ORBS[dvCat]||[])[dvO];
 const dvExCount=()=>dvS.slice(0,5).filter(s=>s&&s.ex).length;
