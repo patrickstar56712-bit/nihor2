@@ -4,7 +4,7 @@
    GET  /api/stats  -> admin cookie: last 30 days, totals, pages and uploads for the Control Panel */
 import { client, isAdmin, missing } from "./_db.js";
 
-const PAGES = new Set(["home", "tools", "loot", "dloot", "screen", "upgrade", "weapons", "jewellery", "armour", "helmets", "shields", "dews", "skills"]);
+const PAGES = new Set(["home", "tools", "loot", "dloot", "screen", "upgrade", "weapons", "jewellery", "armour", "helmets", "shields", "dews", "progress", "skills"]);
 const TOOLS = new Set(["loot", "dloot", "screen"]);
 const DAY = "date('now', '+3 hours')";
 const BOT = /bot|crawl|spider|slurp|preview|headless|monitor|lighthouse|curl|wget|python|node-fetch/i;

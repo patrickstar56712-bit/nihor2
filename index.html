@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-06T17:50:09Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T07:21:43Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -395,6 +395,15 @@ main.enter .panel,main.enter .acc{animation:fadeUp .55s calc(.12s + var(--i,0) *
 .costbox b{text-align:right;font-weight:800;color:var(--gold);transform-origin:right center}
 .costbox b.bump{animation:bump .45s var(--ease)}
 .costbox .tt{border-top:1px solid var(--line);padding-top:6px;font-size:17px}
+.costbox .cbadd{grid-column:1/-1;margin-top:6px;font-weight:800;color:var(--gold);border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}
+.pgtop{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.pgtop h1{margin:0}#pgClr{margin-left:auto}#pgClr.armed{color:var(--red);border-color:var(--red)}
+#pgList{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.pge{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px 12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);animation:fadeUp .35s calc(var(--i,0) * .04s) var(--ease) both}
+.pgi{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--gold) 50%,var(--line));background:color-mix(in srgb,var(--gold) 8%,transparent)}
+.pgi .ic{height:36px;max-width:36px;margin:0;grid-area:1/1}
+.pgi i{grid-area:1/1;font-style:normal;font-weight:800;font-size:18px;color:var(--gold);display:none}.pgi.noimg i{display:block}
+.pgh{display:flex;flex-direction:column;min-width:0}.pgh b{font-size:15px}.pgh small{color:var(--mute);font-size:12px}
+.pge .dchips{grid-column:1/-1;min-width:0}
 
 .crb{display:flex;flex-direction:column;justify-content:center;min-width:120px;cursor:pointer;user-select:none}
 .crb>div{justify-content:center;gap:10px}
@@ -1354,7 +1363,20 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 <main id="v-upgrade" hidden>
   <p class="crumb"><a href="#/">← Main Page</a></p>
   <h1>Upgrade Cost</h1><p class="sub">Pick an item type.</p>
-  <div class="cards"><a class="card" href="#/upgrade/weapons" style="--i:0"><b>Weapons<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/jewellery" style="--i:1"><b>Jewellery<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/armour" style="--i:2"><b>Armour<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/helmets" style="--i:3"><b>Helmets<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/shields" style="--i:4"><b>Shields<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/dews" style="--i:5"><b>Dew Upgrade<em class="beta">Soon</em></b><span>+0 to +9 and craft cost of every dew kind.</span></a></div>
+  <div class="cards"><a class="card" href="#/upgrade/weapons" style="--i:0"><b>Weapons<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/jewellery" style="--i:1"><b>Jewellery<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/armour" style="--i:2"><b>Armour<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/helmets" style="--i:3"><b>Helmets<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/shields" style="--i:4"><b>Shields<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/progress" style="--i:6"><b>Progress</b><span>The items and skills you added, and everything they need together.</span></a><a class="card" href="#/upgrade/dews" style="--i:5"><b>Dew Upgrade<em class="beta">Soon</em></b><span>+0 to +9 and craft cost of every dew kind.</span></a></div>
+</main>
+
+<main id="v-progress" hidden>
+  <p class="crumb"><a href="#/upgrade">← Upgrade Cost</a></p>
+  <div class="pgtop"><h1>Progress</h1><span class="muted" id="pgCnt"></span><button id="pgClr" hidden>Clear all</button></div>
+  <p class="sub">Everything you added with + Add progress, and what it all needs together.</p>
+  <section class="panel" id="pgTot" style="--i:0"></section>
+  <div id="pgList"></div>
+  <div class="costbox" aria-live="polite">
+    <span>Yang Cost :</span><b id="pY">0</b>
+    <span>Material Cost :</span><b id="pM">0</b>
+    <span class="tt">Total Cost :</span><b class="tt" id="pT">0</b>
+  </div>
 </main>
 
 <main id="v-skills" hidden>
@@ -1389,6 +1411,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
     <span>Yang Cost :</span><b id="sY">0</b>
     <span>Material Cost :</span><b id="sM">0</b>
     <span class="tt">Total Cost :</span><b class="tt" id="sT">0</b>
+    <button class="cbadd" id="pgAddS" title="Save these skills to Upgrade Cost → Progress">+ Add progress</button>
   </div>
 </main>
 
@@ -1437,6 +1460,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
     <span>Yang Cost :</span><b id="cY">0</b>
     <span>Material Cost :</span><b id="cM">0</b>
     <span class="tt">Total Cost :</span><b class="tt" id="cT">0</b>
+    <button class="cbadd" id="pgAddW" title="Save this item to Upgrade Cost → Progress">+ Add progress</button>
   </div>
 </main>
 
@@ -2667,6 +2691,57 @@ $("chSk").onclick=e=>{const b=e.target.closest("[data-s]");if(!b)return;
 document.addEventListener("click",e=>{if(chIsOpen()&&!e.target.closest("#chDd"))chOpen(false)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&chIsOpen()){chOpen(false);$("chB").focus()}});
 
+/* ---------- Progress: snapshots of Upgrade Cost / Skill Booster calculations, and what they need together ----------
+   each entry: {id, k: kind, n: name, s: levels / craft, ic: picture name, im: uploaded picture, y: Yang, m: [[material, count]], t: time added} */
+let PG=(v=>Array.isArray(v)?v:[])(ld("upgProgress",[]));
+const pgSave=()=>sv("upgProgress",PG);
+const pgAdd=e=>{if(!e.y&&!e.m.length)return false;PG.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:Date.now(),...e});pgSave();return true};
+/* the open Upgrade Cost item: its picked levels and, with Craft ticked, its craft cost */
+function pgFromW(){
+  const w=cw();
+  return pgAdd({k:CATS[CAT][1],n:w.n,s:(LD>LC?`+${LC} → +${LD}`:"")+(crOn?(LD>LC?" · ":"")+"Craft":""),ic:w.n,im:w.im||"",y:yangCost(),m:rangeMats().map(([n,c])=>[n,c])})?1:0;
+}
+/* every picked skill with levels or Craft becomes its own entry */
+function pgFromSk(){
+  let n=0;
+  for(const t of chSkills()){const g=skRg(t),cr=skCr.has(t);if(!g&&!cr)continue;
+    const s=skTot(t);if(pgAdd({k:"Skill",n:skName(t),s:[skRt(g),cr?"Craft":""].filter(Boolean).join(" · "),ic:skGP(t),y:s.y,m:s.r.map(([a,c])=>[a,c])}))n++}
+  return n;
+}
+function pgBtn(b,n){
+  clearTimeout(b._t);b.textContent=n?`Added ${n>1?n+" ":""}to Progress ✓`:"Nothing to add: pick levels or Craft";
+  b._t=setTimeout(()=>{b.textContent="+ Add progress"},2200);
+}
+$("pgAddW").onclick=e=>pgBtn(e.currentTarget,pgFromW());
+$("pgAddS").onclick=e=>pgBtn(e.currentTarget,pgFromSk());
+const pgTotal=()=>{const r=new Map();let y=0;for(const e of PG){y+=e.y;for(const [n,c] of e.m)r.set(n,(r.get(n)||0)+c)}
+  return{y,r:[...r].sort((a,b)=>b[1]*skPr(b[0])-a[1]*skPr(a[0])||b[1]-a[1])}};
+function pgCost(){const {y,r}=pgTotal(),m=r.reduce((a,[n,c])=>a+c*skPr(n),0);
+  for(const [id,v] of [["pY",y],["pM",m],["pT",y+m]]){const el=$(id);el.dataset.v=v;el.textContent=fv(v)}}
+function drawPg(){
+  const {y,r}=pgTotal();
+  $("pgClr").hidden=!PG.length;$("pgCnt").textContent=PG.length?`${PG.length} item${PG.length===1?"":"s"}`:"";
+  $("pgTot").innerHTML=!PG.length?`<p class="muted">Nothing added yet. Press <b>+ Add progress</b> under the cost on an Upgrade Cost page or in the Skill Booster.</p>`
+    :`<div class="skdh"><b>All together</b><span class="sksub">${f(r.length)} material${r.length===1?"":"s"}${y?` · <b>${fk(y)}</b> Yang`:""}</span></div>`+
+     (r.length?`<div class="skmg">${r.map(([n,c],i)=>skmRow(n,c,esc(n),i)).join("")}</div>`:"");
+  $("pgList").innerHTML=PG.map((e,i)=>`<div class="pge" style="--i:${Math.min(i,12)}"><span class="pgi"><i>${esc((e.n.trim()[0]||"?").toUpperCase())}</i>${e.im?`<img class="ic" src="${e.im}" alt="">`:img(e.ic)}</span>`+
+    `<div class="pgh"><b>${esc(e.n)}</b><small>${esc(e.k)}${e.s?" · "+esc(e.s):""} · ${new Date(e.t).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</small></div>`+
+    `<button class="xb" data-pgx="${e.id}" aria-label="Remove ${esc(e.n)}" title="Remove from Progress">✕</button>`+
+    `<div class="dchips">${e.m.map(([n,c])=>mchip(n,c)).join("")}${e.y?`<span class="chip y"><b>${fk(e.y)}</b><span>Yang</span></span>`:""}</div></div>`).join("");
+  pgCost();
+}
+$("pgList").onclick=e=>{const b=e.target.closest("[data-pgx]");if(!b)return;PG=PG.filter(x=>x.id!==b.dataset.pgx);pgSave();drawPg()};
+$("pgClr").onclick=e=>{const b=e.currentTarget;
+  if(!b.classList.contains("armed")){b.classList.add("armed");b.textContent="Click again to clear all";setTimeout(()=>{b.classList.remove("armed");b.textContent="Clear all"},4000);return}
+  b.classList.remove("armed");b.textContent="Clear all";PG=[];pgSave();drawPg()};
+/* a typed price: its rows and the totals follow (the same price list as everywhere) */
+$("pgTot").addEventListener("input",e=>{
+  const t=e.target,n=t.dataset.pn;if(n===undefined)return;
+  const v=parse(t.value);if(v>0)P[n]=v;else delete P[n];sv("lootPrices",P);
+  $("pgTot").querySelectorAll(".skm").forEach(row=>{const rn=row.dataset.n;if(rn===n||SKCRM[rn]){row.querySelector(".ut").textContent=fv(skPr(rn)*(+row.dataset.q||0))}});
+  pgCost();
+});
+
 /* ---------- tools: detailed loot tracker ----------
    Same log file as the Loot Tracker, kept at second precision. A dungeon run ends with the drop
    holding a Greater/Elite Splinter; its loot is everything dropped since the previous run ended.
@@ -3259,8 +3334,8 @@ document.addEventListener("pointermove",e=>{
 });
 
 /* ---------- sidebar & routing ---------- */
-const V={"":"home",tools:"tools","tools/loot":"loot","tools/live":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons","upgrade/dews":"weapons",skills:"skills","tools/dloot":"dloot","tools/screen":"screen","upgrade/skills":"skills"};
-const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/live","Live Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"],["tools/screen","Screen Tracker"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"],["upgrade/dews","Dew Upgrade"]]]];   // the Control Panel adds its own group
+const V={"":"home",tools:"tools","tools/loot":"loot","tools/live":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons","upgrade/dews":"weapons","upgrade/progress":"progress",skills:"skills","tools/dloot":"dloot","tools/screen":"screen","upgrade/skills":"skills"};
+const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/live","Live Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"],["tools/screen","Screen Tracker"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"],["upgrade/dews","Dew Upgrade"],["upgrade/progress","Progress"]]]];   // the Control Panel adds its own group
 /* addresses: on the website every page has a real path (/upgrade/weapons; vercel.json serves index.html
    for all of them), opened as a file the #/ addresses are used.
    The Control Panel is hidden: its pages live under /31/admin and open nowhere else; once opened,
@@ -3339,7 +3414,7 @@ const NI={home:nIco('<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 
   upgrade:nIco('<path d="M12 19V5M5 12l7-7 7 7"/>'),
   skills:nIco('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M12 7v6M9 10h6"/>'),
   admin:nIco('<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>')};
-const BETA=new Set(["tools/screen","tools/live"]),beta=(k,l)=>l+(BETA.has(k)?`<em class="beta">Beta</em>`:k.startsWith("upgrade/")?`<em class="beta">Soon</em>`:"");   // pages still being tried out / not finished
+const BETA=new Set(["tools/screen","tools/live"]),beta=(k,l)=>l+(BETA.has(k)?`<em class="beta">Beta</em>`:k.startsWith("upgrade/")&&k!=="upgrade/progress"?`<em class="beta">Soon</em>`:"");   // pages still being tried out / not finished
 function renderNav(){
   const k=cur().k;
   const a=(key,label,cls)=>`<a class="${cls}" href="${href(key)}"${key===k?' aria-current="page"':""}>${label}</a>`;
@@ -3377,6 +3452,7 @@ function route(quiet){
     drawW();
   }
   if(c.v==="skills"){skP=null;drawSk(!quiet)}
+  if(c.v==="progress")drawPg();
   if(c.v==="login")drawLogin();
   if(CPL)cpRoute(c,quiet);   // the Control Panel's pages
   slotTo(c.v==="loot"&&c.k==="tools/live"?"l":"n");
