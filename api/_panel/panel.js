@@ -18,7 +18,7 @@ function cpRoute(c,quiet){
 
 /* ---------- Divine Simulator: switch bonus rows off (DVOFF, saved as meta 'dvOff') ---------- */
 const CDV_POOLS=["Normal","6/7","Exalted","Exalted 6/7","Divine","Divine 6/7","Exalted + Divine","Exalted + Divine 6/7"];   // the pools the simulator uses
-let cdvP="Exalted";
+let cdvP="Exalted",cdvKs=[];   // the pool picked and the rows it shows
 function drawCpDv(){
   if(!DVB)return;
   const it=$("cdvIt"),sel=it.value,q=$("cdvQ").value.trim().toLowerCase();
@@ -27,6 +27,10 @@ function drawCpDv(){
     return `<button data-p="${esc(p)}" aria-pressed="${p===cdvP}">${esc(p)}${off?` <small>(${off} off)</small>`:""}</button>`}).join("");
   const rows=(DVB.pools[cdvP]||[]).filter(r=>(sel===""||r[1].includes(+sel))&&(!q||r[0].toLowerCase().includes(q)));
   $("cdvCnt").textContent=`${DVOFF.size} switched off`;
+  /* the picked pool: switch every attribute shown (the item / search filters count) on or off at once */
+  const ks=rows.map(r=>cdvP+"|"+r[0]),on=ks.filter(k=>!DVOFF.has(k)).length,flt=sel!==""||q;
+  $("cdvBar").innerHTML=`<span class="muted"><b>${esc(cdvP)}</b> · ${on} of ${ks.length} on${flt?" (filtered)":""}</span><button data-all="1"${on===ks.length?" disabled":""}>Turn ${flt?"shown":"all"} on</button><button data-all="0"${!on?" disabled":""}>Turn ${flt?"shown":"all"} off</button>`;
+  cdvKs=ks;
   $("cdvBody").innerHTML=rows.map((r,i)=>{const k=cdvP+"|"+r[0],on=!DVOFF.has(k);
     return `<tr class="${on?"":"off"}" style="--i:${Math.min(i,30)}"><td><b>${esc(r[0])}</b></td><td class="it">${r[1].map(x=>esc(DVB.items[x])).join(", ")}</td><td class="tr">${r[2].map(esc).join(" / ")}</td>`+
       `<td><label><input type="checkbox" data-k="${esc(k)}"${on?" checked":""}> ${on?"On":"Off"}</label></td></tr>`}).join("")||`<tr><td colspan="4" class="muted">No attribute in this pool for these filters.</td></tr>`;
@@ -35,7 +39,7 @@ const cdvSave=()=>{sv("dvOff",[...DVOFF]);dbQueue("dvOff");drawCpDv()};
 $("cdvPool").onclick=e=>{const b=e.target.closest("[data-p]");if(b){cdvP=b.dataset.p;drawCpDv()}};
 $("cdvIt").onchange=drawCpDv;$("cdvQ").oninput=drawCpDv;
 $("cdvBody").addEventListener("change",e=>{const k=e.target.dataset.k;if(k===undefined)return;e.target.checked?DVOFF.delete(k):DVOFF.add(k);cdvSave()});
-$("cdvAll").onclick=()=>{for(const k of [...DVOFF])if(k.startsWith(cdvP+"|"))DVOFF.delete(k);cdvSave()};
+$("cdvBar").onclick=e=>{const b=e.target.closest("[data-all]");if(!b)return;for(const k of cdvKs)b.dataset.all==="1"?DVOFF.delete(k):DVOFF.add(k);cdvSave()};
 
 /* ---------- Loot Tracker: the logs visitors loaded (api/logs.js) ---------- */
 async function drawLt(){

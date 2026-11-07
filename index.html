@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T08:19:32Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T08:28:25Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1027,6 +1027,8 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .cpdvt td.tr{font-size:12px;color:var(--mute);max-width:420px}
 .cpdvt td.it{font-size:12px;max-width:260px}
 .cpdvt tr.off td{opacity:.45}.cpdvt tr.off td:last-child{opacity:1}
+.cpdvp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;margin:0 0 10px;border:1px solid var(--line);border-radius:10px;background:var(--soft)}
+.cpdvp b{color:var(--gold)}.cpdvp .muted{margin-right:auto}
 .cpdvt label{display:flex;align-items:center;gap:6px;font-weight:700;font-size:12px;white-space:nowrap}
 .ltt tr{animation:rowIn .3s calc(var(--i,0) * .02s) var(--ease) both}
 .ltt tbody tr:hover{background:var(--hl)}
@@ -2900,8 +2902,8 @@ function dvNum(s){const raw=s.v[s.t-1];if(!s.ex)return raw;
 function dvLine(s){const v=dvNum(s),b=/^(.+) Break$/.exec(s.n);
   return b?`Ignores ${v} of the enemy's ${b[1]} resistance`:s.n.replace(/ \((AVG|SD)\)$/,"")+" +"+v}
 /* the tags after it: [T4] or [D-T8], then [Exalted] [Divined] */
-/* element attributes: their colour class (Burn = fire, Lightning / Thunder = lightning, Poison, Curse) */
-const dvEl=n=>/^Burn /.test(n)?"el-fire":/^(Lightning|Thunder) /.test(n)?"el-bolt":/^Poison/.test(n)?"el-poison":/^Curse /.test(n)?"el-curse":"";
+/* element damage attributes: their colour class (Burn = fire, Lightning, Poison, Curse) */
+const dvEl=n=>/^Burn Damage/.test(n)?"el-fire":/^Lightning Damage/.test(n)?"el-bolt":/^Poison Damage/.test(n)?"el-poison":/^Curse Damage/.test(n)?"el-curse":"";   // element damage only; the Breaks keep the normal colour
 const dvTags=s=>(s.dv?"[D-T"+s.t+"]":"[T"+s.t+"]")+(s.ex?" [Exalted]":"")+(s.dv?"[Divined]":"");
 const dvTc=s=>"t"+Math.max(1,Math.ceil(s.t*5/s.v.length));
 const dvOrb=()=>(DV_ORBS[dvCat]||[])[dvO];
