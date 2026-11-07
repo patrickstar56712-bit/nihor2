@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T08:02:08Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T08:06:28Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1117,7 +1117,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .dvnm{font-weight:700;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:4px}
 .dvpot{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mute)}.dvpot input{width:56px;padding:3px 6px;text-align:right}.dvpot em{font-style:normal}
 .dvsl.ex{border-color:color-mix(in srgb,var(--gold) 45%,var(--line))}.dvsl.pr{border-style:dashed;border-color:color-mix(in srgb,var(--teal) 55%,var(--line))}.dvsl.pr .e{color:var(--teal)}
-.dvex{font-style:normal;font-size:9.5px;font-weight:800;padding:1px 4px;border-radius:4px;color:var(--gold);border:1px solid currentColor;vertical-align:1px}.dvpr{font-style:normal;font-size:11px}
+.dvex{font-style:normal;font-size:9.5px;font-weight:800;padding:1px 4px;border-radius:4px;color:var(--gold);border:1px solid currentColor;vertical-align:1px}
 .dvpick{display:flex;flex-wrap:wrap;gap:5px}.dvpick button{flex:1 1 auto;padding:5px 7px;font-size:12px}
 .dvband{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:8px 0 4px}
 .dvband:first-child{margin-top:0}
@@ -2846,7 +2846,7 @@ $("pgTot").addEventListener("input",e=>{
    slots 1-5 from the "Normal" pool, 6-7 from "6/7". Annulment prepares a slot, Exalted / Greater Exalted fill a prepared slot
    with an exalted attribute ("Exalted" / "Exalted 6/7"), Chaos re-rolls the types (an exalted one can fall back to normal),
    Divine (1-5) / Greater Divine (6-7) re-roll the value over 10 tiers ("Divine" rows for normal, "Exalted + Divine" for exalted).
-   Exalted values are the pool value x the Exalted Potential. AVG and SD on weapons and armor are protected.
+   Exalted values are the pool value x the Exalted Potential. Every attribute can be annulled and re-rolled.
    Data: divine-bonuses.json from the game's bonus list. Not in the guides, so SAMPLES: every tier is equally likely, and a
    Chaos Orb keeps an exalted attribute exalted half of the time. */
 let DVB=null;
@@ -2859,7 +2859,7 @@ const DV_NOEX=new Set(["Belt","Amulet"]);   // Divine only, no exalted attribute
 const DV_BANDS=[["Normal band","slots 1-5",0,5,""],["Rare band","slots 6-7",5,7,"r"],["Godly band","slot 8",7,8,"g"]];
 const DV_CATS=[["fund","Fundamentals","the orbs you know"]];   // more orb groups come here later
 const DV_ORBS={fund:[
-  {n:"Annulment Orb",sc:"slots 1-7",a:0,b:7,v:"Annul",d:"Removes a random attribute from slots 1-7 and prepares its slot for an Exalted Orb. AVG and SD on weapons and armor can not be removed.",tg:"A random attribute of slots 1-7"},
+  {n:"Annulment Orb",sc:"slots 1-7",a:0,b:7,v:"Annul",d:"Removes a random attribute from slots 1-7 and prepares its slot for an Exalted Orb.",tg:"A random attribute of slots 1-7"},
   {n:"Exalted Orb",sc:"slots 1-5",a:0,b:5,v:"Exalt",d:"Fills a prepared slot of 1-5 with an exalted attribute. A slot that never held an attribute is not enough: annul one first.",tg:"First prepared slot of 1-5"},
   {n:"Greater Exalted Orb",sc:"slots 6-7",a:5,b:7,v:"Exalt",d:"Fills a prepared slot of 6-7 with an exalted attribute.",tg:"First prepared slot of 6-7"},
   {n:"Chaos Orb",sc:"slots 1-5",a:0,b:5,v:"Chaos",d:"Re-rolls the attribute types of slots 1-5. An exalted attribute can become a normal one, and the Divine status is lost.",tg:"Every attribute of slots 1-5"},
@@ -2871,7 +2871,6 @@ let dvIt="",dvS=Array(8).fill(null),dvCat="fund",dvO=0,dvQn=1,dvLogL=[],dvSpent=
 const dvTier=n=>1+Math.floor(Math.random()*n);
 const dvAt=i=>dvS[i]&&dvS[i].n?dvS[i]:null;
 const dvRows=p=>{if(!DVB)return[];const i=DVB.items.indexOf(dvIt);return(DVB.pools[p]||[]).filter(r=>r[1].includes(i))};
-const dvProt=s=>!!s&&(dvIt==="Weapon"||dvIt==="Armor")&&/\((AVG|SD)\)$/.test(s.n);
 const dvOwn=skip=>new Set(dvS.filter((s,i)=>s&&s.n&&i!==skip).map(s=>s.n));
 /* a random attribute for slot i from the normal or the exalted pool, not already on the item */
 function dvRoll(i,ex){const p=(ex?"Exalted":i<5?"Normal":"6/7")+(ex&&i>=5?" 6/7":""),own=dvOwn(i),rows=dvRows(p).filter(r=>!own.has(r[0]));
@@ -2889,16 +2888,16 @@ function dvFresh(){dvS=Array(8).fill(null);for(let i=0;i<7;i++)dvS[i]=dvRoll(i,f
 function dvWhyNot(o){
   if(!o)return"Pick an orb";if(!dvIt)return"No item on the bench";if(!DVB)return"Loading the bonuses…";
   const idx=[...Array(o.b-o.a)].map((_,k)=>o.a+k);
-  if(o.v==="Annul")return idx.some(i=>dvAt(i)&&!dvProt(dvAt(i)))?"":"No attribute that can be removed";
+  if(o.v==="Annul")return idx.some(i=>dvAt(i))?"":"No attribute that can be removed";
   if(o.v==="Exalt"){if(DV_NOEX.has(dvIt))return`A ${dvIt.toLowerCase()} takes no exalted attributes`;
     if(o.a===0&&dvExCount()>=dvExMax())return`A ${dvIt.toLowerCase()} takes at most ${dvExMax()} exalted attributes`;
     if(!idx.some(i=>dvS[i]&&dvS[i].p))return"No prepared slot in "+o.sc+": use an Annulment Orb first";
     return dvRows(o.a<5?"Exalted":"Exalted 6/7").some(r=>!dvOwn(-1).has(r[0]))?"":"No exalted attribute left for this item"}
-  return idx.some(i=>dvAt(i)&&!dvProt(dvAt(i)))?"":"No attribute to re-roll in "+o.sc;
+  return idx.some(i=>dvAt(i))?"":"No attribute to re-roll in "+o.sc;
 }
 /* one use of an orb: changes the slots and returns the log line and the slots it touched */
 function dvUse(o){
-  const idx=[...Array(o.b-o.a)].map((_,k)=>o.a+k),live=idx.filter(i=>dvAt(i)&&!dvProt(dvAt(i)));
+  const idx=[...Array(o.b-o.a)].map((_,k)=>o.a+k),live=idx.filter(i=>dvAt(i));
   if(o.v==="Annul"){const i=live[Math.floor(Math.random()*live.length)],old=dvS[i];dvS[i]={p:1};dvAnn++;return[`<b>${esc(o.n)}</b> removed ${esc(old.n)} from slot ${i+1}`,[i]]}
   if(o.v==="Exalt"){const i=idx.find(k=>dvS[k]&&dvS[k].p),s=dvRoll(i,true);dvS[i]=s;return[`<b>${esc(o.n)}</b>: slot ${i+1} ${esc(s.n)} ${dvVal(s)} (exalted)`,[i]]}
   if(o.v==="Chaos"){let down=0;for(const i of live){const ex=dvS[i].ex&&Math.random()<DV_CHAOS_EX;if(dvS[i].ex&&!ex)down++;dvS[i]=null;dvS[i]=dvRoll(i,ex)||dvRoll(i,false)}
@@ -2912,7 +2911,7 @@ function drawDv(fx=[]){
   $("dvNm").textContent=dvIt||"No item on the bench";
   $("dvPick").innerHTML=DV_ITEMS.map(n=>`<button data-it="${n}" aria-pressed="${n===dvIt}">${n}</button>`).join("");
   $("dvSlots").innerHTML=DV_BANDS.map(([l,r,a,b,c])=>`<div class="dvband ${c}">${l} · ${r}</div>`+dvS.slice(a,b).map((s,j)=>{const i=a+j,at=s&&s.n?s:null;
-    return `<div class="dvsl${at&&at.ex?" ex":""}${s&&s.p?" pr":""}${fx.includes(i)&&$("dvAnim").checked?" fx":""}"><span>${i+1}</span>${at?`<span>${esc(at.n)}${at.ex?` <em class="dvex" title="Exalted attribute: pool value × potential">EX</em>`:""}${dvProt(at)?` <em class="dvpr" title="Protected: AVG and SD on weapons and armor">🔒</em>`:""}</span><span class="v">${dvVal(at)}</span><span class="t ${dvTc(at)}" title="Tier ${at.t} of ${at.v.length}">T${at.t}${at.dv?"/"+at.v.length:""}</span>`
+    return `<div class="dvsl${at&&at.ex?" ex":""}${s&&s.p?" pr":""}${fx.includes(i)&&$("dvAnim").checked?" fx":""}"><span>${i+1}</span>${at?`<span>${esc(at.n)}${at.ex?` <em class="dvex" title="Exalted attribute: pool value × potential">EX</em>`:""}</span><span class="v">${dvVal(at)}</span><span class="t ${dvTc(at)}" title="Tier ${at.t} of ${at.v.length}">T${at.t}${at.dv?"/"+at.v.length:""}</span>`
       :s&&s.p?`<span class="e">– prepared –</span>`:`<span class="e">– ${i===7?"godly slot, not part of these orbs":dvIt&&i>=5&&!dvRows("6/7").length?"no slot 6-7 on this item":"empty"} –</span>`}</div>`}).join("")).join("");
   const top=dvS.filter(x=>x&&x.n).reduce((m,s)=>!m||s.t/s.v.length>m.t/m.v.length?s:m,null);
   $("dvSt").innerHTML=`<dt>Prepared slots</dt><dd>${dvS.filter(x=>x&&x.p).length}</dd><dt>Exalted (1-5 / 6-7)</dt><dd>${dvExCount()} / ${dvS.slice(5,7).filter(x=>x&&x.ex).length}</dd><dt>Annulled this session</dt><dd>${dvAnn}</dd><dt>Highest tier</dt><dd>${top?"T"+top.t+"/"+top.v.length:"–"}</dd>`;
