@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T10:37:59Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T10:42:19Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1142,6 +1142,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .dvsl .e{color:var(--mute);font-style:italic}
 .dvsl{position:relative;overflow:hidden}
 .dvsl .gl{flex:1;min-width:0;font-weight:600;color:#f0a53a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dvsl:not(.ex) .gl{color:#f2f2f2}   /* normal attributes white, exalted ones amber (element damage keeps its colour) */
 .dvsl.d6 .gl{color:#ededed}
 .dvsl.d6 .gl::before,.dvsl.d6 .gl::after{color:#bdbdbd;font-weight:400;opacity:.85}
 .dvsl.d6 .gl::before{content:"•— "}.dvsl.d6 .gl::after{content:" —•"}
