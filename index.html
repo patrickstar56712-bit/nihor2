@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T08:41:04Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T08:48:52Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1140,9 +1140,19 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .dvsl{display:flex;align-items:center;gap:10px;padding:5px 10px;margin-bottom:4px;border-radius:6px;border:1px solid var(--line);background:color-mix(in srgb,var(--ink) 3%,transparent);font-size:13px;min-height:30px}
 .dvsl>span:first-child{color:var(--mute);width:14px;font-weight:700}
 .dvsl .e{color:var(--mute);font-style:italic}
-.dvsl .gl{flex:1;min-width:0;font-weight:600}.dvsl.ex .gl{color:var(--gold)}
+.dvsl{position:relative;overflow:hidden}
+.dvsl .gl{flex:1;min-width:0;font-weight:600;color:#f0a53a}
+.dvsl.d6 .gl{color:#ededed}
+.dvsl.d6 .gl::before,.dvsl.d6 .gl::after{color:#bdbdbd;font-weight:400;opacity:.85}
+.dvsl.d6 .gl::before{content:"•— "}.dvsl.d6 .gl::after{content:" —•"}
+.dvsl.d10 .gl{color:#fff;font-weight:700}
+.dvsl.d10 .gl>span{padding:0 6px 1px;border:1px solid rgba(255,255,255,.7);border-top:0;border-radius:0 0 3px 3px}
+.dvsl.d6::after{content:"";position:absolute;top:0;bottom:0;left:0;width:38%;pointer-events:none;background:linear-gradient(105deg,transparent 0,rgba(255,255,255,0) 35%,rgba(255,255,255,.28) 50%,rgba(255,255,255,0) 65%,transparent 100%);transform:translateX(-120%);animation:dvSweep 4.2s ease-in-out infinite}
+.dvsl.d10::after{background:linear-gradient(105deg,transparent 0,rgba(255,236,170,0) 30%,rgba(255,246,210,.55) 50%,rgba(255,236,170,0) 70%,transparent 100%);animation-duration:2.6s}
+@keyframes dvSweep{0%{transform:translateX(-120%)}55%,100%{transform:translateX(300%)}}
+.dv.noanim .dvsl::after{display:none}
 /* element attributes in their element's colour */
-.dvsl .gl.el-fire{color:#ff6a3d}.dvsl .gl.el-bolt{color:#5cc8ff}.dvsl .gl.el-poison{color:#5cd65c}.dvsl .gl.el-curse{color:#b58cff}
+.dvsl .gl.el-fire,.dvsl.d6 .gl.el-fire{color:#ff6a3d}.dvsl .gl.el-bolt,.dvsl.d6 .gl.el-bolt{color:#5cc8ff}.dvsl .gl.el-poison,.dvsl.d6 .gl.el-poison{color:#5cd65c}.dvsl .gl.el-curse,.dvsl.d6 .gl.el-curse{color:#b58cff}
 .dvsl .t{flex:none;font-size:11px;font-weight:800;padding:1px 6px;border-radius:5px;border:1px solid currentColor;white-space:nowrap}
 .dvsl .t1{color:var(--mute)}.dvsl .t2{color:var(--ink)}.dvsl .t3{color:var(--teal)}.dvsl .t4{color:var(--vio)}.dvsl .t5{color:var(--gold)}
 .dvsl.fx{animation:dvFx .6s var(--ease)}
@@ -2936,12 +2946,13 @@ function dvUse(o){
   return[`<b>${esc(o.n)}</b> re-rolled ${live.map(i=>`${i+1}: T${dvS[i].t}`).join(", ")}`,live];
 }
 function drawDv(fx=[]){
+  $("v-divine").querySelector(".dv").classList.toggle("noanim",!$("dvAnim").checked);   // Play animations off: no slot flash, no sweep
   const o=dvOrb();
   $("dvPl").innerHTML=dvIt?`<i>${dvIt[0]}</i>`:"";
   $("dvNm").textContent=dvIt||"No item on the bench";
   $("dvPick").innerHTML=DV_ITEMS.map(n=>`<button data-it="${n}" aria-pressed="${n===dvIt}">${n}</button>`).join("");
   $("dvSlots").innerHTML=DV_BANDS.map(([l,r,a,b,c])=>`<div class="dvband ${c}">${l} · ${r}</div>`+dvS.slice(a,b).map((s,j)=>{const i=a+j,at=s&&s.n?s:null;
-    return `<div class="dvsl${at&&at.ex?" ex":""}${s&&s.p?" pr":""}${fx.includes(i)&&$("dvAnim").checked?" fx":""}"><span>${i+1}</span>${at?`<span class="gl ${dvEl(at.n)}" title="${esc(at.n)}">${esc(dvLine(at))}</span><span class="t ${dvTc(at)}" title="Tier ${at.t} of ${at.v.length}${at.ex?" · pool value × potential":""}">${dvTags(at)}</span>`
+    return `<div class="dvsl${at&&at.ex?" ex":""}${at&&at.dv&&at.t>=6?" d6"+(at.t>=at.v.length?" d10":""):""}${s&&s.p?" pr":""}${fx.includes(i)&&$("dvAnim").checked?" fx":""}"><span>${i+1}</span>${at?`<span class="gl ${dvEl(at.n)}" title="${esc(at.n)}"><span>${esc(dvLine(at))}</span></span><span class="t ${dvTc(at)}" title="Tier ${at.t} of ${at.v.length}${at.ex?" · pool value × potential":""}">${dvTags(at)}</span>`
       :s&&s.p?`<span class="e">– prepared –</span>`:`<span class="e">– ${i===7?"godly slot, not part of these orbs":dvIt&&i>=5&&!dvRows("6/7").length?"no slot 6-7 on this item":"empty"} –</span>`}</div>`}).join("")).join("");
   const top=dvS.filter(x=>x&&x.n).reduce((m,s)=>!m||s.t/s.v.length>m.t/m.v.length?s:m,null);
   $("dvSt").innerHTML=`<dt>Prepared slots</dt><dd>${dvS.filter(x=>x&&x.p).length}</dd><dt>Exalted (1-5 / 6-7)</dt><dd>${dvExCount()} / ${dvS.slice(5,7).filter(x=>x&&x.ex).length}</dd><dt>Annulled this session</dt><dd>${dvAnn}</dd><dt>Highest tier</dt><dd>${top?"T"+top.t+"/"+top.v.length:"–"}</dd>`;
@@ -2968,6 +2979,7 @@ $("dvClr").onclick=()=>{dvIt="";dvS=Array(8).fill(null);dvAnn=0;dvLogL=[];dvSpen
 $("dvOrbs").onclick=e=>{const b=e.target.closest("[data-o]");if(!b)return;dvO=+b.dataset.o;
   $("dvOrbs").querySelectorAll("[data-o]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));dvSide()};
 $("v-divine").querySelector(".dvq").onclick=e=>{const b=e.target.closest("[data-q]");if(!b)return;dvQn=Math.max(1,Math.min(100,dvQn+ +b.dataset.q));drawDv()};
+$("dvAnim").onchange=()=>drawDv();
 $("dvPot").oninput=()=>{const v=parse($("dvPot").value);dvPot=v>0?Math.min(v,1000):82;drawDv()};
 /* the big button: the picked orb, as many times as x says (stops when it can not go on) */
 $("dvGo").onclick=()=>{
