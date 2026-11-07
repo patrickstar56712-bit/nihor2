@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T07:30:40Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T07:34:48Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1101,6 +1101,67 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
   .skbx{flex:1 1 100%}
   .skm .mnn{white-space:normal;overflow:visible;line-height:1.2}
 }
+
+/* divine simulator: a crafting bench in the game's style */
+.dv{display:grid;grid-template-columns:210px 300px minmax(0,1fr);gap:8px;margin-top:12px}
+.dvp{background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.dvw,.dvbar{grid-column:1/-1}
+.dvh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:6px;margin-bottom:8px;border-bottom:1px solid color-mix(in srgb,var(--gold) 45%,var(--line))}
+.dvh b{color:var(--gold);font-size:14px}.dvh small{color:var(--mute);font-size:12px}
+.dvh2{margin-top:14px}
+.dvsh{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:10px 0 6px}
+.dvwb{display:grid;grid-template-columns:190px minmax(0,1fr) 230px;gap:14px}
+.dvbench{display:flex;flex-direction:column;gap:8px}
+.dvpl{height:120px;border-radius:8px;border:1px solid var(--line);background:linear-gradient(180deg,color-mix(in srgb,var(--ink) 6%,transparent),transparent);display:grid;place-items:center}
+.dvpl .ic{height:64px;max-width:80px;margin:0}
+.dvpl i{font-style:normal;font-size:40px;font-weight:800;color:var(--gold)}
+.dvnm{font-weight:700;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:4px}
+.dvpick{display:flex;gap:5px}.dvpick button{flex:1;padding:5px 4px;font-size:12px}
+.dvband{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:8px 0 4px}
+.dvband:first-child{margin-top:0}
+.dvband.r{color:var(--teal)}.dvband.g{color:var(--vio)}
+.dvsl{display:flex;align-items:center;gap:10px;padding:5px 10px;margin-bottom:4px;border-radius:6px;border:1px solid var(--line);background:color-mix(in srgb,var(--ink) 3%,transparent);font-size:13px;min-height:30px}
+.dvsl>span:first-child{color:var(--mute);width:14px;font-weight:700}
+.dvsl .e{color:var(--mute);font-style:italic}
+.dvsl .v{margin-left:auto;font-weight:800;color:var(--gold)}
+.dvsl .t{font-size:11px;font-weight:800;padding:1px 6px;border-radius:5px;border:1px solid currentColor}
+.dvsl .t1{color:var(--mute)}.dvsl .t2{color:var(--ink)}.dvsl .t3{color:var(--teal)}.dvsl .t4{color:var(--vio)}.dvsl .t5{color:var(--gold)}
+.dvsl.fx{animation:dvFx .6s var(--ease)}
+@keyframes dvFx{0%{background:color-mix(in srgb,var(--gold) 35%,transparent);transform:scale(1.02)}100%{background:color-mix(in srgb,var(--ink) 3%,transparent);transform:none}}
+.dvst dl,.dvspend dl{display:grid;grid-template-columns:1fr auto;gap:4px 10px;margin:0;font-size:13px}
+.dvst dt,.dvspend dt{color:var(--mute)}.dvst dd,.dvspend dd{margin:0;text-align:right;font-weight:700}
+.dvlog{list-style:none;margin:0;padding:0;max-height:130px;overflow:auto;font-size:12px;display:flex;flex-direction:column;gap:3px}
+.dvlog li{color:var(--ink)}.dvlog li b{color:var(--gold)}.dvlog .muted{font-style:italic}
+.dvsp{display:flex;justify-content:space-between;margin-top:8px;padding-top:6px;border-top:1px solid var(--line);font-size:13px}.dvsp b{color:var(--gold)}
+.dvc{display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;margin-bottom:5px;border-radius:7px;text-align:left;box-shadow:inset 3px 0 color-mix(in srgb,var(--mute) 50%,transparent)}
+.dvc span{display:flex;flex-direction:column;min-width:0;flex:1}.dvc b{font-size:13.5px}.dvc small{font-size:11px;color:var(--mute);font-weight:500}
+.dvc em{font-style:normal;color:var(--gold);font-weight:800;font-size:13px}
+.dvc[aria-pressed=true]{border-color:var(--gold);color:var(--gold);box-shadow:inset 3px 0 var(--gold);background:color-mix(in srgb,var(--gold) 10%,var(--panel))}
+.dvo{display:flex;align-items:center;gap:10px;width:100%;padding:6px 10px;margin-bottom:5px;border-radius:7px;text-align:left}
+.dvo .ic{height:30px;max-width:30px;margin:0}
+.dvo span{display:flex;flex-direction:column;flex:1;min-width:0}.dvo b{font-size:13.5px}.dvo small{font-size:11px;color:var(--mute);font-weight:500}
+.dvo em{font-style:normal;font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;color:var(--gold);border:1px solid color-mix(in srgb,var(--gold) 50%,var(--line))}
+.dvo em.no{color:var(--red);border-color:color-mix(in srgb,var(--red) 50%,var(--line))}
+.dvo[aria-pressed=true]{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 10%,var(--panel))}
+.dvrh{display:flex;align-items:center;gap:12px}
+.dvrh .pgi{width:52px;height:52px}.dvrh .pgi .ic{height:42px;max-width:42px}
+.dvrh b{font-size:16px;color:var(--gold)}
+.dvchip{display:inline-block;margin-top:4px;font-size:11px;padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--mute)}
+.dvrec p{margin:0;font-size:13.5px;line-height:1.45}
+.dvneed{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;border:1px solid var(--line);font-size:13px}
+.dvneed .ic{height:24px;max-width:24px;margin:0}.dvneed b{margin-left:auto;color:var(--jade)}
+.dvtg{color:var(--gold);font-size:13px;margin:0 0 6px}
+.dvbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr);gap:16px;align-items:center}
+.dvspend .skpi{width:120px;margin-left:auto}
+.dvgo{display:flex;flex-direction:column;align-items:center;gap:6px}
+#dvGo{width:100%;padding:14px;font-size:20px;font-weight:800;letter-spacing:.12em;color:var(--gold);border-color:color-mix(in srgb,var(--gold) 55%,var(--line));background:linear-gradient(180deg,color-mix(in srgb,var(--gold) 14%,var(--panel)),var(--panel))}
+#dvGo:disabled{color:var(--mute);border-color:var(--line);background:var(--panel);cursor:not-allowed}
+#dvWhy{color:var(--red);min-height:1em}
+.dvmisc{display:flex;flex-direction:column;gap:8px;align-items:flex-start}.dvmisc .dvsh{margin:0}
+.dvmisc label{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink)}
+.dvq{display:flex;align-items:center;gap:6px}.dvq b{min-width:44px;text-align:center;padding:4px 8px;border:1px solid var(--line);border-radius:6px}
+@media (max-width:900px){.dv{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.dvrec{grid-column:1/-1}.dvwb{grid-template-columns:minmax(0,1fr)}.dvbench{flex-direction:row;flex-wrap:wrap;align-items:center}.dvpl{width:96px;height:96px}.dvnm{flex:1}.dvpick{flex-basis:100%}}
+@media (max-width:560px){.dv{grid-template-columns:minmax(0,1fr)}.dvbar{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body>
@@ -1156,7 +1217,41 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 <main id="v-divine" hidden>
   <p class="crumb"><a href="#/">← Main Page</a></p>
   <h1>Divine Simulator<em class="beta">Soon</em></h1>
-  <section class="panel" style="--i:0"><p class="muted">Coming soon: new simulations will appear here.</p></section>
+  <p class="sub">Try orbs on an item without spending a thing. The attributes and their chances are samples for now.</p>
+  <div class="dv">
+    <section class="dvp dvw">
+      <div class="dvh"><b>Workpiece</b><small>Put a weapon, a piece of armour or a jewel on the bench</small></div>
+      <div class="dvwb">
+        <div class="dvbench">
+          <div class="dvpl" id="dvPl"></div>
+          <div class="dvnm" id="dvNm">No item on the bench</div>
+          <div class="dvpick" id="dvPick"><button data-it="Weapon">Weapon</button><button data-it="Armour">Armour</button><button data-it="Jewel">Jewel</button></div>
+        </div>
+        <div class="dvslots" id="dvSlots"></div>
+        <div class="dvst">
+          <dl id="dvSt"></dl>
+          <div class="dvsh">This session</div>
+          <ol class="dvlog" id="dvLog"></ol>
+          <div class="dvsp"><span>Spent this session</span><b id="dvSp">0 Yang</b></div>
+        </div>
+      </div>
+    </section>
+    <section class="dvp dvcat">
+      <div class="dvh"><b>Recipes</b></div><div id="dvCats"></div>
+      <div class="dvh dvh2"><b>Tools</b></div><div id="dvTools"></div>
+    </section>
+    <section class="dvp dvorbs"><div class="dvh"><b id="dvCatT"></b><small id="dvCatN"></small></div><div id="dvOrbs"></div></section>
+    <section class="dvp dvrec"><div class="dvh"><b>Recipe</b></div><div id="dvRec"></div></section>
+    <section class="dvp dvbar">
+      <div class="dvspend"><div class="dvsh">Spending</div><dl id="dvSpend"></dl></div>
+      <div class="dvgo"><button id="dvGo">ANNUL</button><small id="dvWhy"></small></div>
+      <div class="dvmisc"><div class="dvsh">Misc.</div>
+        <label><input type="checkbox" id="dvAnim" checked> Play animations</label>
+        <div class="dvq"><button data-q="-1" aria-label="Fewer">−</button><b id="dvQ">x1</b><button data-q="1" aria-label="More">+</button></div>
+        <button id="dvClr">Clear bench</button>
+      </div>
+    </section>
+  </div>
 </main>
 
 <main id="v-tools" hidden>
@@ -2751,6 +2846,88 @@ $("pgTot").addEventListener("input",e=>{
   pgCost();
 });
 
+/* ---------- divine simulator: orbs on an item's 8 attribute slots (normal 1-5, rare 6-7, godly 8) ----------
+   SAMPLE data until the real attribute lists and chances are known: each attribute has a base value, a tier (1-5) multiplies it */
+const DV_ATTR={
+  Weapon:[["Attack Value",15,""],["Magic Attack Value",15,""],["Strong against Monsters",2,"%"],["Strong against Half Humans",2,"%"],["Critical Hit",2,"%"],["Piercing Hit",2,"%"],["Average Damage",3,"%"],["Skill Damage",3,"%"],["Attack Speed",2,"%"],["Max HP",300,""]],
+  Armour:[["Max HP",300,""],["Max SP",150,""],["Defence",20,""],["Resistance against Magic",2,"%"],["Block physical attacks",2,"%"],["Dodge arrows",2,"%"],["HP Regeneration",3,"%"],["Reflect damage",1,"%"],["Strong against Monsters",2,"%"],["Average Damage resistance",2,"%"]],
+  Jewel:[["Max HP",250,""],["Max SP",120,""],["Critical Hit",2,"%"],["Piercing Hit",2,"%"],["Casting Speed",3,"%"],["Strong against Monsters",2,"%"],["Strong against Half Humans",2,"%"],["Resistance against Magic",2,"%"],["Skill Damage resistance",2,"%"],["Attack Speed",1,"%"]]};
+const DV_W=[40,30,18,9,3],DV_WG=[10,25,30,25,10];   // tier chances (%) of a normal and a greater orb
+const DV_BANDS=[["Normal band","slots 1-5",0,5,""],["Rare band","slots 6-7",5,7,"r"],["Godly band","slot 8",7,8,"g"]];
+const DV_CATS=[["fund","Fundamentals","the orbs you know"],["tgt","Targeted","you pick the slot"],["inf","Influence","bind and re-roll"],["asc","Ascension","push the tier"],
+  ["res","Restoration","undo the ruin"],["spi","Spiritstone","infect the stone"],["skb","Skill Booster","level and rank"],["tal","Talismans","refine and break through"]];
+const DV_TOOLS=[["swb","Switchbot","grind it unattended"]];
+/* the orbs: scope = slots they act on [from, to), verb on the button, what they do */
+const DV_ORBS={fund:[
+  {n:"Annulment Orb",sc:"all slots",a:0,b:8,v:"Annul",d:"Removes one attribute at random and banks a charge an Exalted Orb can spend.",tg:"Acts on the whole band"},
+  {n:"Exalted Orb",sc:"slots 1-5",a:0,b:5,v:"Exalt",d:"Adds a new random attribute to an empty slot of the normal band. Spends a banked charge first when there is one.",tg:"First empty slot of slots 1-5"},
+  {n:"Greater Exalted Orb",sc:"slots 6-7",a:5,b:7,v:"Exalt",d:"Adds a new random attribute to an empty slot of the rare band, with better tier chances.",tg:"First empty slot of slots 6-7",g:1},
+  {n:"Chaos Orb",sc:"slots 1-5",a:0,b:5,v:"Chaos",d:"Re-rolls every attribute of the normal band: new attributes, new tiers.",tg:"Every filled slot of slots 1-5"},
+  {n:"Greater Chaos Orb",sc:"slots 6-7",a:5,b:7,v:"Chaos",d:"Re-rolls every attribute of the rare band, with better tier chances.",tg:"Every filled slot of slots 6-7",g:1},
+  {n:"Divine Orb",sc:"all slots",a:0,b:8,v:"Divine",d:"Keeps the attributes and re-rolls their tiers.",tg:"Every filled slot"},
+  {n:"Greater Divine Orb",sc:"all slots",a:0,b:8,v:"Divine",d:"Keeps the attributes and re-rolls their tiers, with better tier chances.",tg:"Every filled slot",g:1}]};
+let dvIt="",dvS=Array(8).fill(null),dvCat="fund",dvO=0,dvQn=1,dvLogL=[],dvSpent=0,dvAnn=0,dvBank=0;
+const dvTier=g=>{let x=Math.random()*100;const w=g?DV_WG:DV_W;for(let i=0;i<5;i++){if((x-=w[i])<0)return i+1}return 5};
+/* a new attribute not already on the item */
+function dvNew(g){const own=new Set(dvS.filter(Boolean).map(s=>s.n)),pool=DV_ATTR[dvIt].filter(a=>!own.has(a[0]));
+  const a=(pool.length?pool:DV_ATTR[dvIt])[Math.floor(Math.random()*(pool.length||DV_ATTR[dvIt].length))];return{n:a[0],b:a[1],u:a[2],t:dvTier(g)}}
+const dvVal=s=>"+"+f(s.b*s.t)+s.u;
+const dvOrb=()=>(DV_ORBS[dvCat]||[])[dvO];
+/* why the picked orb can not be used now ("" = it can) */
+function dvWhyNot(o){
+  if(!o)return"Pick an orb";if(!dvIt)return"No item on the bench";
+  const band=dvS.slice(o.a,o.b);
+  if(o.v==="Exalt")return band.some(s=>!s)?"":"No empty slot in "+o.sc;
+  return band.some(Boolean)?"":"No attribute in "+o.sc;
+}
+/* one use of an orb: changes the slots and returns the log line and the slots it touched */
+function dvUse(o){
+  const idx=[...Array(o.b-o.a)].map((_,i)=>o.a+i),full=idx.filter(i=>dvS[i]),empty=idx.filter(i=>!dvS[i]);
+  if(o.v==="Annul"){const i=full[Math.floor(Math.random()*full.length)],old=dvS[i];dvS[i]=null;dvAnn++;dvBank++;return[`<b>${esc(o.n)}</b> removed ${esc(old.n)} from slot ${i+1}`,[i]]}
+  if(o.v==="Exalt"){const i=empty[0],s=dvNew(o.g);dvS[i]=s;let fr="";if(dvBank>0&&o.a===0){dvBank--;fr=" (banked charge)"}return[`<b>${esc(o.n)}</b>${fr}: slot ${i+1} ${esc(s.n)} ${dvVal(s)} T${s.t}`,[i]]}
+  if(o.v==="Chaos"){for(const i of full)dvS[i]=null;for(const i of full)dvS[i]=dvNew(o.g);return[`<b>${esc(o.n)}</b> re-rolled slot${full.length>1?"s":""} ${full.map(i=>i+1).join(", ")}`,full]}
+  for(const i of full)dvS[i].t=dvTier(o.g);
+  return[`<b>${esc(o.n)}</b> re-rolled the tiers: ${full.map(i=>"T"+dvS[i].t).join(" ")}`,full];
+}
+function drawDv(fx=[]){
+  const o=dvOrb();
+  $("dvPl").innerHTML=dvIt?`<i>${dvIt[0]}</i>`:"";
+  $("dvNm").textContent=dvIt?"Sample "+dvIt.toLowerCase():"No item on the bench";
+  $("dvPick").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.it===dvIt)));
+  $("dvSlots").innerHTML=DV_BANDS.map(([l,r,a,b,c])=>`<div class="dvband ${c}">${l} · ${r}</div>`+dvS.slice(a,b).map((s,j)=>{const i=a+j;
+    return `<div class="dvsl${fx.includes(i)&&$("dvAnim").checked?" fx":""}"><span>${i+1}</span>${s?`<span>${esc(s.n)}</span><span class="v">${dvVal(s)}</span><span class="t t${s.t}">T${s.t}</span>`:`<span class="e">– empty –</span>`}</div>`}).join("")).join("");
+  const top=Math.max(0,...dvS.filter(Boolean).map(s=>s.t));
+  $("dvSt").innerHTML=`<dt>Annulled, restorable</dt><dd>${dvBank} / ${dvAnn}</dd><dt>Influences bound</dt><dd>0 / 8</dd><dt>Slots filled</dt><dd>${dvS.filter(Boolean).length} / 8</dd><dt>Highest tier</dt><dd>${top?"T"+top:"–"}</dd>`;
+  $("dvLog").innerHTML=dvLogL.length?dvLogL.slice(-40).reverse().map(l=>`<li>${l}</li>`).join(""):`<li class="muted">Nothing crafted yet.</li>`;
+  $("dvSp").textContent=fv(dvSpent)+" Yang";
+  $("dvCats").innerHTML=DV_CATS.map(([k,l,s])=>`<button class="dvc" data-c="${k}" aria-pressed="${k===dvCat}"><span><b>${l}</b><small>${s}</small></span><em>${(DV_ORBS[k]||[]).length||""}</em></button>`).join("");
+  $("dvTools").innerHTML=DV_TOOLS.map(([k,l,s])=>`<button class="dvc" data-c="${k}" aria-pressed="${k===dvCat}"><span><b>${l}</b><small>${s}</small></span></button>`).join("");
+  const c=[...DV_CATS,...DV_TOOLS].find(x=>x[0]===dvCat),list=DV_ORBS[dvCat]||[];
+  $("dvCatT").textContent=c[1];$("dvCatN").textContent=list.length||"";
+  $("dvOrbs").innerHTML=list.map((x,i)=>{const p=price(x.n);return `<button class="dvo" data-o="${i}" aria-pressed="${i===dvO}">${img(x.n)}<span><b>${esc(x.n)}</b><small>${x.sc}</small></span><em class="${p?"":"no"}" title="Unit price">${p?fv(p):"no price"}</em></button>`}).join("")
+    ||`<p class="muted">${esc(c[1])} is not added yet. Tell us what its orbs do and it comes next.</p>`;
+  const why=dvWhyNot(o),p=o?price(o.n):0;
+  $("dvRec").innerHTML=!o?`<p class="muted">Pick an orb.</p>`:`<div class="dvrh"><span class="pgi">${img(o.n)}</span><div><b>${esc(o.n)}</b><br><span class="dvchip">${o.sc}</span></div></div>`+
+    `<div class="dvsh">What it does</div><p>${esc(o.d)}</p><div class="dvsh">You need</div><div class="dvneed">${img(o.n)}<span>${esc(o.n)}</span><b>${dvQn}</b></div>`+
+    `<div class="dvsh">Target</div><p class="dvtg">${esc(o.tg)}</p>`;
+  $("dvSpend").innerHTML=o?`<dt>${esc(o.n)}</dt><dd>${dvQn} ×</dd><dt>Unit price</dt><dd><label class="skpi"><input data-pn="${esc(o.n)}" value="${p?fp(p):""}" placeholder="Unit price" inputmode="decimal" aria-label="${esc(o.n)} unit price"><em>Yang</em></label></dd><dt>Cost</dt><dd>${p?fv(p*dvQn):"free"}</dd>`:"";
+  $("dvGo").textContent=o?o.v.toUpperCase():"–";$("dvGo").disabled=!!why;$("dvWhy").textContent=why;$("dvQ").textContent="x"+dvQn;
+}
+$("dvPick").onclick=e=>{const b=e.target.closest("[data-it]");if(!b)return;
+  if(b.dataset.it!==dvIt){dvIt=b.dataset.it;dvS=Array(8).fill(null);dvBank=0;dvLogL.push(`${dvIt} put on the bench`)}drawDv()};
+$("dvClr").onclick=()=>{dvIt="";dvS=Array(8).fill(null);dvBank=0;dvAnn=0;dvLogL=[];dvSpent=0;drawDv()};
+$("dvCats").onclick=$("dvTools").onclick=e=>{const b=e.target.closest("[data-c]");if(!b)return;dvCat=b.dataset.c;dvO=0;drawDv()};
+$("dvOrbs").onclick=e=>{const b=e.target.closest("[data-o]");if(!b)return;dvO=+b.dataset.o;drawDv()};
+$("v-divine").querySelector(".dvq").onclick=e=>{const b=e.target.closest("[data-q]");if(!b)return;dvQn=Math.max(1,Math.min(100,dvQn+ +b.dataset.q));drawDv()};
+$("dvAnim").onchange=()=>{};
+/* the big button: the picked orb, as many times as x says (stops when it can not go on) */
+$("dvGo").onclick=()=>{
+  const o=dvOrb();let fx=new Set();
+  for(let k=0;k<dvQn&&!dvWhyNot(o);k++){const [l,t]=dvUse(o);dvLogL.push(l);t.forEach(i=>fx.add(i));dvSpent+=price(o.n)}
+  drawDv([...fx]);
+};
+$("dvSpend").addEventListener("change",e=>{const n=e.target.dataset.pn;if(n===undefined)return;const v=parse(e.target.value);if(v>0)P[n]=v;else delete P[n];sv("lootPrices",P);drawDv()});
+
 /* ---------- tools: detailed loot tracker ----------
    Same log file as the Loot Tracker, kept at second precision. A dungeon run ends with the drop
    holding a Greater/Elite Splinter; its loot is everything dropped since the previous run ended.
@@ -3463,6 +3640,7 @@ function route(quiet){
   }
   if(c.v==="skills"){skP=null;drawSk(!quiet)}
   if(c.v==="progress")drawPg();
+  if(c.v==="divine")drawDv();
   if(c.v==="login")drawLogin();
   if(CPL)cpRoute(c,quiet);   // the Control Panel's pages
   slotTo(c.v==="loot"&&c.k==="tools/live"?"l":"n");
