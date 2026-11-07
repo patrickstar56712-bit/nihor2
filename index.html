@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T07:21:43Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T07:26:58Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -709,6 +709,8 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .top #setB i{display:none}
 #topR #setP{position:absolute;right:0;top:100%}
 @media (max-width:760px){#topNav a span,.top #setB span{display:none}#topNav a{padding:7px 10px}.tb #topNav{margin-left:6px}}
+/* small phones: logo without the name, tighter menu, so all five sections fit next to the links on the right */
+@media (max-width:480px){.tb .brand{font-size:0;gap:0}.tb #topNav{gap:0;margin-left:4px}#topNav a{padding:7px 8px}#topNav .tn>a i{display:none}.tb #topR{gap:5px}#topR .ilk{width:32px;height:32px}}
 .flb{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;font-size:13px;font-weight:700;text-decoration:none;color:var(--gold);
   background:linear-gradient(var(--panel),var(--panel)) padding-box,linear-gradient(135deg,var(--gold),var(--jade)) border-box;border:1px solid transparent;
   box-shadow:0 6px 18px -10px var(--gold);transition:transform .25s var(--ease),box-shadow .25s,color .2s}
@@ -1147,7 +1149,14 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
     <a class="card" href="#/tools/loot" style="--i:0"><b>Loot Tracker</b><span>Upload a log file, see drop values and hourly income.</span></a>
     <a class="card" href="#/upgrade" style="--i:1"><b>Upgrade Cost</b><span>Yang and material cost of +0 to +9 upgrades.</span></a>
     <a class="card" href="#/skills" style="--i:2"><b>Skill Booster</b><span>M1 to P10 skill level cost and materials.</span></a>
+    <a class="card" href="#/divine" style="--i:3"><b>Divine Simulator<em class="beta">Soon</em></b><span>New simulations are on the way.</span></a>
   </div>
+</main>
+
+<main id="v-divine" hidden>
+  <p class="crumb"><a href="#/">← Main Page</a></p>
+  <h1>Divine Simulator<em class="beta">Soon</em></h1>
+  <section class="panel" style="--i:0"><p class="muted">Coming soon: new simulations will appear here.</p></section>
 </main>
 
 <main id="v-tools" hidden>
@@ -3334,7 +3343,7 @@ document.addEventListener("pointermove",e=>{
 });
 
 /* ---------- sidebar & routing ---------- */
-const V={"":"home",tools:"tools","tools/loot":"loot","tools/live":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons","upgrade/dews":"weapons","upgrade/progress":"progress",skills:"skills","tools/dloot":"dloot","tools/screen":"screen","upgrade/skills":"skills"};
+const V={"":"home",tools:"tools","tools/loot":"loot","tools/live":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons","upgrade/dews":"weapons","upgrade/progress":"progress",skills:"skills",divine:"divine","tools/dloot":"dloot","tools/screen":"screen","upgrade/skills":"skills"};
 const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/live","Live Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"],["tools/screen","Screen Tracker"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"],["upgrade/dews","Dew Upgrade"],["upgrade/progress","Progress"]]]];   // the Control Panel adds its own group
 /* addresses: on the website every page has a real path (/upgrade/weapons; vercel.json serves index.html
    for all of them), opened as a file the #/ addresses are used.
@@ -3413,6 +3422,7 @@ const NI={home:nIco('<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 
   tools:nIco('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>'),
   upgrade:nIco('<path d="M12 19V5M5 12l7-7 7 7"/>'),
   skills:nIco('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M12 7v6M9 10h6"/>'),
+  divine:nIco('<path d="M12 3l2.2 5.6L20 9.5l-4.5 3.8L17 19l-5-3-5 3 1.5-5.7L4 9.5l5.8-.9z"/>'),
   admin:nIco('<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>')};
 const BETA=new Set(["tools/screen","tools/live"]),beta=(k,l)=>l+(BETA.has(k)?`<em class="beta">Beta</em>`:k.startsWith("upgrade/")&&k!=="upgrade/progress"?`<em class="beta">Soon</em>`:"");   // pages still being tried out / not finished
 function renderNav(){
@@ -3428,7 +3438,7 @@ function renderNav(){
     GROUPS.filter(g=>g[0]==="admin"&&ADM).map(grp).join("")+
     `</nav>`;
   /* top bar: each heading opens its pages on hover / keyboard focus */
-  $("topNav").innerHTML=[["tools","Tools"],["upgrade","Upgrade Cost"],["skills","Skill Booster"],...ADM?[["admin","Control Panel"]]:[]].map(([g,l])=>{
+  $("topNav").innerHTML=[["tools","Tools"],["upgrade","Upgrade Cost"],["skills","Skill Booster"],["divine","Divine Simulator"],...ADM?[["admin","Control Panel"]]:[]].map(([g,l])=>{
     const kids=(GROUPS.find(x=>x[0]===g)||[])[2]||[];
     return `<div class="tn${tnShut===g?" shut":""}" data-g="${g}"><a href="${href(g)}"${k===g||k.startsWith(g+"/")?' aria-current="page"':""}>${NI[g]}<span>${l}</span>${kids.length?'<i aria-hidden="true">⌄</i>':""}</a>`+
       (kids.length?`<div class="tdd"><div>${kids.map(([kk,kl])=>`<a href="${href(kk)}"${kk===k?' aria-current="page"':""}>${beta(kk,kl)}</a>`).join("")}</div></div>`:"")+`</div>`}).join("");
