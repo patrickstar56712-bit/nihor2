@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T10:26:24Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T10:29:05Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2293,6 +2293,12 @@ const p50H=n=>({n,y:[1e6,12e5,14e5,16e5,18e5,2e6,22e5,24e5,26e5],
      {n:"Blue Taskal",c:[0,0,2,3,4,4,4,5,6]},{n:"Blue Owlbile",c:[0,0,0,0,0,1,1,2,3]},{n:"Blue Uranium",c:[0,0,0,0,0,0,0,5,10]},
      {n:"Structure of Ice",c:[3,5,7,9,11,13,15,17,20]}],
   a:[],cr:{y:45e5,m:[{n:"Shard",c:4050},{n:"Magic Iceblock",c:9},{n:"Structure of Ice",c:6},{n:"Horn of Nemere",c:25}]}});
+/* P200 armour and helmet share one list (craft: the P50 one at +9) */
+const p200A=n=>({n,y:[36e5,47e5,58e5,69e5,7e6,81e5,92e5,103e5,13e6],
+  m:[{n:"Shard",c:[1650,1710,1770,1830,1890,1950,2010,2070,2130]},{n:"Blue Citrindust",c:[70,75,80,85,90,95,0,0,0]},
+     {n:"Blue Citrin",c:[0,0,0,85,90,95,0,0,0]},{n:"Polished blue Citrin",c:[2,4,6,8,10,12,14,16,20]},
+     {n:"Blue Meteor splinter",c:[0,0,0,0,0,0,4,8,16]},{n:"Midnight Potion",c:[0,0,0,0,0,0,40,45,50]},{n:"Nataraja's Medallion",c:[0,0,0,0,0,0,15,20,20]}],
+  a:[],cr:{y:1e7,m:[{n:"Shard",c:1650},{n:"Blue Taskal",c:10},{n:"Blue Owlbile",c:6},{n:"Blue Uranium",c:15},{n:"Structure of Ice",c:30},{n:"Nataraja's Medallion",c:30}]}});
 const DEFS={weapons:[{n:"P50 Weapon",y:[1e6,12e5,14e5,16e5,18e5,2e6,22e5,24e5,26e5],
     m:[{n:"Shard",c:[450,600,750,900,1050,1200,1350,1500,1650]},{n:"Violett Tasman",c:[90,100,110,120,130,140,140,150,160]},
        {n:"Red Taskal",c:[0,0,2,3,4,4,4,5,6]},{n:"Red Owlbile",c:[0,0,0,0,0,1,1,2,3]},{n:"Red Uranium",c:[0,0,0,0,0,0,0,5,10]},
@@ -2305,9 +2311,8 @@ const DEFS={weapons:[{n:"P50 Weapon",y:[1e6,12e5,14e5,16e5,18e5,2e6,22e5,24e5,26
     a:[],cr:{y:25e7,m:[{n:"Shard",c:4500},{n:"Red Meteor splinter",c:35},{n:"Polished red Citrin",c:40},{n:"Talikos Magical Fire",c:20},
       {n:"Midnight Potion",c:150},{n:"Nataraja's Medallion",c:75}]}}],
   dews:DEW_C.flatMap(c=>DEW_T.map((_,t)=>({n:dewName(c,t),y:Array(LV).fill(0),m:[],a:[],cr:{y:0,m:[]}})))  ,
-  helmets:[p50H("P50 Helmet")],shields:[p50H("P50 Shield")],
-  armour:[p50H("P50 Armour"),{n:"P200 Armour",y:Array(LV).fill(0),m:[],a:[],   // the +0 to +9 costs are not known yet
-    cr:{y:1e7,m:[{n:"Shard",c:1650},{n:"Blue Taskal",c:10},{n:"Blue Owlbile",c:6},{n:"Blue Uranium",c:15},{n:"Structure of Ice",c:30},{n:"Nataraja's Medallion",c:30}]}}],
+  helmets:[p50H("P50 Helmet"),p200A("P200 Helmet")],shields:[p50H("P50 Shield")],
+  armour:[p50H("P50 Armour"),p200A("P200 Armour")],
   jewellery:[p50J("P50 Necklace"),p50J("P50 Bracelet"),p50J("P50 Earring"),
   {n:"P200 Citrine Earring",y:[36e5,47e5,58e5,69e5,7e6,81e5,92e5,1e7,13e6],
     m:[{n:"Shard",c:[1650,1710,1770,1830,1890,1950,2010,2070,2130]},{n:"Yellow Citrindust",c:[70,75,80,85,90,95,0,0,0]},
@@ -2315,7 +2320,7 @@ const DEFS={weapons:[{n:"P50 Weapon",y:[1e6,12e5,14e5,16e5,18e5,2e6,22e5,24e5,26
        {n:"Green Meteor splinter",c:[0,0,0,0,0,0,3,4,6]},{n:"Midnight Potion",c:[0,0,0,0,0,0,20,25,40]},{n:"Nataraja's Medallion",c:[0,0,0,0,0,0,15,20,30]}],
     a:[],cr:{y:1e7,m:[{n:"Shard",c:1650},{n:"Green Tasman",c:500},{n:"Green Taskal",c:10},{n:"Green Uranium",c:10},{n:"Green Owlbile",c:10},
       {n:"Hallowed Tree Gum",c:15},{n:"Nataraja's Medallion",c:25}]}}]};
-const DEFNEW={armour:["P200 Armour"]};   // built-in items newer than the database's lists (dbApply adds them once)
+const DEFNEW={armour:["P200 Armour"],helmets:["P200 Helmet"]};   // built-in items newer than the database's lists (dbApply adds them once)
 const fixCr=c=>({y:+(c&&c.y)||0,m:((c&&c.m)||[]).map(m=>({n:String(m.n||""),c:+m.c||0}))});
 const fixW=w=>{
   w.n=String(w.n||"Weapon");
@@ -2359,7 +2364,7 @@ function loadCat(c){
     sv(K("upgW"),W)}
   for(const d of DEFS[CAT]||[]){const i=W.findIndex(x=>x.n.trim().toLowerCase()===d.n.toLowerCase());
     /* "empty" = no Yang and no materials besides the Blessing Scroll every new item starts with */
-    if(i>=0&&(d.y.some(Boolean)||d.m.length)&&!W[i].y.some(Boolean)&&W[i].m.every(m=>m.n==="Blessing Scroll"||!m.c.some(Boolean))&&!W[i].cr.y&&!W[i].cr.m.some(m=>m.c>0)){W[i]=fixW({...JSON.parse(JSON.stringify(d)),n:W[i].n,a:W[i].a,f:W[i].f,im:W[i].im});sv(K("upgW"),W)}}
+    if(i>=0&&(d.y.some(Boolean)||d.m.length)&&!W[i].y.some(Boolean)&&W[i].m.every(m=>m.n==="Blessing Scroll"||!m.c.some(Boolean))&&((DEFNEW[CAT]||[]).includes(d.n)||!W[i].cr.y&&!W[i].cr.m.some(m=>m.c>0))){W[i]=fixW({...JSON.parse(JSON.stringify(d)),n:W[i].n,a:W[i].a,f:W[i].f,im:W[i].im});sv(K("upgW"),W)}}
   if(!W.length)W=[blankW(CATS[CAT][1]+" 1")];
   WS=Math.max(0,Math.min(+ld(K("upgSel"),0)||0,W.length-1));
   const v=ld(K("upgLv"),[0,9]);
