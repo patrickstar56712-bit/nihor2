@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T08:48:52Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T08:53:29Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1153,8 +1153,12 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .dv.noanim .dvsl::after{display:none}
 /* element attributes in their element's colour */
 .dvsl .gl.el-fire,.dvsl.d6 .gl.el-fire{color:#ff6a3d}.dvsl .gl.el-bolt,.dvsl.d6 .gl.el-bolt{color:#5cc8ff}.dvsl .gl.el-poison,.dvsl.d6 .gl.el-poison{color:#5cd65c}.dvsl .gl.el-curse,.dvsl.d6 .gl.el-curse{color:#b58cff}
-.dvsl .t{flex:none;font-size:11px;font-weight:800;padding:1px 6px;border-radius:5px;border:1px solid currentColor;white-space:nowrap}
-.dvsl .t1{color:var(--mute)}.dvsl .t2{color:var(--ink)}.dvsl .t3{color:var(--teal)}.dvsl .t4{color:var(--vio)}.dvsl .t5{color:var(--gold)}
+.dvch{flex:none;display:flex;align-items:center;gap:5px}
+.dvch em{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.03em;padding:2px 7px;border-radius:4px;border:1px solid;white-space:nowrap;line-height:1.2}
+.dvch .cx{color:#e9b04a;border-color:color-mix(in srgb,#e9b04a 70%,transparent);background:rgba(0,0,0,.25)}
+.dvch .ced{color:#fff;border-color:#e9b04a;background:rgba(0,0,0,.35)}
+.dvch .cd{color:#efe6ff;border-color:#7d63c9;background:#4a3a86}
+.dvch .ct{color:var(--mute);border-color:var(--line);background:rgba(0,0,0,.2)}
 .dvsl.fx{animation:dvFx .6s var(--ease)}
 @keyframes dvFx{0%{background:color-mix(in srgb,var(--gold) 35%,transparent);transform:scale(1.02)}100%{background:color-mix(in srgb,var(--ink) 3%,transparent);transform:none}}
 .dvst dl,.dvspend dl{display:grid;grid-template-columns:1fr auto;gap:4px 10px;margin:0;font-size:13px}
@@ -2920,7 +2924,6 @@ function dvLine(s){const v=dvNum(s),b=/^(.+) Break$/.exec(s.n);
 /* element damage attributes: their colour class (Burn = fire, Lightning, Poison, Curse) */
 const dvEl=n=>/^Burn Damage/.test(n)?"el-fire":/^Lightning Damage/.test(n)?"el-bolt":/^Poison Damage/.test(n)?"el-poison":/^Curse Damage/.test(n)?"el-curse":"";   // element damage only; the Breaks keep the normal colour
 const dvTags=s=>(s.dv?"[D-T"+s.t+"]":"[T"+s.t+"]")+(s.ex?" [Exalted]":"")+(s.dv?"[Divined]":"");
-const dvTc=s=>"t"+Math.max(1,Math.ceil(s.t*5/s.v.length));
 const dvOrb=()=>(DV_ORBS[dvCat]||[])[dvO];
 const dvExCount=()=>dvS.slice(0,5).filter(s=>s&&s.ex).length;
 /* a fresh item: normal attributes in 1-5 and, if the item has them, 6-7 */
@@ -2952,7 +2955,7 @@ function drawDv(fx=[]){
   $("dvNm").textContent=dvIt||"No item on the bench";
   $("dvPick").innerHTML=DV_ITEMS.map(n=>`<button data-it="${n}" aria-pressed="${n===dvIt}">${n}</button>`).join("");
   $("dvSlots").innerHTML=DV_BANDS.map(([l,r,a,b,c])=>`<div class="dvband ${c}">${l} · ${r}</div>`+dvS.slice(a,b).map((s,j)=>{const i=a+j,at=s&&s.n?s:null;
-    return `<div class="dvsl${at&&at.ex?" ex":""}${at&&at.dv&&at.t>=6?" d6"+(at.t>=at.v.length?" d10":""):""}${s&&s.p?" pr":""}${fx.includes(i)&&$("dvAnim").checked?" fx":""}"><span>${i+1}</span>${at?`<span class="gl ${dvEl(at.n)}" title="${esc(at.n)}"><span>${esc(dvLine(at))}</span></span><span class="t ${dvTc(at)}" title="Tier ${at.t} of ${at.v.length}${at.ex?" · pool value × potential":""}">${dvTags(at)}</span>`
+    return `<div class="dvsl${at&&at.ex?" ex":""}${at&&at.dv&&at.t>=6?" d6"+(at.t>=at.v.length?" d10":""):""}${s&&s.p?" pr":""}${fx.includes(i)&&$("dvAnim").checked?" fx":""}"><span>${i+1}</span>${at?`<span class="gl ${dvEl(at.n)}" title="${esc(at.n)}"><span>${esc(dvLine(at))}</span></span><span class="dvch" title="Tier ${at.t} of ${at.v.length}${at.ex?" · pool value × potential":""}">${at.ex?`<em class="cx">EXALTED</em>`:""}<em class="${at.dv?(at.ex?"ced":"cd"):"ct"}">${at.dv?(at.ex?"ED-":"D-"):""}T${at.t}</em></span>`
       :s&&s.p?`<span class="e">– prepared –</span>`:`<span class="e">– ${i===7?"godly slot, not part of these orbs":dvIt&&i>=5&&!dvRows("6/7").length?"no slot 6-7 on this item":"empty"} –</span>`}</div>`}).join("")).join("");
   const top=dvS.filter(x=>x&&x.n).reduce((m,s)=>!m||s.t/s.v.length>m.t/m.v.length?s:m,null);
   $("dvSt").innerHTML=`<dt>Prepared slots</dt><dd>${dvS.filter(x=>x&&x.p).length}</dd><dt>Exalted (1-5 / 6-7)</dt><dd>${dvExCount()} / ${dvS.slice(5,7).filter(x=>x&&x.ex).length}</dd><dt>Annulled this session</dt><dd>${dvAnn}</dd><dt>Highest tier</dt><dd>${top?"T"+top.t+"/"+top.v.length:"–"}</dd>`;
