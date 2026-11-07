@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T11:05:57Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T12:34:47Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2296,6 +2296,13 @@ const p50H=n=>({n,y:[1e6,12e5,14e5,16e5,18e5,2e6,22e5,24e5,26e5],
      {n:"Blue Taskal",c:[0,0,2,3,4,4,4,5,6]},{n:"Blue Owlbile",c:[0,0,0,0,0,1,1,2,3]},{n:"Blue Uranium",c:[0,0,0,0,0,0,0,5,10]},
      {n:"Structure of Ice",c:[3,5,7,9,11,13,15,17,20]}],
   a:[],cr:{y:45e5,m:[{n:"Shard",c:4050},{n:"Magic Iceblock",c:9},{n:"Structure of Ice",c:6},{n:"Horn of Nemere",c:25}]}});
+/* P200 earring, necklace and bracelet share one list */
+const p200J=n=>({n,y:[36e5,47e5,58e5,69e5,7e6,81e5,92e5,1e7,13e6],
+  m:[{n:"Shard",c:[1650,1710,1770,1830,1890,1950,2010,2070,2130]},{n:"Yellow Citrindust",c:[70,75,80,85,90,95,0,0,0]},
+     {n:"Yellow Citrine",c:[0,0,0,85,90,95,0,0,0]},{n:"Polished yellow Citrin",c:[1,2,3,4,5,6,7,8,10]},
+     {n:"Green Meteor splinter",c:[0,0,0,0,0,0,3,4,6]},{n:"Midnight Potion",c:[0,0,0,0,0,0,20,25,40]},{n:"Nataraja's Medallion",c:[0,0,0,0,0,0,15,20,30]}],
+  a:[],cr:{y:1e7,m:[{n:"Shard",c:1650},{n:"Green Tasman",c:500},{n:"Green Taskal",c:10},{n:"Green Uranium",c:10},{n:"Green Owlbile",c:10},
+    {n:"Hallowed Tree Gum",c:15},{n:"Nataraja's Medallion",c:25}]}});
 /* P200 armour and helmet share one list (craft: the P50 one at +9) */
 const p200A=n=>({n,y:[36e5,47e5,58e5,69e5,7e6,81e5,92e5,103e5,13e6],
   m:[{n:"Shard",c:[1650,1710,1770,1830,1890,1950,2010,2070,2130]},{n:"Blue Citrindust",c:[70,75,80,85,90,95,0,0,0]},
@@ -2317,13 +2324,8 @@ const DEFS={weapons:[{n:"P50 Weapon",y:[1e6,12e5,14e5,16e5,18e5,2e6,22e5,24e5,26
   helmets:[p50H("P50 Helmet"),p200A("P200 Helmet")],shields:[p50H("P50 Shield")],
   armour:[p50H("P50 Armour"),p200A("P200 Armour")],
   jewellery:[p50J("P50 Necklace"),p50J("P50 Bracelet"),p50J("P50 Earring"),
-  {n:"P200 Citrine Earring",y:[36e5,47e5,58e5,69e5,7e6,81e5,92e5,1e7,13e6],
-    m:[{n:"Shard",c:[1650,1710,1770,1830,1890,1950,2010,2070,2130]},{n:"Yellow Citrindust",c:[70,75,80,85,90,95,0,0,0]},
-       {n:"Yellow Citrine",c:[0,0,0,85,90,95,0,0,0]},{n:"Polished yellow Citrin",c:[1,2,3,4,5,6,7,8,10]},
-       {n:"Green Meteor splinter",c:[0,0,0,0,0,0,3,4,6]},{n:"Midnight Potion",c:[0,0,0,0,0,0,20,25,40]},{n:"Nataraja's Medallion",c:[0,0,0,0,0,0,15,20,30]}],
-    a:[],cr:{y:1e7,m:[{n:"Shard",c:1650},{n:"Green Tasman",c:500},{n:"Green Taskal",c:10},{n:"Green Uranium",c:10},{n:"Green Owlbile",c:10},
-      {n:"Hallowed Tree Gum",c:15},{n:"Nataraja's Medallion",c:25}]}}]};
-const DEFNEW={armour:["P200 Armour"],helmets:["P200 Helmet"]};   // built-in items newer than the database's lists (dbApply adds them once)
+  p200J("P200 Citrine Earring"),p200J("P200 Necklace"),p200J("P200 Bracelet")]};
+const DEFNEW={armour:["P200 Armour"],helmets:["P200 Helmet"],jewellery:["P200 Necklace","P200 Bracelet"]};   // built-in items newer than the database's lists (dbApply adds them once)
 const fixCr=c=>({y:+(c&&c.y)||0,m:((c&&c.m)||[]).map(m=>({n:String(m.n||""),c:+m.c||0}))});
 const fixW=w=>{
   w.n=String(w.n||"Weapon");
