@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T08:28:25Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T08:38:20Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1230,7 +1230,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 <main id="v-divine" hidden>
   <p class="crumb"><a href="#/">← Main Page</a></p>
   <h1>Divine Simulator<em class="beta">Soon</em></h1>
-  <p class="sub">Try orbs on an item without spending a thing. Rules from the wiki's Exalted and Divine Attributes guides, values from the game's bonus list. Not in the guides, so guessed: every tier is equally likely, and Chaos keeps an exalted attribute exalted half the time.</p>
+  <p class="sub">Try orbs on an item without spending a thing. Rules from the wiki's Exalted and Divine Attributes guides, values from the game's bonus list. Not in the guides, so guessed: every tier is equally likely, and an Exalted Orb gives an exalted attribute half the time.</p>
   <div class="dv">
     <section class="dvp dvw">
       <div class="dvh"><b>Workpiece</b><small>Pick an item for the bench</small></div>
@@ -2865,12 +2865,15 @@ $("pgTot").addEventListener("input",e=>{
    Divine (1-5) / Greater Divine (6-7) re-roll the value over 10 tiers ("Divine" rows for normal, "Exalted + Divine" for exalted).
    Exalted values are the pool value x the Exalted Potential. Every attribute can be annulled and re-rolled.
    Data: divine-bonuses.json from the game's bonus list. Not in the guides, so SAMPLES: every tier is equally likely, and a
-   Chaos Orb keeps an exalted attribute exalted half of the time. */
+   Exalted Orb gives an exalted attribute half of the time (else a normal one); a Chaos Orb always gives exalted ones. */
 let DVB=null;
 /* bonus rows switched off in Control Panel -> Divine Simulator ("pool|attribute"); the database decides for everyone */
 let DVOFF=new Set(ld("dvOff",[]));
 const dvLoad=()=>DVB?Promise.resolve(DVB):fetch("divine-bonuses.json").then(r=>r.json()).then(d=>DVB=d);
-const DV_CHAOS_EX=.5;   // chance a re-rolled exalted attribute stays exalted (sample)
+const DV_EXALT_EX=.5;   // chance an Exalted Orb gives an exalted (not a normal) attribute (sample)
+/* exalted when wanted and the item still takes one (a weapon holds at most 3 in slots 1-5), else normal */
+const dvExOk=i=>!DV_NOEX.has(dvIt)&&(i>=5||dvExCount()<dvExMax());
+const dvPick=(i,ex)=>(ex&&dvExOk(i)&&dvRoll(i,true))||dvRoll(i,false);
 const DV_EXMAX={Weapon:3};   // exalted attributes an item can hold in slots 1-5 (5 unless named here)
 const dvExMax=()=>DV_EXMAX[dvIt]||5;
 const DV_ITEMS=["Weapon","Armor","Helmet","Shield","Shoes","Bracelet","Necklace","Earrings","Belt","Amulet"];
@@ -2879,10 +2882,10 @@ const DV_BANDS=[["Normal band","slots 1-5",0,5,""],["Rare band","slots 6-7",5,7,
 const DV_CATS=[["fund","Fundamentals","the orbs you know"]];   // more orb groups come here later
 const DV_ORBS={fund:[
   {n:"Annulment Orb",sc:"slots 1-7",a:0,b:7,v:"Annul",d:"Removes a random attribute from slots 1-7 and prepares its slot for an Exalted Orb.",tg:"A random attribute of slots 1-7"},
-  {n:"Exalted Orb",sc:"slots 1-5",a:0,b:5,v:"Exalt",d:"Fills a prepared slot of 1-5 with an exalted attribute. A slot that never held an attribute is not enough: annul one first.",tg:"First prepared slot of 1-5"},
-  {n:"Greater Exalted Orb",sc:"slots 6-7",a:5,b:7,v:"Exalt",d:"Fills a prepared slot of 6-7 with an exalted attribute.",tg:"First prepared slot of 6-7"},
-  {n:"Chaos Orb",sc:"slots 1-5",a:0,b:5,v:"Chaos",d:"Re-rolls the attribute types of slots 1-5. An exalted attribute can become a normal one, and the Divine status is lost.",tg:"Every attribute of slots 1-5"},
-  {n:"Greater Chaos Orb",sc:"slots 6-7",a:5,b:7,v:"Chaos",d:"Re-rolls the attribute types of slots 6-7. An exalted attribute can become a normal one, and the Divine status is lost.",tg:"Every attribute of slots 6-7"},
+  {n:"Exalted Orb",sc:"slots 1-5",a:0,b:5,v:"Exalt",d:"Fills a prepared slot of 1-5 with a new attribute: a normal or an exalted one. A slot that never held an attribute is not enough: annul one first.",tg:"First prepared slot of 1-5"},
+  {n:"Greater Exalted Orb",sc:"slots 6-7",a:5,b:7,v:"Exalt",d:"Fills a prepared slot of 6-7 with a new attribute: a normal or an exalted one.",tg:"First prepared slot of 6-7"},
+  {n:"Chaos Orb",sc:"slots 1-5",a:0,b:5,v:"Chaos",d:"Re-rolls the attribute types of slots 1-5 into exalted attributes only. The Divine status is lost.",tg:"Every attribute of slots 1-5"},
+  {n:"Greater Chaos Orb",sc:"slots 6-7",a:5,b:7,v:"Chaos",d:"Re-rolls the attribute types of slots 6-7 into exalted attributes only. The Divine status is lost.",tg:"Every attribute of slots 6-7"},
   {n:"Divine Orb",sc:"slots 1-5",a:0,b:5,v:"Divine",d:"Keeps the types and re-rolls every value of slots 1-5 anywhere from T1 to T10. Good values can go down; above T5 is not guaranteed.",tg:"Every attribute of slots 1-5"},
   {n:"Greater Divine Orb",sc:"slots 6-7",a:5,b:7,v:"Divine",d:"Keeps the types and re-rolls every value of slots 6-7 anywhere from T1 to T10.",tg:"Every attribute of slots 6-7"}]};
 /* a slot: null = never held anything, {p:1} = prepared (annulled), or an attribute {n, v: tier values, t: tier, ex: exalted, dv: divine} */
@@ -2916,18 +2919,17 @@ function dvWhyNot(o){
   const idx=[...Array(o.b-o.a)].map((_,k)=>o.a+k);
   if(o.v==="Annul")return idx.some(i=>dvAt(i))?"":"No attribute that can be removed";
   if(o.v==="Exalt"){if(DV_NOEX.has(dvIt))return`A ${dvIt.toLowerCase()} takes no exalted attributes`;
-    if(o.a===0&&dvExCount()>=dvExMax())return`A ${dvIt.toLowerCase()} takes at most ${dvExMax()} exalted attributes`;
     if(!idx.some(i=>dvS[i]&&dvS[i].p))return"No prepared slot in "+o.sc+": use an Annulment Orb first";
-    return dvRows(o.a<5?"Exalted":"Exalted 6/7").some(r=>!dvOwn(-1).has(r[0]))?"":"No exalted attribute left for this item"}
+    return""}
   return idx.some(i=>dvAt(i))?"":"No attribute to re-roll in "+o.sc;
 }
 /* one use of an orb: changes the slots and returns the log line and the slots it touched */
 function dvUse(o){
   const idx=[...Array(o.b-o.a)].map((_,k)=>o.a+k),live=idx.filter(i=>dvAt(i));
   if(o.v==="Annul"){const i=live[Math.floor(Math.random()*live.length)],old=dvS[i];dvS[i]={p:1};dvAnn++;return[`<b>${esc(o.n)}</b> removed ${esc(old.n)} from slot ${i+1}`,[i]]}
-  if(o.v==="Exalt"){const i=idx.find(k=>dvS[k]&&dvS[k].p),s=dvRoll(i,true);dvS[i]=s;return[`<b>${esc(o.n)}</b>: slot ${i+1} ${esc(dvLine(s))} ${dvTags(s)}`,[i]]}
-  if(o.v==="Chaos"){let down=0;for(const i of live){const ex=dvS[i].ex&&Math.random()<DV_CHAOS_EX;if(dvS[i].ex&&!ex)down++;dvS[i]=null;dvS[i]=dvRoll(i,ex)||dvRoll(i,false)}
-    return[`<b>${esc(o.n)}</b> re-rolled slot${live.length>1?"s":""} ${live.map(i=>i+1).join(", ")}${down?` · ${down} exalted fell back to normal`:""}`,live]}
+  if(o.v==="Exalt"){const i=idx.find(k=>dvS[k]&&dvS[k].p),s=dvPick(i,Math.random()<DV_EXALT_EX);if(!s)return["Nothing left to roll",[]];dvS[i]=s;return[`<b>${esc(o.n)}</b>: slot ${i+1} ${esc(dvLine(s))} ${dvTags(s)}`,[i]]}
+  if(o.v==="Chaos"){for(const i of live)dvS[i]={p:1};for(const i of live)dvS[i]=dvPick(i,true);   // emptied first, so the exalted limit counts only what stays
+    return[`<b>${esc(o.n)}</b> re-rolled slot${live.length>1?"s":""} ${live.map(i=>i+1).join(", ")}`,live]}
   for(const i of live){const s=dvS[i],r=dvRows((s.ex?"Exalted + Divine":"Divine")+(i>=5?" 6/7":"")).find(x=>x[0]===s.n);if(r){s.v=r[2];s.dv=1;s.t=dvTier(r[2].length)}}
   return[`<b>${esc(o.n)}</b> re-rolled ${live.map(i=>`${i+1}: T${dvS[i].t}`).join(", ")}`,live];
 }
