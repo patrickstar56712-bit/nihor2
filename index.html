@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T07:47:30Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T07:49:12Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1103,12 +1103,11 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 }
 
 /* divine simulator: a crafting bench in the game's style */
-.dv{display:grid;grid-template-columns:210px minmax(340px,1fr) minmax(0,1.15fr);gap:8px;margin-top:12px}
+.dv{display:grid;grid-template-columns:minmax(340px,1fr) minmax(0,1.3fr);gap:8px;margin-top:12px}
 .dvp{background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
 .dvw,.dvbar{grid-column:1/-1}
 .dvh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:6px;margin-bottom:8px;border-bottom:1px solid color-mix(in srgb,var(--gold) 45%,var(--line))}
 .dvh b{color:var(--gold);font-size:14px}.dvh small{color:var(--mute);font-size:12px}
-.dvh2{margin-top:14px}
 .dvsh{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:10px 0 6px}
 .dvwb{display:grid;grid-template-columns:230px minmax(0,1fr) 230px;gap:14px}
 .dvbench{display:flex;flex-direction:column;gap:8px}
@@ -1133,10 +1132,6 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .dvlog{list-style:none;margin:0;padding:0;max-height:130px;overflow:auto;font-size:12px;display:flex;flex-direction:column;gap:3px}
 .dvlog li{color:var(--ink)}.dvlog li b{color:var(--gold)}.dvlog .muted{font-style:italic}
 .dvsp{display:flex;justify-content:space-between;margin-top:8px;padding-top:6px;border-top:1px solid var(--line);font-size:13px}.dvsp b{color:var(--gold)}
-.dvc{display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;margin-bottom:5px;border-radius:7px;text-align:left;box-shadow:inset 3px 0 color-mix(in srgb,var(--mute) 50%,transparent)}
-.dvc span{display:flex;flex-direction:column;min-width:0;flex:1}.dvc b{font-size:13.5px}.dvc small{font-size:11px;color:var(--mute);font-weight:500}
-.dvc em{font-style:normal;color:var(--gold);font-weight:800;font-size:13px}
-.dvc[aria-pressed=true]{border-color:var(--gold);color:var(--gold);box-shadow:inset 3px 0 var(--gold);background:color-mix(in srgb,var(--gold) 10%,var(--panel))}
 .dvo{display:flex;align-items:center;gap:10px;width:100%;padding:6px 10px;margin-bottom:5px;border-radius:7px;text-align:left}
 .dvo .ic{flex:none;height:30px;max-width:30px;margin:0}
 .dvo span{display:flex;flex-direction:column;flex:1;min-width:0}.dvo b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dvo small{font-size:11px;color:var(--mute);font-weight:500}
@@ -1160,7 +1155,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .dvmisc{display:flex;flex-direction:column;gap:8px;align-items:flex-start}.dvmisc .dvsh{margin:0}
 .dvmisc label{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink)}
 .dvq{display:flex;align-items:center;gap:6px}.dvq b{min-width:44px;text-align:center;padding:4px 8px;border:1px solid var(--line);border-radius:6px}
-@media (max-width:900px){.dv{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.dvrec{grid-column:1/-1}.dvwb{grid-template-columns:minmax(0,1fr)}.dvbench{flex-direction:row;flex-wrap:wrap;align-items:center}.dvpl{width:96px;height:96px}.dvnm{flex:1}.dvpick{flex-basis:100%}}
+@media (max-width:900px){.dv{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.dvwb{grid-template-columns:minmax(0,1fr)}.dvbench{flex-direction:row;flex-wrap:wrap;align-items:center}.dvpl{width:96px;height:96px}.dvnm{flex:1}.dvpick{flex-basis:100%}}
 @media (max-width:560px){.dv{grid-template-columns:minmax(0,1fr)}.dvbar{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
@@ -1235,10 +1230,6 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
           <div class="dvsp"><span>Spent this session</span><b id="dvSp">0 Yang</b></div>
         </div>
       </div>
-    </section>
-    <section class="dvp dvcat">
-      <div class="dvh"><b>Recipes</b></div><div id="dvCats"></div>
-      <div class="dvh dvh2"><b>Tools</b></div><div id="dvTools"></div>
     </section>
     <section class="dvp dvorbs"><div class="dvh"><b id="dvCatT"></b><small id="dvCatN"></small></div><div id="dvOrbs"></div></section>
     <section class="dvp dvrec"><div class="dvh"><b>Recipe</b></div><div id="dvRec"></div></section>
@@ -2857,9 +2848,7 @@ const DV_EXMAX={Weapon:3};   // Exalted attributes an item can hold in slots 1-5
 const dvExMax=()=>DV_EXMAX[dvIt]||5;
 const DV_ITEMS=["Weapon","Armor","Helmet","Shield","Shoes","Bracelet","Necklace","Earrings"];   // the items with Exalted attributes
 const DV_BANDS=[["Normal band","slots 1-5",0,5,""],["Rare band","slots 6-7",5,7,"r"],["Godly band","slot 8",7,8,"g"]];
-const DV_CATS=[["fund","Fundamentals","the orbs you know"],["tgt","Targeted","you pick the slot"],["inf","Influence","bind and re-roll"],["asc","Ascension","push the tier"],
-  ["res","Restoration","undo the ruin"],["spi","Spiritstone","infect the stone"],["skb","Skill Booster","level and rank"],["tal","Talismans","refine and break through"]];
-const DV_TOOLS=[["swb","Switchbot","grind it unattended"]];
+const DV_CATS=[["fund","Fundamentals","the orbs you know"]];   // more orb groups come here later
 /* the orbs: scope = slots they act on [from, to), verb on the button, what they do */
 const DV_ORBS={fund:[
   {n:"Annulment Orb",sc:"all slots",a:0,b:8,v:"Annul",d:"Removes one attribute at random and banks a charge an Exalted Orb can spend.",tg:"Acts on the whole band"},
@@ -2913,9 +2902,7 @@ function drawDv(fx=[]){
   $("dvSt").innerHTML=`<dt>Annulled, restorable</dt><dd>${dvBank} / ${dvAnn}</dd><dt>Influences bound</dt><dd>0 / 8</dd><dt>Slots filled</dt><dd>${dvS.filter(Boolean).length} / 8</dd><dt>Highest tier</dt><dd>${top?"T"+top.t+"/"+top.v.length:"–"}</dd>`;
   $("dvLog").innerHTML=dvLogL.length?dvLogL.slice(-40).reverse().map(l=>`<li>${l}</li>`).join(""):`<li class="muted">Nothing crafted yet.</li>`;
   $("dvSp").textContent=fv(dvSpent)+" Yang";
-  $("dvCats").innerHTML=DV_CATS.map(([k,l,s])=>`<button class="dvc" data-c="${k}" aria-pressed="${k===dvCat}"><span><b>${l}</b><small>${s}</small></span><em>${(DV_ORBS[k]||[]).length||""}</em></button>`).join("");
-  $("dvTools").innerHTML=DV_TOOLS.map(([k,l,s])=>`<button class="dvc" data-c="${k}" aria-pressed="${k===dvCat}"><span><b>${l}</b><small>${s}</small></span></button>`).join("");
-  const c=[...DV_CATS,...DV_TOOLS].find(x=>x[0]===dvCat),list=DV_ORBS[dvCat]||[];
+  const c=DV_CATS.find(x=>x[0]===dvCat),list=DV_ORBS[dvCat]||[];
   $("dvCatT").textContent=c[1];$("dvCatN").textContent=list.length||"";
   $("dvOrbs").innerHTML=list.map((x,i)=>{const p=price(x.n);return `<button class="dvo" data-o="${i}" aria-pressed="${i===dvO}">${img(x.n)}<span><b>${esc(x.n)}</b><small>${x.sc}</small></span><em class="${p?"":"inf"}" title="${p?"Unit price":"No price: as many as you like"}">${p?fv(p):"∞"}</em></button>`}).join("")
     ||`<p class="muted">${esc(c[1])} is not added yet. Tell us what its orbs do and it comes next.</p>`;
@@ -2929,7 +2916,6 @@ function drawDv(fx=[]){
 $("dvPick").onclick=e=>{const b=e.target.closest("[data-it]");if(!b)return;
   if(b.dataset.it!==dvIt){dvIt=b.dataset.it;dvS=Array(8).fill(null);dvBank=0;dvLogL.push(`${dvIt} put on the bench`)}drawDv()};
 $("dvClr").onclick=()=>{dvIt="";dvS=Array(8).fill(null);dvBank=0;dvAnn=0;dvLogL=[];dvSpent=0;drawDv()};
-$("dvCats").onclick=$("dvTools").onclick=e=>{const b=e.target.closest("[data-c]");if(!b)return;dvCat=b.dataset.c;dvO=0;drawDv()};
 $("dvOrbs").onclick=e=>{const b=e.target.closest("[data-o]");if(!b)return;dvO=+b.dataset.o;drawDv()};
 $("v-divine").querySelector(".dvq").onclick=e=>{const b=e.target.closest("[data-q]");if(!b)return;dvQn=Math.max(1,Math.min(100,dvQn+ +b.dataset.q));drawDv()};
 $("dvAnim").onchange=()=>{};
