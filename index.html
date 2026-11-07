@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T08:09:31Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T08:10:56Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2933,7 +2933,7 @@ function drawDv(fx=[]){
   $("dvSp").textContent=fv(dvSpent)+" Yang";
   const c=DV_CATS.find(x=>x[0]===dvCat),list=DV_ORBS[dvCat]||[];
   $("dvCatT").textContent=c[1];$("dvCatN").textContent=list.length||"";
-  $("dvOrbs").innerHTML=list.map((x,i)=>{const p=price(x.n);return `<button class="dvo" data-o="${i}" aria-pressed="${i===dvO}">${img(x.n)}<span><b>${esc(x.n)}</b><small>${x.sc}</small></span><em class="${p?"":"inf"}" title="${p?"Unit price":"No price: as many as you like"}">${p?fv(p):"∞"}</em></button>`}).join("")
+  $("dvOrbs").innerHTML=list.map((x,i)=>{const p=price(x.n);return `<button class="dvo" data-o="${i}" aria-pressed="${i===dvO}">${img(x.n)}<span><b>${esc(x.n)}</b><small>${x.sc}</small></span><em class="inf" title="As many as you like${p?" · unit price "+fv(p)+" Yang":""}">∞</em></button>`}).join("")
     ||`<p class="muted">${esc(c[1])} is not added yet. Tell us what its orbs do and it comes next.</p>`;
   const why=dvWhyNot(o),p=o?price(o.n):0;
   $("dvRec").innerHTML=!o?`<p class="muted">Pick an orb.</p>`:`<div class="dvrh"><span class="pgi">${img(o.n)}</span><div><b>${esc(o.n)}</b><br><span class="dvchip">${o.sc}</span></div></div>`+
