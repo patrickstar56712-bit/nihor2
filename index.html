@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T08:38:20Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T08:41:04Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1115,7 +1115,9 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 }
 
 /* divine simulator: a crafting bench in the game's style */
-#v-divine{max-width:1090px}   /* wider page: the slot column in the middle gets 25% more room */
+#v-divine{max-width:1090px}
+#v-divine .dv,#v-divine .dv *{transition:none!important;animation:none!important}
+#v-divine .dv .dvsl.fx{animation:dvFx .6s var(--ease)!important}   /* wider page: the slot column in the middle gets 25% more room */
 .dv{display:grid;grid-template-columns:minmax(340px,1fr) minmax(0,1.3fr);gap:8px;margin-top:12px}
 .dvp{background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
 .dvw,.dvbar{grid-column:1/-1}
@@ -2949,7 +2951,11 @@ function drawDv(fx=[]){
   $("dvCatT").textContent=c[1];$("dvCatN").textContent=list.length||"";
   $("dvOrbs").innerHTML=list.map((x,i)=>{const p=price(x.n);return `<button class="dvo" data-o="${i}" aria-pressed="${i===dvO}">${img(x.n)}<span><b>${esc(x.n)}</b><small>${x.sc}</small></span><em class="inf" title="As many as you like${p?" · unit price "+fv(p)+" Yang":""}">∞</em></button>`}).join("")
     ||`<p class="muted">${esc(c[1])} is not added yet. Tell us what its orbs do and it comes next.</p>`;
-  const why=dvWhyNot(o),p=o?price(o.n):0;
+  dvSide();
+}
+/* the picked orb: recipe, spending and the big button (picking an orb redraws only these, not the bench) */
+function dvSide(){
+  const o=dvOrb(),why=dvWhyNot(o),p=o?price(o.n):0;
   $("dvRec").innerHTML=!o?`<p class="muted">Pick an orb.</p>`:`<div class="dvrh"><span class="pgi">${img(o.n)}</span><div><b>${esc(o.n)}</b><br><span class="dvchip">${o.sc}</span></div></div>`+
     `<div class="dvsh">What it does</div><p>${esc(o.d)}</p><div class="dvsh">You need</div><div class="dvneed">${img(o.n)}<span>${esc(o.n)}</span><b>${dvQn}</b></div>`+
     `<div class="dvsh">Target</div><p class="dvtg">${esc(o.tg)}</p>`;
@@ -2959,7 +2965,8 @@ function drawDv(fx=[]){
 $("dvPick").onclick=e=>{const b=e.target.closest("[data-it]");if(!b)return;
   if(b.dataset.it!==dvIt){dvIt=b.dataset.it;dvFresh();dvLogL.push(`${dvIt} put on the bench with normal attributes`)}drawDv([0,1,2,3,4,5,6])};
 $("dvClr").onclick=()=>{dvIt="";dvS=Array(8).fill(null);dvAnn=0;dvLogL=[];dvSpent=0;drawDv()};
-$("dvOrbs").onclick=e=>{const b=e.target.closest("[data-o]");if(!b)return;dvO=+b.dataset.o;drawDv()};
+$("dvOrbs").onclick=e=>{const b=e.target.closest("[data-o]");if(!b)return;dvO=+b.dataset.o;
+  $("dvOrbs").querySelectorAll("[data-o]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));dvSide()};
 $("v-divine").querySelector(".dvq").onclick=e=>{const b=e.target.closest("[data-q]");if(!b)return;dvQn=Math.max(1,Math.min(100,dvQn+ +b.dataset.q));drawDv()};
 $("dvPot").oninput=()=>{const v=parse($("dvPot").value);dvPot=v>0?Math.min(v,1000):82;drawDv()};
 /* the big button: the picked orb, as many times as x says (stops when it can not go on) */
