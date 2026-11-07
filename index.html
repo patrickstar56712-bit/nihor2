@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T07:26:58Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T07:30:40Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -165,7 +165,7 @@ main.enter .hero h1{animation:fadeUp .6s var(--ease) both,shine 10s linear infin
 .cbox span{font-size:11px;font-weight:600}
 .ic{height:18px;width:auto;max-width:28px;object-fit:contain;vertical-align:middle;margin-right:6px}
 .beta{font-style:normal;font-size:.55em;font-weight:800;letter-spacing:.06em;text-transform:uppercase;vertical-align:middle;margin-left:.5em;padding:.15em .5em;border-radius:999px;border:1px solid var(--gold);color:var(--gold);line-height:1}
-.ski .beta,.tdd .beta{font-size:9.5px}
+.ski .beta,.tdd .beta,#topNav .tn>a .beta{font-size:9.5px}
 .cbox .ic{align-self:center;margin-right:0}
 .cbox b{font-size:15px;font-weight:800}
 /* every content box: dark inside, its own colour on the ring and the count */
@@ -3440,7 +3440,7 @@ function renderNav(){
   /* top bar: each heading opens its pages on hover / keyboard focus */
   $("topNav").innerHTML=[["tools","Tools"],["upgrade","Upgrade Cost"],["skills","Skill Booster"],["divine","Divine Simulator"],...ADM?[["admin","Control Panel"]]:[]].map(([g,l])=>{
     const kids=(GROUPS.find(x=>x[0]===g)||[])[2]||[];
-    return `<div class="tn${tnShut===g?" shut":""}" data-g="${g}"><a href="${href(g)}"${k===g||k.startsWith(g+"/")?' aria-current="page"':""}>${NI[g]}<span>${l}</span>${kids.length?'<i aria-hidden="true">⌄</i>':""}</a>`+
+    return `<div class="tn${tnShut===g?" shut":""}" data-g="${g}"><a href="${href(g)}"${k===g||k.startsWith(g+"/")?' aria-current="page"':""}>${NI[g]}<span>${l}${g==="divine"?`<em class="beta">Soon</em>`:""}</span>${kids.length?'<i aria-hidden="true">⌄</i>':""}</a>`+
       (kids.length?`<div class="tdd"><div>${kids.map(([kk,kl])=>`<a href="${href(kk)}"${kk===k?' aria-current="page"':""}>${beta(kk,kl)}</a>`).join("")}</div></div>`:"")+`</div>`}).join("");
 }
 let lastV="";
