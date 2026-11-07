@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T08:56:44Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T09:02:01Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2898,8 +2898,8 @@ const DV_BANDS=[["Normal band","slots 1-5",0,5,""],["Rare band","slots 6-7",5,7,
 const DV_CATS=[["fund","Fundamentals","the orbs you know"]];   // more orb groups come here later
 const DV_ORBS={fund:[
   {n:"Annulment Orb",sc:"slots 1-7",a:0,b:7,v:"Annul",d:"Removes a random attribute from slots 1-7 and prepares its slot for an Exalted Orb.",tg:"A random attribute of slots 1-7"},
-  {n:"Exalted Orb",sc:"slots 1-5",a:0,b:5,v:"Exalt",d:"Fills a prepared slot of 1-5 with a new attribute: a normal or an exalted one. A slot that never held an attribute is not enough: annul one first.",tg:"First prepared slot of 1-5"},
-  {n:"Greater Exalted Orb",sc:"slots 6-7",a:5,b:7,v:"Exalt",d:"Fills a prepared slot of 6-7 with a new attribute: a normal or an exalted one.",tg:"First prepared slot of 6-7"},
+  {n:"Exalted Orb",sc:"slots 1-5",a:0,b:5,v:"Exalt",d:"Fills an empty slot of 1-5 with a new attribute: a normal or an exalted one. On a weapon only slots 1-3 take one.",tg:"First empty slot of 1-5 (1-3 on a weapon)"},
+  {n:"Greater Exalted Orb",sc:"slots 6-7",a:5,b:7,v:"Exalt",d:"Fills an empty slot of 6-7 with a new attribute: a normal or an exalted one.",tg:"First empty slot of 6-7"},
   {n:"Chaos Orb",sc:"slots 1-5",a:0,b:5,v:"Chaos",d:"Re-rolls the attribute types of slots 1-5 into exalted attributes only. The Divine status is lost.",tg:"Every attribute of slots 1-5"},
   {n:"Greater Chaos Orb",sc:"slots 6-7",a:5,b:7,v:"Chaos",d:"Re-rolls the attribute types of slots 6-7 into exalted attributes only. The Divine status is lost.",tg:"Every attribute of slots 6-7"},
   {n:"Divine Orb",sc:"slots 1-5",a:0,b:5,v:"Divine",d:"Keeps the types and re-rolls every value of slots 1-5 anywhere from T1 to T10. Good values can go down; above T5 is not guaranteed.",tg:"Every attribute of slots 1-5"},
@@ -2919,7 +2919,7 @@ function dvNum(s){const raw=s.v[s.t-1];if(!s.ex)return raw;
   return(Number.isInteger(x)?x.toLocaleString("en-US"):x.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}))+m[2]}
 /* the attribute as the game writes it: "Magic Break" -> "Ignores 4.14% of the enemy's Magic resistance", AVG / SD without the short form */
 function dvLine(s){const v=dvNum(s),b=/^(.+) Break$/.exec(s.n);
-  return b?`Ignores ${v} of the enemy's ${b[1]} resistance`:s.n.replace(/ \((AVG|SD)\)$/,"")+" +"+v}
+  return b?`Ignores ${v} of the enemy's ${b[1]} resistance`:/^% /.test(s.n)?v+" "+s.n.slice(2):s.n.replace(/ \((AVG|SD)\)$/,"")+" +"+v}
 /* the tags after it: [T4] or [D-T8], then [Exalted] [Divined] */
 /* element attributes: their colour class (Burn = fire, Lightning, Poison, Curse, Magical Power = magic) */
 const dvEl=n=>/^Burn Damage/.test(n)?"el-fire":/^Lightning Damage/.test(n)?"el-bolt":/^Poison Damage/.test(n)?"el-poison":/^Curse Damage/.test(n)?"el-curse":/^Magical Power/.test(n)?"el-magic":"";   // element damage only; the Breaks keep the normal colour
@@ -2927,14 +2927,17 @@ const dvTags=s=>(s.dv?"[D-T"+s.t+"]":"[T"+s.t+"]")+(s.ex?" [Exalted]":"")+(s.dv?
 const dvOrb=()=>(DV_ORBS[dvCat]||[])[dvO];
 const dvExCount=()=>dvS.slice(0,5).filter(s=>s&&s.ex).length;
 /* a fresh item: normal attributes in 1-5 and, if the item has them, 6-7 */
-function dvFresh(){dvS=Array(8).fill(null);for(let i=0;i<7;i++)dvS[i]=dvRoll(i,false)}
+function dvFresh(){dvS=Array(8).fill(null)}   // a new item starts with no attributes
+/* slots an orb can work on: a weapon has only 1-3 of the normal band (4-5 stay locked); items without 6-7 have none there */
+const dvOpen=i=>i<7&&!(dvIt==="Weapon"&&i>=3&&i<5)&&!(i>=5&&!dvRows("6/7").length);
+const dvFree=i=>dvOpen(i)&&(!dvS[i]||dvS[i].p);
 /* why the picked orb can not be used now ("" = it can) */
 function dvWhyNot(o){
   if(!o)return"Pick an orb";if(!dvIt)return"No item on the bench";if(!DVB)return"Loading the bonuses…";
   const idx=[...Array(o.b-o.a)].map((_,k)=>o.a+k);
   if(o.v==="Annul")return idx.some(i=>dvAt(i))?"":"No attribute that can be removed";
   if(o.v==="Exalt"){if(DV_NOEX.has(dvIt))return`A ${dvIt.toLowerCase()} takes no exalted attributes`;
-    if(!idx.some(i=>dvS[i]&&dvS[i].p))return"No prepared slot in "+o.sc+": use an Annulment Orb first";
+    if(!idx.some(dvFree))return"No empty slot in "+(dvIt==="Weapon"&&o.a===0?"slots 1-3 (a weapon uses only these)":o.sc);
     return""}
   return idx.some(i=>dvAt(i))?"":"No attribute to re-roll in "+o.sc;
 }
@@ -2942,7 +2945,7 @@ function dvWhyNot(o){
 function dvUse(o){
   const idx=[...Array(o.b-o.a)].map((_,k)=>o.a+k),live=idx.filter(i=>dvAt(i));
   if(o.v==="Annul"){const i=live[Math.floor(Math.random()*live.length)],old=dvS[i];dvS[i]={p:1};dvAnn++;return[`<b>${esc(o.n)}</b> removed ${esc(old.n)} from slot ${i+1}`,[i]]}
-  if(o.v==="Exalt"){const i=idx.find(k=>dvS[k]&&dvS[k].p),s=dvPick(i,Math.random()<DV_EXALT_EX);if(!s)return["Nothing left to roll",[]];dvS[i]=s;return[`<b>${esc(o.n)}</b>: slot ${i+1} ${esc(dvLine(s))} ${dvTags(s)}`,[i]]}
+  if(o.v==="Exalt"){const i=idx.find(dvFree),s=dvPick(i,Math.random()<DV_EXALT_EX);if(!s)return["Nothing left to roll",[]];dvS[i]=s;return[`<b>${esc(o.n)}</b>: slot ${i+1} ${esc(dvLine(s))} ${dvTags(s)}`,[i]]}
   if(o.v==="Chaos"){for(const i of live)dvS[i]={p:1};for(const i of live)dvS[i]=dvPick(i,true);   // emptied first, so the exalted limit counts only what stays
     return[`<b>${esc(o.n)}</b> re-rolled slot${live.length>1?"s":""} ${live.map(i=>i+1).join(", ")}`,live]}
   for(const i of live){const s=dvS[i],r=dvRows((s.ex?"Exalted + Divine":"Divine")+(i>=5?" 6/7":"")).find(x=>x[0]===s.n);if(r){s.v=r[2];s.dv=1;s.t=dvTier(r[2].length)}}
@@ -2956,7 +2959,7 @@ function drawDv(fx=[]){
   $("dvPick").innerHTML=DV_ITEMS.map(n=>`<button data-it="${n}" aria-pressed="${n===dvIt}">${n}</button>`).join("");
   $("dvSlots").innerHTML=DV_BANDS.map(([l,r,a,b,c])=>`<div class="dvband ${c}">${l} · ${r}</div>`+dvS.slice(a,b).map((s,j)=>{const i=a+j,at=s&&s.n?s:null;
     return `<div class="dvsl${at&&at.ex?" ex":""}${at&&at.dv&&at.t>=6?" d6"+(at.t>=at.v.length?" d10":""):""}${s&&s.p?" pr":""}${fx.includes(i)&&$("dvAnim").checked?" fx":""}"><span>${i+1}</span>${at?`<span class="gl ${dvEl(at.n)}" title="${esc(at.n)}"><span>${esc(dvLine(at))}</span></span><span class="dvch" title="Tier ${at.t} of ${at.v.length}${at.ex?" · pool value × potential":""}">${at.ex?`<em class="cx">EXALTED</em>`:""}<em class="${at.dv?(at.ex?"ced":"cd"):"ct"}">${at.dv?(at.ex?"ED-":"D-"):""}T${at.t}</em></span>`
-      :s&&s.p?`<span class="e">– prepared –</span>`:`<span class="e">– ${i===7?"godly slot, not part of these orbs":dvIt&&i>=5&&!dvRows("6/7").length?"no slot 6-7 on this item":"empty"} –</span>`}</div>`}).join("")).join("");
+      :s&&s.p?`<span class="e">– prepared –</span>`:`<span class="e">– ${i===7?"godly slot, not part of these orbs":dvIt&&i>=5&&!dvRows("6/7").length?"no slot 6-7 on this item":dvIt&&!dvOpen(i)?"locked for a weapon":"empty"} –</span>`}</div>`}).join("")).join("");
   const top=dvS.filter(x=>x&&x.n).reduce((m,s)=>!m||s.t/s.v.length>m.t/m.v.length?s:m,null);
   $("dvSt").innerHTML=`<dt>Prepared slots</dt><dd>${dvS.filter(x=>x&&x.p).length}</dd><dt>Exalted (1-5 / 6-7)</dt><dd>${dvExCount()} / ${dvS.slice(5,7).filter(x=>x&&x.ex).length}</dd><dt>Annulled this session</dt><dd>${dvAnn}</dd><dt>Highest tier</dt><dd>${top?"T"+top.t+"/"+top.v.length:"–"}</dd>`;
   $("dvLog").innerHTML=dvLogL.length?dvLogL.slice(-40).reverse().map(l=>`<li>${l}</li>`).join(""):`<li class="muted">Nothing crafted yet.</li>`;
@@ -2977,7 +2980,7 @@ function dvSide(){
   $("dvGo").textContent=o?o.v.toUpperCase():"–";$("dvGo").disabled=!!why;$("dvWhy").textContent=why;$("dvQ").textContent="x"+dvQn;
 }
 $("dvPick").onclick=e=>{const b=e.target.closest("[data-it]");if(!b)return;
-  if(b.dataset.it!==dvIt){dvIt=b.dataset.it;dvFresh();dvLogL.push(`${dvIt} put on the bench with normal attributes`)}drawDv([0,1,2,3,4,5,6])};
+  if(b.dataset.it!==dvIt){dvIt=b.dataset.it;dvFresh();dvLogL.push(`${dvIt} put on the bench`)}drawDv()};
 $("dvClr").onclick=()=>{dvIt="";dvS=Array(8).fill(null);dvAnn=0;dvLogL=[];dvSpent=0;drawDv()};
 $("dvOrbs").onclick=e=>{const b=e.target.closest("[data-o]");if(!b)return;dvO=+b.dataset.o;
   $("dvOrbs").querySelectorAll("[data-o]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));dvSide()};
