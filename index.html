@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T19:22:59Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T19:27:08Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -396,59 +396,6 @@ main.enter .panel,main.enter .acc{animation:fadeUp .55s calc(.12s + var(--i,0) *
 .costbox b.bump{animation:bump .45s var(--ease)}
 .costbox .tt{border-top:1px solid var(--line);padding-top:6px;font-size:17px}
 .costbox .cbadd{grid-column:1/-1;margin-top:6px;font-weight:800;color:var(--gold);border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}
-.eqw{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:start}
-.eqg{display:grid;grid-template-columns:repeat(4,58px);grid-template-rows:repeat(5,58px);gap:6px;padding:10px;border-radius:10px;border:1px solid #4a3d2c;background:linear-gradient(180deg,#1a1611,#100e0b)}
-.eqs{position:relative;display:grid;place-items:center;padding:0;border:1px solid #5d4c35;border-radius:4px;background:radial-gradient(circle at 50% 40%,#211c16,#0d0b09);box-shadow:inset 0 0 0 1px rgba(0,0,0,.6);cursor:pointer;min-width:0}
-.eqs .ic{position:absolute;inset:0;margin:auto;height:42px;max-width:48px;object-fit:contain;background:#100d0a}.eqs.tall .ic{height:96px;max-width:50px}   /* over the name: the name shows only when there is no picture */
-.eqs b{position:absolute;left:4px;bottom:2px;font-size:11.5px;font-weight:800;color:#fff;text-shadow:0 0 3px #000,0 0 2px #000}
-.eqs small{padding:0 3px;word-break:break-word;font-size:10px;color:#8d7c63;text-align:center;line-height:1.1}
-.eqs:hover{border-color:#a8875a}.eqs[aria-pressed=true]{background:radial-gradient(circle at 50% 40%,#2a2318,#0d0b09);color:inherit;border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),inset 0 0 12px color-mix(in srgb,var(--gold) 25%,transparent)}
-.eqs.off{opacity:.35;cursor:default}
-.eqbag{display:flex;gap:6px;align-items:flex-start}
-.eqg.eqimg{--k:2;display:block;position:relative;width:calc(162px*var(--k));height:calc(187px*var(--k));padding:0;border:0;border-radius:4px;background:url(png/inventory.png) 0 0/100% 100%;image-rendering:auto}
-.eqp{position:absolute;left:calc(var(--x)*1px*var(--k));top:calc(var(--y)*1px*var(--k));width:calc(var(--w)*1px*var(--k));height:calc(var(--h)*1px*var(--k));padding:0;border:1px solid transparent;border-radius:9px;background:transparent;cursor:pointer;display:grid;place-items:center}
-.eqp:hover{border-color:#a8875a;background:rgba(255,220,150,.06)}
-.eqp[aria-pressed=true]{border-color:var(--gold);background:rgba(255,200,90,.08);box-shadow:0 0 0 1px var(--gold)}
-.eqp.has{background:#0d0b09}
-.eqp .ic{position:absolute;inset:0;margin:auto;height:78%;max-width:84%;object-fit:contain;background:#0d0b09}.eqp.tall .ic{height:90%}
-.eqp small{padding:0 3px;font-size:10px;color:#cdbb98;text-align:center;word-break:break-word;line-height:1.1}
-.eqp b{position:absolute;left:4px;bottom:2px;font-size:11.5px;font-weight:800;color:#fff;text-shadow:0 0 3px #000,0 0 2px #000}
-.eqlv .cr{color:var(--teal)}.eqsh small{text-transform:none;letter-spacing:0;font-weight:500}
-.pgsa{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mute);margin-left:auto}.pgsa+#pgClr{margin-left:0}
-@media(max-width:640px){.eqg.eqimg{--k:1.8}}
-.eqtabs{display:flex;flex-direction:column;gap:4px;padding-top:10px}
-.eqtabs button{width:30px;height:26px;padding:0;font-size:11.5px;font-weight:800;font-family:Georgia,serif;color:#cdbb98;border:1px solid #5d4c35;border-radius:4px;background:linear-gradient(180deg,#2a231a,#15110d)}
-.eqtabs button[aria-selected=true]{color:#fff;border-color:var(--gold);background:linear-gradient(180deg,#5a4526,#2a1f12)}
-.eqg.eqabs{display:block;position:relative;width:270px;height:334px;box-sizing:border-box}
-.eqabs .eqs.off{opacity:1;border-color:#4a3d2c}.eqabs .eqs.lk{color:#6f6250}.eqabs .eqs.lk svg{width:18px;height:18px}
-.eqabs .eqs.rg{border-radius:10px}.eqabs .eqs.rd{border-radius:10px;border-color:#a8875a}
-.eqfig{width:100%;height:100%;fill:none;stroke:#6f6250;stroke-width:1.2}
-.eqdiv{position:absolute;left:134px;top:10px;bottom:10px;border-left:1px solid #4a3d2c}
-.eqln{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke:#7a6243;stroke-width:1.4}
-.eqmid{position:absolute;left:111px;top:143px;width:48px;height:48px;display:grid;place-items:center;border-radius:50%;border:2px solid #a8875a;background:#1a140d;color:#e8d7b0;font-size:12px;font-weight:800}
-.eqabs .sbs{cursor:pointer;opacity:1;padding:0;display:grid;place-items:center}.eqabs .sbs:hover{border-color:#d4ad6a}
-.sbs .ic{position:absolute;inset:0;margin:auto;height:40px;max-width:44px;object-fit:contain;background:#0d0b09}
-.sbs small{padding:0 2px;font-size:9.5px;color:#cdbb98;text-align:center;line-height:1.1;word-break:break-word}
-.sbs b{position:absolute;left:3px;bottom:1px;font-size:11px;font-weight:800;color:#fff;text-shadow:0 0 3px #000,0 0 2px #000}
-.sbs[aria-pressed=true]{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold);background:radial-gradient(circle at 50% 40%,#2a2318,#0d0b09)}
-.eqln.sbl.on{stroke:#ffd77a;stroke-width:2.2;filter:drop-shadow(0 0 3px #ffbf47) drop-shadow(0 0 7px rgba(255,190,70,.8))}
-.eqln.sbl.on line,.eqln.sbl.on circle{stroke-dasharray:10 7;animation:sbFlow 1.1s linear infinite}
-.eqln.sbl.on circle{animation-duration:3s}
-@keyframes sbFlow{to{stroke-dashoffset:-34}}
-.eqmid.on{color:#fff3cf;border-color:#ffd77a;box-shadow:0 0 10px #ffbf47,inset 0 0 8px rgba(255,200,90,.5);animation:sbPulse 1.6s ease-in-out infinite}
-@keyframes sbPulse{50%{box-shadow:0 0 18px #ffcf6a,inset 0 0 12px rgba(255,210,110,.7)}}
-.sblv{flex-direction:column;gap:5px}.sblv div{display:flex;flex-wrap:wrap;gap:5px}
-@media (prefers-reduced-motion:reduce){.eqln.sbl.on line,.eqln.sbl.on circle,.eqmid.on{animation:none}}
-.eqcol{position:absolute;left:105px;top:30px;width:60px;height:250px;display:flex;flex-direction:column;align-items:center;justify-content:space-around;border:2px solid #5d4c35;border-radius:12px;background:#0f0c09}
-.eqcol i{width:30px;height:30px;border-radius:50%;border:2px solid #7a6243;background:radial-gradient(circle,#2b3550 35%,#0d0b09 40%)}
-.eqcol b{width:40px;height:12px;border:1px solid #7a6243;border-radius:2px}
-.eqman{position:absolute;left:90px;top:294px;width:90px;height:26px;display:grid;place-items:center;border:1px solid #4d6b8a;border-radius:4px;background:linear-gradient(180deg,#2c4866,#18283b);color:#d6e4f3;font-size:12px;font-weight:700;opacity:.8}
-.eqed{min-width:0}.eqed .skdh{display:flex;align-items:center;justify-content:space-between}
-.eqsh{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:12px 0 6px}
-.eqit{display:flex;flex-wrap:wrap;gap:6px}.eqit button{display:flex;align-items:center;gap:8px;padding:5px 10px;font-size:13px}.eqit .ic{height:26px;max-width:26px;margin:0}
-.eqit button[aria-pressed=true],.eqlv button[aria-pressed=true]{border-color:var(--gold);color:var(--gold);background:color-mix(in srgb,var(--gold) 10%,var(--panel))}
-.eqlv{display:flex;flex-wrap:wrap;gap:5px}.eqlv button{min-width:38px;padding:5px 6px;font-weight:700}
-@media(max-width:640px){.eqw{grid-template-columns:1fr}.eqg{justify-self:center;grid-template-columns:repeat(4,52px);grid-template-rows:repeat(5,52px)}.eqs.tall .ic{height:84px}}
 .pgtop{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.pgtop h1{margin:0}#pgClr{margin-left:auto}#pgClr.armed{color:var(--red);border-color:var(--red)}
 #pgList{display:flex;flex-direction:column;gap:10px;margin-top:14px}
 .pge{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px 12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);animation:fadeUp .35s calc(var(--i,0) * .04s) var(--ease) both}
@@ -1297,8 +1244,8 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
   <div class="cards">
     <a class="card" href="#/tools/loot" style="--i:0"><b>Loot Tracker</b><span>Upload a log file, see drop values and hourly income.</span></a>
     <a class="card" href="#/upgrade" style="--i:1"><b>Upgrade Cost</b><span>Yang and material cost of +0 to +9 upgrades.</span></a>
-    <a class="card" href="#/skills" style="--i:2"><b>Skill Booster</b><span>M1 to P10 skill level cost and materials.</span></a>
-    <a class="card" href="#/progress" style="--i:3"><b>Progress</b><span>Your equipment and what it still needs to +9.</span></a>
+    <a class="card" href="#/progress" style="--i:2"><b>Progress List</b><span>Everything you added with + Add progress, added up.</span></a>
+    <a class="card" href="#/skills" style="--i:3"><b>Skill Booster</b><span>M1 to P10 skill level cost and materials.</span></a>
     <a class="card" href="#/divine" style="--i:4"><b>Divine Simulator</b><span>The crafting bench: orbs, attributes and tiers.</span></a>
   </div>
 </main>
@@ -1559,10 +1506,9 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 
 <main id="v-progress" hidden>
   <p class="crumb"><a href="#/">← Main Page</a></p>
-  <div class="pgtop"><h1>Progress</h1><span class="muted" id="pgCnt"></span><label class="pgsa" id="pgSaL" hidden><input type="checkbox" id="pgSa"> Count added progress</label><button id="pgClr" hidden>Clear all</button></div>
-  <p class="sub">Click a box and put your item in it with its level: what it still needs to +9 is added up below, together with everything you added with + Add progress.</p>
-  <section class="panel eqw" style="--i:0"><div class="eqbag"><div class="eqtabs" id="eqT" role="tablist" aria-label="Inventory pages"></div><div class="eqg" id="eqG" role="group" aria-label="Equipment"></div></div><div class="eqed" id="eqEd"></div></section>
-  <section class="panel" id="pgTot" style="--i:1"></section>
+  <div class="pgtop"><h1>Progress List</h1><span class="muted" id="pgCnt"></span><button id="pgClr" hidden>Clear all</button></div>
+  <p class="sub">Everything you added with + Add progress, and what it all needs together.</p>
+  <section class="panel" id="pgTot" style="--i:0"></section>
   <div id="pgList"></div>
   <div class="costbox" aria-live="polite">
     <span>Yang Cost :</span><b id="pY">0</b>
@@ -1603,7 +1549,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
     <span>Yang Cost :</span><b id="sY">0</b>
     <span>Material Cost :</span><b id="sM">0</b>
     <span class="tt">Total Cost :</span><b class="tt" id="sT">0</b>
-    <button class="cbadd" id="pgAddS" title="Save these skills to Progress">+ Add progress</button>
+    <button class="cbadd" id="pgAddS" title="Save these skills to the Progress List">+ Add progress</button>
   </div>
 </main>
 
@@ -1652,7 +1598,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
     <span>Yang Cost :</span><b id="cY">0</b>
     <span>Material Cost :</span><b id="cM">0</b>
     <span class="tt">Total Cost :</span><b class="tt" id="cT">0</b>
-    <button class="cbadd" id="pgAddW" title="Save this item to Progress">+ Add progress</button>
+    <button class="cbadd" id="pgAddW" title="Save this item to the Progress List">+ Add progress</button>
   </div>
 </main>
 
@@ -2912,107 +2858,22 @@ function pgBtn(b,n){
 }
 $("pgAddW").onclick=e=>pgBtn(e.currentTarget,pgFromW());
 $("pgAddS").onclick=e=>pgBtn(e.currentTarget,pgFromSk());
-/* the equipment: the boxes of the game's inventory (bag and emblem left out); each box takes an item of its Upgrade Cost list and its level */
-const EQ=[["weapon","weapons","Weapon",[6,4,32,63]],["helmet","helmets","Helmet",[42,4,32,31]],["armour","armour","Armour",[42,36,32,64]],["shield","shields","Shield",[79,36,31,32]],
-  ["earring","jewellery","Earrings",[118,36,32,32],/earring/i],["bracelet","jewellery","Bracelet",[79,68,31,32],/bracelet/i],["necklace","jewellery","Necklace",[118,68,32,32],/necklace/i]];
-let EQS=(v=>v&&typeof v==="object"&&!Array.isArray(v)?v:{})(ld("pgEq",{})),eqSel="";
-const eqSave=()=>sv("pgEq",EQS);
-const eqList=c=>{const l=c===CAT?W:(ld(UPG(c),[])||[]).map(fixW);return l.length?l:(DEFS[c]||[]).map(d=>fixW(JSON.parse(JSON.stringify(d))))};
-const eqItems=d=>{const l=eqList(d[1]).filter(w=>w.y.some(Boolean)||w.m.length),m=d[4]?l.filter(w=>d[4].test(w.n)):l;return m.length?m:l};
-/* what a box still needs, only for that item: from its level to +9, or with Craft (level -1: not made yet) its craft first */
-function eqNeed(d){const e=EQS[d[0]];if(!e)return null;const w=eqList(d[1]).find(x=>x.n===e.n);if(!w)return null;
-  let y=0;const m=new Map(),add=(n,c)=>{if(n&&c>0)m.set(n,(m.get(n)||0)+c)};
-  if(e.l<0){y+=w.cr.y;for(const x of w.cr.m)add(x.n.trim(),x.c)}
-  for(let i=Math.max(0,e.l);i<LV;i++){y+=w.y[i]||0;for(const x of w.m)add(x.n,x.c[i])}
-  return{k:d[2],n:w.n,s:`${e.l<0?"Craft":"+"+e.l} → +${LV}`,y,m:[...m]}}
-const eqLv=l=>l<0?"Craft":"+"+l;
-const eqEntries=()=>[...EQ.map(eqNeed),...SBS.map((_,i)=>sbNeed(i))].filter(x=>x&&(x.y||x.m.length));
-/* the inventory's pages I-VI; only Equipment takes items for now, the others show the game's layout */
-const EQT=[["eq","Equipment"],["co","Costumes"],["ss","Spiritstones"],["sb","Skill Booster"],["sg","Sigils"],["ta","Talismans"]],ROM=["I","II","III","IV","V","VI"];
-/* the five Skill Booster boxes: {t: skill book, l: level index 0..29} */
-let SBS=(v=>Array.from({length:5},(_,i)=>v&&v[i]&&typeof v[i].t==="string"?{t:v[i].t,l:Math.max(0,Math.min(SKN-1,+v[i].l||0))}:null))(ld("pgSb",[]));
-const sbSave=()=>sv("pgSb",SBS);
-/* skills to pick: the chosen character's, else every skill added in the Control Panel, else every skill book */
-const sbSkills=()=>{const c=chSel.c,own=Object.entries(CSK).filter(([k])=>!c||k.startsWith(c+"/")).flatMap(([,l])=>l||[]),all=[...new Set(own.length?own:Object.values(CSK).flat())];return all.length?all:SKBOOKS};
-/* what a box still needs: from its level to P10 */
-const sbNeed=i=>{const e=SBS[i];if(!e||e.l>=SKN-1)return e?{k:"Skill",n:skName(e.t),s:skL(e.l),y:0,m:[]}:null;const x=skSum(e.l,SKN-2,e.t);return{k:"Skill",n:skName(e.t),s:`${skL(e.l)} → ${skL(SKN-1)}`,y:x.y,m:x.r}};
-let eqTab=EQT.some(t=>t[0]===ld("pgTab","eq"))?ld("pgTab","eq"):"eq";
-/* a box at x, y (px inside the 270 x 334 page), w x h */
-const eqB=(x,y,w,h,c="",t="")=>`<span class="eqs off ${c}" style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px">${t}</span>`;
-const EQ_LOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
-const eqRing=(n,R,a0=-90)=>Array.from({length:n},(_,k)=>{const a=(a0+k*360/n)*Math.PI/180;return[135+R*Math.cos(a),167+R*Math.sin(a)]});
-function eqPage(t){
-  if(t==="co"){const fig='<svg class="eqfig" viewBox="0 0 60 100" aria-hidden="true"><circle cx="30" cy="12" r="8"/><path d="M18 26h24l6 30h-8l-3-18v58h-8V64h-2v32h-8V38l-3 18h-8z"/></svg>';
-    return [10,74,138,202].map(y=>eqB(10,y,58,58)+eqB(202,y,58,58)).join("")+`<div style="position:absolute;left:75px;top:70px;width:120px;height:190px">${fig}</div>`+eqB(106,10,58,58)+eqB(106,266,58,58)}
-  if(t==="ss")return [10,64,154,208].map((x,ci)=>[0,1,2,3,4].map(k=>eqB(x,10+54*k,48,48,ci>1?"lk":k===4?"rg":"",ci>1?EQ_LOCK:"")).join("")).join("")+'<i class="eqdiv"></i>';
-  if(t==="sb"){const p=eqRing(5,105),n=SBS.filter(x=>x&&x.l>=10).length,on=n===5;
-    return `<svg class="eqln sbl${on?" on":""}" viewBox="0 0 270 334" aria-hidden="true">${p.map(([x,y])=>`<line x1="135" y1="167" x2="${x}" y2="${y}"/>`).join("")}<circle cx="135" cy="167" r="105"/></svg>`+
-      p.map(([x,y],i)=>{const e=SBS[i];return `<button class="eqs sbs${e?" has":""}" data-sb="${i}" style="position:absolute;left:${x-27}px;top:${y-27}px;width:54px;height:54px" aria-pressed="${eqSel==="sb"+i}" title="${e?esc(skName(e.t))+" "+skL(e.l):"Click to put a skill in"}">${e?`<small>${esc(skName(e.t))}</small>${img(skGP(e.t))}<b>${skL(e.l)}</b>`:""}</button>`}).join("")+
-      `<span class="eqmid${on?" on":""}">${n}/5</span>`}
-  if(t==="sg")return [40,135,230].map(y=>eqB(14,y,64,64)+eqB(192,y,64,64)).join("")+'<span class="eqcol"><i></i><i></i><i></i><b></b></span><span class="eqman">Manage</span>';
-  if(t==="ta"){const p=eqRing(6,110),tri=k=>[0,2,4].map(j=>p[(j+k)%6].join(",")).join(" ");
-    return `<svg class="eqln" viewBox="0 0 270 334" aria-hidden="true"><polygon points="${tri(0)}"/><polygon points="${tri(1)}"/><circle cx="135" cy="167" r="62"/></svg>`+p.map(([x,y])=>eqB(x-27,y-27,54,54)).join("")+'<span class="eqmid">0/6</span>'}
-  return "";
-}
-function drawEq(){
-  $("eqT").innerHTML=EQT.map(([k,n],i)=>`<button role="tab" data-eqt="${k}" aria-selected="${k===eqTab}" title="${n}">${ROM[i]}</button>`).join("");
-  $("eqG").classList.toggle("eqabs",eqTab!=="eq");$("eqG").classList.toggle("eqimg",eqTab==="eq");$("eqG").setAttribute("aria-label",EQT.find(t=>t[0]===eqTab)[1]);
-  if(eqTab==="sb"){$("eqG").innerHTML=eqPage("sb");const i=eqSel.startsWith("sb")?+eqSel.slice(2):-1,e=SBS[i];
-    if(i<0){$("eqEd").innerHTML=`<div class="skdh"><b>Skill Booster</b></div><p class="muted">Click a box and pick a skill and its level. With all five at G1 or higher the lines light up.</p>`;return}
-    const nd=sbNeed(i);
-    $("eqEd").innerHTML=`<div class="skdh"><b>Booster ${i+1}</b>${e?`<button class="xb" data-sbx aria-label="Empty this box" title="Empty this box">✕</button>`:""}</div>`+
-      `<div class="eqsh">Skill</div><div class="eqit">${sbSkills().map(t=>`<button data-sbt="${esc(t)}" aria-pressed="${!!e&&e.t===t}"${SBS.some((x,k)=>k!==i&&x&&x.t===t)?" disabled title=\"Already in another box\"":""}>${img(skGP(t))}<span>${esc(skName(t))}</span></button>`).join("")}</div>`+
-      `<div class="eqsh">Its level now</div><div class="eqlv sblv">${SKT.map((g,a)=>`<div>${Array.from({length:10},(_,k)=>a*10+k).map(l=>`<button data-sbl="${l}" aria-pressed="${!!e&&e.l===l}"${e?"":" disabled"}>${skL(l)}</button>`).join("")}</div>`).join("")}</div>`+
-      (nd?`<div class="eqsh">Still needs (${nd.s})</div><div class="dchips">${nd.m.map(([n,c])=>mchip(n,c)).join("")}${nd.y?`<span class="chip y"><b>${fk(nd.y)}</b><span>Yang</span></span>`:""}${!nd.y&&!nd.m.length?`<span class="muted">${e.l>=SKN-1?`Nothing: it is at ${skL(SKN-1)}.`:"No Skill Booster cost entered for these levels."}</span>`:""}</div>`:"");
-    return}
-  if(eqTab!=="eq"){$("eqG").innerHTML=eqPage(eqTab);const n=EQT.find(t=>t[0]===eqTab)[1];
-    $("eqEd").innerHTML=`<div class="skdh"><b>${n}</b></div><p class="muted">${eqTab==="co"?"Costumes are not opened here.":"Only the game's layout for now: these boxes have no upgrade cost here yet."}</p>`;return}
-  $("eqG").innerHTML=EQ.map(d=>{const e=EQS[d[0]],[x,y,w,h]=d[3];
-    return `<button class="eqp${h>40?" tall":""}${e?" has":""}" data-eq="${d[0]}" style="--x:${x};--y:${y};--w:${w};--h:${h}" aria-pressed="${eqSel===d[0]}" aria-label="${esc(d[2])}" title="${esc(d[2])}${e?": "+esc(e.n)+" "+eqLv(e.l):" · click to put an item in"}">${e?`<small>${esc(e.n)}</small>`+img(e.n)+`<b>${eqLv(e.l)}</b>`:""}</button>`}).join("");
-  const d=EQ.find(x=>x[0]===eqSel);
-  if(!d){$("eqEd").innerHTML=`<p class="muted">Click a box on the left and pick the item you wear there and its level.</p>`;return}
-  const e=EQS[d[0]],it=eqItems(d),nd=eqNeed(d);
-  $("eqEd").innerHTML=`<div class="skdh"><b>${esc(d[2])}</b>${e?`<button class="xb" data-eqx aria-label="Empty this box" title="Empty this box">✕</button>`:""}</div>`+
-    `<div class="eqsh">Item</div><div class="eqit">${it.map(w=>`<button data-eqn="${esc(w.n)}" aria-pressed="${!!e&&e.n===w.n}">${img(w.n)}<span>${esc(w.n)}</span></button>`).join("")||`<span class="muted">No item in Upgrade Cost for this box yet.</span>`}</div>`+
-    `<div class="eqsh">Its level now <small>(Craft: not made yet)</small></div><div class="eqlv">${Array.from({length:LV+2},(_,k)=>k-1).map(l=>`<button data-eql="${l}" class="${l<0?"cr":""}" aria-pressed="${!!e&&e.l===l}"${e?"":" disabled"}>${eqLv(l)}</button>`).join("")}</div>`+
-    (nd?`<div class="eqsh">Still needs (${nd.s})</div><div class="dchips">${nd.m.map(([n,c])=>mchip(n,c)).join("")}${nd.y?`<span class="chip y"><b>${fk(nd.y)}</b><span>Yang</span></span>`:""}${!nd.y&&!nd.m.length?`<span class="muted">Nothing: it is at +${LV}.</span>`:""}</div>`:"");
-}
-$("eqT").onclick=e=>{const b=e.target.closest("[data-eqt]");if(!b)return;eqTab=b.dataset.eqt;eqSel="";sv("pgTab",eqTab);drawEq()};
-$("eqG").onclick=e=>{const sb=e.target.closest("[data-sb]");if(sb){eqSel=eqSel==="sb"+sb.dataset.sb?"":"sb"+sb.dataset.sb;drawEq();return}
-  const b=e.target.closest("[data-eq]");if(!b)return;eqSel=eqSel===b.dataset.eq?"":b.dataset.eq;drawEq()};
-$("eqEd").onclick=e=>{const t=e.target.closest("button");if(!t)return;
-  if(eqSel.startsWith("sb")){const i=+eqSel.slice(2);
-    if(t.dataset.sbt!==undefined)SBS[i]={t:t.dataset.sbt,l:SBS[i]?SBS[i].l:0};
-    else if(t.dataset.sbl!==undefined&&SBS[i])SBS[i].l=+t.dataset.sbl;
-    else if(t.dataset.sbx!==undefined)SBS[i]=null;
-    else return;
-    sbSave();drawPg();return}
-  const d=EQ.find(x=>x[0]===eqSel);if(!d)return;
-  if(t.dataset.eqn!==undefined)EQS[d[0]]={n:t.dataset.eqn,l:EQS[d[0]]?EQS[d[0]].l:0};
-  else if(t.dataset.eql!==undefined&&EQS[d[0]])EQS[d[0]].l=+t.dataset.eql;
-  else if(t.dataset.eqx!==undefined)delete EQS[d[0]];
-  else return;
-  eqSave();drawPg()};
-let pgSa=ld("pgShowAdd",false);   // the + Add progress entries are left out unless ticked
-const pgTotal=()=>{const r=new Map();let y=0;for(const e of [...eqEntries(),...(pgSa?PG:[])]){y+=e.y;for(const [n,c] of e.m)r.set(n,(r.get(n)||0)+c)}
+const pgTotal=()=>{const r=new Map();let y=0;for(const e of PG){y+=e.y;for(const [n,c] of e.m)r.set(n,(r.get(n)||0)+c)}
   return{y,r:[...r].sort((a,b)=>b[1]*skPr(b[0])-a[1]*skPr(a[0])||b[1]-a[1])}};
 function pgCost(){const {y,r}=pgTotal(),m=r.reduce((a,[n,c])=>a+c*skPr(n),0);
   for(const [id,v] of [["pY",y],["pM",m],["pT",y+m]]){const el=$(id);el.dataset.v=v;el.textContent=fv(v)}}
 function drawPg(){
-  drawEq();
-  const {y,r}=pgTotal(),any=(pgSa&&PG.length)||eqEntries().length;
-  $("pgSaL").hidden=!PG.length;$("pgSa").checked=pgSa;$("pgList").hidden=!pgSa;
-  $("pgClr").hidden=!PG.length||!pgSa;$("pgCnt").textContent=PG.length?`${PG.length} item${PG.length===1?"":"s"}`:"";
-  $("pgTot").innerHTML=!any?`<p class="muted">Nothing yet. Put your items in the boxes above, or press <b>+ Add progress</b> under the cost on an Upgrade Cost page or in the Skill Booster.</p>`
+  const {y,r}=pgTotal(),any=PG.length;
+  $("pgClr").hidden=!PG.length;$("pgCnt").textContent=PG.length?`${PG.length} item${PG.length===1?"":"s"}`:"";
+  $("pgTot").innerHTML=!any?`<p class="muted">Nothing added yet. Press <b>+ Add progress</b> under the cost on an Upgrade Cost page or in the Skill Booster.</p>`
     :`<div class="skdh"><b>All together</b><span class="sksub">${f(r.length)} material${r.length===1?"":"s"}${y?` · <b>${fk(y)}</b> Yang`:""}</span></div>`+
      (r.length?`<div class="skmg">${r.map(([n,c],i)=>skmRow(n,c,esc(n),i)).join("")}</div>`:"");
   $("pgList").innerHTML=PG.map((e,i)=>`<div class="pge" style="--i:${Math.min(i,12)}"><span class="pgi"><i>${esc((e.n.trim()[0]||"?").toUpperCase())}</i>${e.im?`<img class="ic" src="${e.im}" alt="">`:img(e.ic)}</span>`+
     `<div class="pgh"><b>${esc(e.n)}</b><small>${esc(e.k)}${e.s?" · "+esc(e.s):""} · ${new Date(e.t).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</small></div>`+
-    `<button class="xb" data-pgx="${e.id}" aria-label="Remove ${esc(e.n)}" title="Remove from Progress">✕</button>`+
+    `<button class="xb" data-pgx="${e.id}" aria-label="Remove ${esc(e.n)}" title="Remove from the Progress List">✕</button>`+
     `<div class="dchips">${e.m.map(([n,c])=>mchip(n,c)).join("")}${e.y?`<span class="chip y"><b>${fk(e.y)}</b><span>Yang</span></span>`:""}</div></div>`).join("");
   pgCost();
 }
-$("pgSa").onchange=e=>{pgSa=e.target.checked;sv("pgShowAdd",pgSa);drawPg()};
 $("pgList").onclick=e=>{const b=e.target.closest("[data-pgx]");if(!b)return;PG=PG.filter(x=>x.id!==b.dataset.pgx);pgSave();drawPg()};
 $("pgClr").onclick=e=>{const b=e.currentTarget;
   if(!b.classList.contains("armed")){b.classList.add("armed");b.textContent="Click again to clear all";setTimeout(()=>{b.classList.remove("armed");b.textContent="Clear all"},4000);return}
@@ -3841,13 +3702,13 @@ function renderNav(){
   $("sideNav").innerHTML=
     `<nav aria-label="Menu">`+a("",NI.home+"<span>Main Page</span>","si")+
     GROUPS.filter(g=>g[0]!=="admin").map(grp).join("")+
+    a("progress",NI.progress+"<span>Progress List</span>","si")+
     a("skills",NI.skills+"<span>Skill Booster</span>","si")+
-    a("progress",NI.progress+"<span>Progress</span>","si")+
     a("divine",NI.divine+"<span>Divine Simulator</span>","si")+
     GROUPS.filter(g=>g[0]==="admin"&&ADM).map(grp).join("")+
     `</nav>`;
   /* top bar: each heading opens its pages on hover / keyboard focus */
-  $("topNav").innerHTML=[["tools","Tools"],["upgrade","Upgrade Cost"],["skills","Skill Booster"],["progress","Progress"],["divine","Divine Simulator"],...ADM?[["admin","Control Panel"]]:[]].map(([g,l])=>{
+  $("topNav").innerHTML=[["tools","Tools"],["upgrade","Upgrade Cost"],["progress","Progress List"],["skills","Skill Booster"],["divine","Divine Simulator"],...ADM?[["admin","Control Panel"]]:[]].map(([g,l])=>{
     const kids=(GROUPS.find(x=>x[0]===g)||[])[2]||[];
     return `<div class="tn${tnShut===g?" shut":""}" data-g="${g}"><a href="${href(g)}"${k===g||k.startsWith(g+"/")?' aria-current="page"':""}>${NI[g]}<span>${l}</span>${kids.length?'<i aria-hidden="true">⌄</i>':""}</a>`+
       (kids.length?`<div class="tdd"><div>${kids.map(([kk,kl])=>`<a href="${href(kk)}"${kk===k?' aria-current="page"':""}>${beta(kk,kl)}</a>`).join("")}</div></div>`:"")+`</div>`}).join("");
