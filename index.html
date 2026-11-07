@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T07:37:56Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T07:44:16Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1116,7 +1116,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .dvpl .ic{height:64px;max-width:80px;margin:0}
 .dvpl i{font-style:normal;font-size:40px;font-weight:800;color:var(--gold)}
 .dvnm{font-weight:700;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:4px}
-.dvpick{display:flex;gap:5px}.dvpick button{flex:1;padding:5px 4px;font-size:12px}
+.dvpick{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.dvpick button{padding:5px 2px;font-size:11.5px}
 .dvband{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:8px 0 4px}
 .dvband:first-child{margin-top:0}
 .dvband.r{color:var(--teal)}.dvband.g{color:var(--vio)}
@@ -1217,15 +1217,15 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 <main id="v-divine" hidden>
   <p class="crumb"><a href="#/">← Main Page</a></p>
   <h1>Divine Simulator<em class="beta">Soon</em></h1>
-  <p class="sub">Try orbs on an item without spending a thing. The attributes and their chances are samples for now.</p>
+  <p class="sub">Try orbs on an item without spending a thing. Attributes and values come from the game's bonus list; the tier chances are samples for now.</p>
   <div class="dv">
     <section class="dvp dvw">
-      <div class="dvh"><b>Workpiece</b><small>Put a weapon, a piece of armour or a jewel on the bench</small></div>
+      <div class="dvh"><b>Workpiece</b><small>Pick an item for the bench</small></div>
       <div class="dvwb">
         <div class="dvbench">
           <div class="dvpl" id="dvPl"></div>
           <div class="dvnm" id="dvNm">No item on the bench</div>
-          <div class="dvpick" id="dvPick"><button data-it="Weapon">Weapon</button><button data-it="Armour">Armour</button><button data-it="Jewel">Jewel</button></div>
+          <div class="dvpick" id="dvPick"></div>
         </div>
         <div class="dvslots" id="dvSlots"></div>
         <div class="dvst">
@@ -2847,12 +2847,13 @@ $("pgTot").addEventListener("input",e=>{
 });
 
 /* ---------- divine simulator: orbs on an item's 8 attribute slots (normal 1-5, rare 6-7, godly 8) ----------
-   SAMPLE data until the real attribute lists and chances are known: each attribute has a base value, a tier (1-5) multiplies it */
-const DV_ATTR={
-  Weapon:[["Attack Value",15,""],["Magic Attack Value",15,""],["Strong against Monsters",2,"%"],["Strong against Half Humans",2,"%"],["Critical Hit",2,"%"],["Piercing Hit",2,"%"],["Average Damage",3,"%"],["Skill Damage",3,"%"],["Attack Speed",2,"%"],["Max HP",300,""]],
-  Armour:[["Max HP",300,""],["Max SP",150,""],["Defence",20,""],["Resistance against Magic",2,"%"],["Block physical attacks",2,"%"],["Dodge arrows",2,"%"],["HP Regeneration",3,"%"],["Reflect damage",1,"%"],["Strong against Monsters",2,"%"],["Average Damage resistance",2,"%"]],
-  Jewel:[["Max HP",250,""],["Max SP",120,""],["Critical Hit",2,"%"],["Piercing Hit",2,"%"],["Casting Speed",3,"%"],["Strong against Monsters",2,"%"],["Strong against Half Humans",2,"%"],["Resistance against Magic",2,"%"],["Skill Damage resistance",2,"%"],["Attack Speed",1,"%"]]};
-const DV_W=[40,30,18,9,3],DV_WG=[10,25,30,25,10];   // tier chances (%) of a normal and a greater orb
+   attributes and their tier values: divine-bonuses.json, taken from the game's bonus list (nihor2.com/database?catalog=bonuses).
+   Pools: "Exalted" (slots 1-5) and "Exalted 6/7" (slots 6-7) give 5-tier rolls; a Divine Orb moves an attribute to its
+   "Exalted + Divine" / "Exalted + Divine 6/7" row with 10 tiers. The tier CHANCES are samples until the real ones are known. */
+let DVB=null;
+const dvLoad=()=>DVB?Promise.resolve(DVB):fetch("divine-bonuses.json").then(r=>r.json()).then(d=>DVB=d);
+const DV_W={5:[40,30,18,9,3],10:[20,18,15,13,11,9,7,4,2,1]},DV_WG={5:[10,25,30,25,10],10:[5,7,9,11,13,15,14,12,9,5]};
+const DV_ITEMS=["Weapon","Armor","Helmet","Shield","Shoes","Bracelet","Necklace","Earrings"];   // the items with Exalted attributes
 const DV_BANDS=[["Normal band","slots 1-5",0,5,""],["Rare band","slots 6-7",5,7,"r"],["Godly band","slot 8",7,8,"g"]];
 const DV_CATS=[["fund","Fundamentals","the orbs you know"],["tgt","Targeted","you pick the slot"],["inf","Influence","bind and re-roll"],["asc","Ascension","push the tier"],
   ["res","Restoration","undo the ruin"],["spi","Spiritstone","infect the stone"],["skb","Skill Booster","level and rank"],["tal","Talismans","refine and break through"]];
@@ -2860,44 +2861,53 @@ const DV_TOOLS=[["swb","Switchbot","grind it unattended"]];
 /* the orbs: scope = slots they act on [from, to), verb on the button, what they do */
 const DV_ORBS={fund:[
   {n:"Annulment Orb",sc:"all slots",a:0,b:8,v:"Annul",d:"Removes one attribute at random and banks a charge an Exalted Orb can spend.",tg:"Acts on the whole band"},
-  {n:"Exalted Orb",sc:"slots 1-5",a:0,b:5,v:"Exalt",d:"Adds a new random attribute to an empty slot of the normal band. Spends a banked charge first when there is one.",tg:"First empty slot of slots 1-5"},
-  {n:"Greater Exalted Orb",sc:"slots 6-7",a:5,b:7,v:"Exalt",d:"Adds a new random attribute to an empty slot of the rare band, with better tier chances.",tg:"First empty slot of slots 6-7",g:1},
-  {n:"Chaos Orb",sc:"slots 1-5",a:0,b:5,v:"Chaos",d:"Re-rolls every attribute of the normal band: new attributes, new tiers.",tg:"Every filled slot of slots 1-5"},
-  {n:"Greater Chaos Orb",sc:"slots 6-7",a:5,b:7,v:"Chaos",d:"Re-rolls every attribute of the rare band, with better tier chances.",tg:"Every filled slot of slots 6-7",g:1},
-  {n:"Divine Orb",sc:"all slots",a:0,b:8,v:"Divine",d:"Keeps the attributes and re-rolls their tiers.",tg:"Every filled slot"},
-  {n:"Greater Divine Orb",sc:"all slots",a:0,b:8,v:"Divine",d:"Keeps the attributes and re-rolls their tiers, with better tier chances.",tg:"Every filled slot",g:1}]};
+  {n:"Exalted Orb",sc:"slots 1-5",a:0,b:5,v:"Exalt",d:"Adds a new attribute from the Exalted pool (5 tiers) to an empty slot of the normal band. Spends a banked charge first when there is one.",tg:"First empty slot of slots 1-5"},
+  {n:"Greater Exalted Orb",sc:"slots 6-7",a:5,b:7,v:"Exalt",d:"Adds a new attribute from the Exalted 6/7 pool (5 tiers) to an empty slot of the rare band.",tg:"First empty slot of slots 6-7",g:1},
+  {n:"Chaos Orb",sc:"slots 1-5",a:0,b:5,v:"Chaos",d:"Re-rolls every attribute of the normal band from the Exalted pool: new attributes, new tiers.",tg:"Every filled slot of slots 1-5"},
+  {n:"Greater Chaos Orb",sc:"slots 6-7",a:5,b:7,v:"Chaos",d:"Re-rolls every attribute of the rare band from the Exalted 6/7 pool.",tg:"Every filled slot of slots 6-7",g:1},
+  {n:"Divine Orb",sc:"all slots",a:0,b:8,v:"Divine",d:"Keeps the attributes and re-rolls them on their Exalted + Divine row: 10 tiers, higher values.",tg:"Every filled slot"},
+  {n:"Greater Divine Orb",sc:"all slots",a:0,b:8,v:"Divine",d:"Like the Divine Orb, with better chances for the high tiers.",tg:"Every filled slot",g:1}]};
 let dvIt="",dvS=Array(8).fill(null),dvCat="fund",dvO=0,dvQn=1,dvLogL=[],dvSpent=0,dvAnn=0,dvBank=0;
-const dvTier=g=>{let x=Math.random()*100;const w=g?DV_WG:DV_W;for(let i=0;i<5;i++){if((x-=w[i])<0)return i+1}return 5};
-/* a new attribute not already on the item */
-function dvNew(g){const own=new Set(dvS.filter(Boolean).map(s=>s.n)),pool=DV_ATTR[dvIt].filter(a=>!own.has(a[0]));
-  const a=(pool.length?pool:DV_ATTR[dvIt])[Math.floor(Math.random()*(pool.length||DV_ATTR[dvIt].length))];return{n:a[0],b:a[1],u:a[2],t:dvTier(g)}}
-const dvVal=s=>"+"+f(s.b*s.t)+s.u;
+/* a tier for an n-tier row (5 or 10); greater orbs lean higher */
+const dvTier=(g,n)=>{const w=(g?DV_WG:DV_W)[n]||Array(n).fill(100/n);let x=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<n;i++){if((x-=w[i])<0)return i+1}return n};
+/* the rows of a pool this item can get: [attribute, item indexes, tier values] */
+const dvRows=p=>{if(!DVB)return[];const i=DVB.items.indexOf(dvIt);return(DVB.pools[p]||[]).filter(r=>r[1].includes(i))};
+const dvPool=i=>i<5?"Exalted":"Exalted 6/7";
+/* a new attribute for slot i, not already on the item (null when none is left) */
+function dvNew(i,g){const own=new Set(dvS.filter(Boolean).map(s=>s.n)),rows=dvRows(dvPool(i)).filter(r=>!own.has(r[0]));
+  if(!rows.length)return null;const r=rows[Math.floor(Math.random()*rows.length)];return{n:r[0],v:r[2],t:dvTier(g,r[2].length),dv:0}}
+/* a Divine Orb on slot i: the attribute's Exalted + Divine row (10 tiers) */
+function dvDiv(i,g){const s=dvS[i],r=dvRows(dvPool(i).replace("Exalted","Exalted + Divine")).find(x=>x[0]===s.n);
+  if(!r)return false;s.v=r[2];s.dv=1;s.t=dvTier(g,r[2].length);return true}
+const dvVal=s=>"+"+s.v[s.t-1];
+const dvTc=s=>"t"+Math.max(1,Math.ceil(s.t*5/s.v.length));   // colour by how high the tier is
 const dvOrb=()=>(DV_ORBS[dvCat]||[])[dvO];
 /* why the picked orb can not be used now ("" = it can) */
 function dvWhyNot(o){
-  if(!o)return"Pick an orb";if(!dvIt)return"No item on the bench";
+  if(!o)return"Pick an orb";if(!dvIt)return"No item on the bench";if(!DVB)return"Loading the bonuses…";
   const band=dvS.slice(o.a,o.b);
-  if(o.v==="Exalt")return band.some(s=>!s)?"":"No empty slot in "+o.sc;
+  if(o.v==="Exalt"){if(!band.some(s=>!s))return"No empty slot in "+o.sc;const own=new Set(dvS.filter(Boolean).map(s=>s.n));
+    return dvRows(dvPool(o.a)).some(r=>!own.has(r[0]))?"":`No ${dvPool(o.a)} attribute left for this item`}
   return band.some(Boolean)?"":"No attribute in "+o.sc;
 }
 /* one use of an orb: changes the slots and returns the log line and the slots it touched */
 function dvUse(o){
   const idx=[...Array(o.b-o.a)].map((_,i)=>o.a+i),full=idx.filter(i=>dvS[i]),empty=idx.filter(i=>!dvS[i]);
   if(o.v==="Annul"){const i=full[Math.floor(Math.random()*full.length)],old=dvS[i];dvS[i]=null;dvAnn++;dvBank++;return[`<b>${esc(o.n)}</b> removed ${esc(old.n)} from slot ${i+1}`,[i]]}
-  if(o.v==="Exalt"){const i=empty[0],s=dvNew(o.g);dvS[i]=s;let fr="";if(dvBank>0&&o.a===0){dvBank--;fr=" (banked charge)"}return[`<b>${esc(o.n)}</b>${fr}: slot ${i+1} ${esc(s.n)} ${dvVal(s)} T${s.t}`,[i]]}
-  if(o.v==="Chaos"){for(const i of full)dvS[i]=null;for(const i of full)dvS[i]=dvNew(o.g);return[`<b>${esc(o.n)}</b> re-rolled slot${full.length>1?"s":""} ${full.map(i=>i+1).join(", ")}`,full]}
-  for(const i of full)dvS[i].t=dvTier(o.g);
-  return[`<b>${esc(o.n)}</b> re-rolled the tiers: ${full.map(i=>"T"+dvS[i].t).join(" ")}`,full];
+  if(o.v==="Exalt"){const i=empty[0],s=dvNew(i,o.g);dvS[i]=s;let fr="";if(dvBank>0&&o.a===0){dvBank--;fr=" (banked charge)"}return[`<b>${esc(o.n)}</b>${fr}: slot ${i+1} ${esc(s.n)} ${dvVal(s)} T${s.t}`,[i]]}
+  if(o.v==="Chaos"){for(const i of full)dvS[i]=null;for(const i of full)dvS[i]=dvNew(i,o.g);return[`<b>${esc(o.n)}</b> re-rolled slot${full.length>1?"s":""} ${full.map(i=>i+1).join(", ")}`,full]}
+  const done=full.filter(i=>dvDiv(i,o.g));
+  return[`<b>${esc(o.n)}</b> re-rolled ${done.length?done.map(i=>`${i+1}: T${dvS[i].t}/${dvS[i].v.length}`).join(", "):"nothing (no Divine row)"}`,done];
 }
 function drawDv(fx=[]){
   const o=dvOrb();
   $("dvPl").innerHTML=dvIt?`<i>${dvIt[0]}</i>`:"";
-  $("dvNm").textContent=dvIt?"Sample "+dvIt.toLowerCase():"No item on the bench";
-  $("dvPick").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.it===dvIt)));
+  $("dvNm").textContent=dvIt||"No item on the bench";
+  $("dvPick").innerHTML=DV_ITEMS.map(n=>`<button data-it="${n}" aria-pressed="${n===dvIt}">${n}</button>`).join("");
   $("dvSlots").innerHTML=DV_BANDS.map(([l,r,a,b,c])=>`<div class="dvband ${c}">${l} · ${r}</div>`+dvS.slice(a,b).map((s,j)=>{const i=a+j;
-    return `<div class="dvsl${fx.includes(i)&&$("dvAnim").checked?" fx":""}"><span>${i+1}</span>${s?`<span>${esc(s.n)}</span><span class="v">${dvVal(s)}</span><span class="t t${s.t}">T${s.t}</span>`:`<span class="e">– empty –</span>`}</div>`}).join("")).join("");
-  const top=Math.max(0,...dvS.filter(Boolean).map(s=>s.t));
-  $("dvSt").innerHTML=`<dt>Annulled, restorable</dt><dd>${dvBank} / ${dvAnn}</dd><dt>Influences bound</dt><dd>0 / 8</dd><dt>Slots filled</dt><dd>${dvS.filter(Boolean).length} / 8</dd><dt>Highest tier</dt><dd>${top?"T"+top:"–"}</dd>`;
+    return `<div class="dvsl${fx.includes(i)&&$("dvAnim").checked?" fx":""}"><span>${i+1}</span>${s?`<span>${esc(s.n)}</span><span class="v">${dvVal(s)}</span><span class="t ${dvTc(s)}" title="Tier ${s.t} of ${s.v.length}">T${s.t}${s.dv?"/"+s.v.length:""}</span>`:`<span class="e">– empty –</span>`}</div>`}).join("")).join("");
+  const top=dvS.filter(Boolean).reduce((m,s)=>!m||s.t/s.v.length>m.t/m.v.length?s:m,null);
+  $("dvSt").innerHTML=`<dt>Annulled, restorable</dt><dd>${dvBank} / ${dvAnn}</dd><dt>Influences bound</dt><dd>0 / 8</dd><dt>Slots filled</dt><dd>${dvS.filter(Boolean).length} / 8</dd><dt>Highest tier</dt><dd>${top?"T"+top.t+"/"+top.v.length:"–"}</dd>`;
   $("dvLog").innerHTML=dvLogL.length?dvLogL.slice(-40).reverse().map(l=>`<li>${l}</li>`).join(""):`<li class="muted">Nothing crafted yet.</li>`;
   $("dvSp").textContent=fv(dvSpent)+" Yang";
   $("dvCats").innerHTML=DV_CATS.map(([k,l,s])=>`<button class="dvc" data-c="${k}" aria-pressed="${k===dvCat}"><span><b>${l}</b><small>${s}</small></span><em>${(DV_ORBS[k]||[]).length||""}</em></button>`).join("");
@@ -3640,7 +3650,7 @@ function route(quiet){
   }
   if(c.v==="skills"){skP=null;drawSk(!quiet)}
   if(c.v==="progress")drawPg();
-  if(c.v==="divine")drawDv();
+  if(c.v==="divine"){drawDv();dvLoad().then(()=>drawDv(),()=>{$("dvWhy").textContent="The bonus list could not be loaded."})}
   if(c.v==="login")drawLogin();
   if(CPL)cpRoute(c,quiet);   // the Control Panel's pages
   slotTo(c.v==="loot"&&c.k==="tools/live"?"l":"n");
