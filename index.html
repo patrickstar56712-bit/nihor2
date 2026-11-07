@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T09:02:01Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T10:24:03Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1165,6 +1165,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .dvst dt,.dvspend dt{color:var(--mute)}.dvst dd,.dvspend dd{margin:0;text-align:right;font-weight:700}
 .dvlog{list-style:none;margin:0;padding:0;max-height:130px;overflow:auto;font-size:12px;display:flex;flex-direction:column;gap:3px}
 .dvlog li{color:var(--ink)}.dvlog li b{color:var(--gold)}.dvlog .muted{font-style:italic}
+.dvused{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:4px;font-size:13px}.dvused li{display:flex;align-items:center;gap:8px}.dvused img{width:20px;height:20px;object-fit:contain}.dvused span{flex:1;color:var(--mute)}
 .dvsp{display:flex;justify-content:space-between;margin-top:8px;padding-top:6px;border-top:1px solid var(--line);font-size:13px}.dvsp b{color:var(--gold)}
 .dvo{display:flex;align-items:center;gap:10px;width:100%;padding:6px 10px;margin-bottom:5px;border-radius:7px;text-align:left}
 .dvo .ic{flex:none;height:30px;max-width:30px;margin:0}
@@ -1239,13 +1240,13 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
     <a class="card" href="#/tools/loot" style="--i:0"><b>Loot Tracker</b><span>Upload a log file, see drop values and hourly income.</span></a>
     <a class="card" href="#/upgrade" style="--i:1"><b>Upgrade Cost</b><span>Yang and material cost of +0 to +9 upgrades.</span></a>
     <a class="card" href="#/skills" style="--i:2"><b>Skill Booster</b><span>M1 to P10 skill level cost and materials.</span></a>
-    <a class="card" href="#/divine" style="--i:3"><b>Divine Simulator<em class="beta">Soon</em></b><span>New simulations are on the way.</span></a>
+    <a class="card" href="#/divine" style="--i:3"><b>Divine Simulator</b><span>The crafting bench: orbs, attributes and tiers.</span></a>
   </div>
 </main>
 
 <main id="v-divine" hidden>
   <p class="crumb"><a href="#/">← Main Page</a></p>
-  <h1>Divine Simulator<em class="beta">Soon</em></h1>
+  <h1>Divine Simulator</h1>
   <p class="sub">Try orbs on an item without spending a thing. Rules from the wiki's Exalted and Divine Attributes guides, values from the game's bonus list. Not in the guides, so guessed: every tier is equally likely, and an Exalted Orb gives an exalted attribute half the time.</p>
   <div class="dv">
     <section class="dvp dvw">
@@ -1263,6 +1264,7 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
           <div class="dvsh">This session</div>
           <ol class="dvlog" id="dvLog"></ol>
           <div class="dvsp"><span>Spent this session</span><b id="dvSp">0 Yang</b></div>
+          <ul class="dvused" id="dvUsed"></ul>
         </div>
       </div>
     </section>
@@ -2886,6 +2888,7 @@ let DVB=null;
 /* bonus rows switched off in Control Panel -> Divine Simulator ("pool|attribute"); the database decides for everyone */
 let DVOFF=new Set(ld("dvOff",[]));
 const dvLoad=()=>DVB?Promise.resolve(DVB):fetch("divine-bonuses.json").then(r=>r.json()).then(d=>DVB=d);
+const DV_CHAOS_NORMAL=.28;   // chance a Chaos Orb turns one of its attributes into a normal one (sample)
 const DV_EXALT_EX=.5;   // chance an Exalted Orb gives an exalted (not a normal) attribute (sample)
 /* exalted when wanted and the item still takes one (a weapon holds at most 3 in slots 1-5), else normal */
 const dvExOk=i=>!DV_NOEX.has(dvIt)&&(i>=5||dvExCount()<dvExMax());
@@ -2900,26 +2903,30 @@ const DV_ORBS={fund:[
   {n:"Annulment Orb",sc:"slots 1-7",a:0,b:7,v:"Annul",d:"Removes a random attribute from slots 1-7 and prepares its slot for an Exalted Orb.",tg:"A random attribute of slots 1-7"},
   {n:"Exalted Orb",sc:"slots 1-5",a:0,b:5,v:"Exalt",d:"Fills an empty slot of 1-5 with a new attribute: a normal or an exalted one. On a weapon only slots 1-3 take one.",tg:"First empty slot of 1-5 (1-3 on a weapon)"},
   {n:"Greater Exalted Orb",sc:"slots 6-7",a:5,b:7,v:"Exalt",d:"Fills an empty slot of 6-7 with a new attribute: a normal or an exalted one.",tg:"First empty slot of 6-7"},
-  {n:"Chaos Orb",sc:"slots 1-5",a:0,b:5,v:"Chaos",d:"Re-rolls the attribute types of slots 1-5 into exalted attributes only. The Divine status is lost.",tg:"Every attribute of slots 1-5"},
-  {n:"Greater Chaos Orb",sc:"slots 6-7",a:5,b:7,v:"Chaos",d:"Re-rolls the attribute types of slots 6-7 into exalted attributes only. The Divine status is lost.",tg:"Every attribute of slots 6-7"},
+  {n:"Chaos Orb",sc:"slots 1-5",a:0,b:5,v:"Chaos",d:"Re-rolls the attribute types of slots 1-5 into exalted attributes. Now and then one of them comes out normal. The Divine status is lost.",tg:"Every attribute of slots 1-5"},
+  {n:"Greater Chaos Orb",sc:"slots 6-7",a:5,b:7,v:"Chaos",d:"Re-rolls the attribute types of slots 6-7 into exalted attributes. Now and then one of them comes out normal. The Divine status is lost.",tg:"Every attribute of slots 6-7"},
   {n:"Divine Orb",sc:"slots 1-5",a:0,b:5,v:"Divine",d:"Keeps the types and re-rolls every value of slots 1-5 anywhere from T1 to T10. Good values can go down; above T5 is not guaranteed.",tg:"Every attribute of slots 1-5"},
   {n:"Greater Divine Orb",sc:"slots 6-7",a:5,b:7,v:"Divine",d:"Keeps the types and re-rolls every value of slots 6-7 anywhere from T1 to T10.",tg:"Every attribute of slots 6-7"}]};
 /* a slot: null = never held anything, {p:1} = prepared (annulled), or an attribute {n, v: tier values, t: tier, ex: exalted, dv: divine} */
-let dvIt="",dvS=Array(8).fill(null),dvCat="fund",dvO=0,dvQn=1,dvLogL=[],dvSpent=0,dvAnn=0,dvPot=82;
+let dvIt="",dvS=Array(8).fill(null),dvCat="fund",dvO=0,dvQn=1,dvLogL=[],dvSpent=0,dvAnn=0,dvPot=82,dvUsed={};
 const dvTier=n=>1+Math.floor(Math.random()*n);
 const dvAt=i=>dvS[i]&&dvS[i].n?dvS[i]:null;
 const dvRows=p=>{if(!DVB)return[];const i=DVB.items.indexOf(dvIt);return(DVB.pools[p]||[]).filter(r=>r[1].includes(i)&&!DVOFF.has(p+"|"+r[0]))};
 const dvOwn=skip=>new Set(dvS.filter((s,i)=>s&&s.n&&i!==skip).map(s=>s.n));
 /* a random attribute for slot i from the normal or the exalted pool, not already on the item */
+/* how likely an attribute is next to the others (samples): strong ones half as often, each Break already on the item makes another one 4x rarer */
+const DV_RARE=new Set(["Critical Damage","Chance of critical hit","Strong against Bosses","Strong against Portals","Strong against Metinstones","Average Damage (AVG)","Skill Damage (SD)"]);
+const dvW=(n,brk)=>(DV_RARE.has(n)?.5:1)*(/ Break$/.test(n)?Math.pow(.25,brk):1);
 function dvRoll(i,ex){const p=(ex?"Exalted":i<5?"Normal":"6/7")+(ex&&i>=5?" 6/7":""),own=dvOwn(i),rows=dvRows(p).filter(r=>!own.has(r[0]));
-  if(!rows.length)return null;const r=rows[Math.floor(Math.random()*rows.length)];return{n:r[0],v:r[2],t:dvTier(r[2].length),ex:!!ex,dv:0}}
+  if(!rows.length)return null;const brk=[...own].filter(n=>/ Break$/.test(n)).length,w=rows.map(r=>dvW(r[0],brk));
+  let x=Math.random()*w.reduce((a,b)=>a+b,0),k=0;while(k<rows.length-1&&(x-=w[k])>=0)k++;const r=rows[k];return{n:r[0],v:r[2],t:dvTier(r[2].length),ex:!!ex,dv:0}}
 /* a value with the potential applied to exalted attributes: "50%" x 82% -> "41%" */
 function dvNum(s){const raw=s.v[s.t-1];if(!s.ex)return raw;
   const m=/^([\d.,]+)(.*)$/.exec(raw);if(!m)return raw;const x=parseFloat(m[1].replace(/,/g,""))*dvPot/100;
   return(Number.isInteger(x)?x.toLocaleString("en-US"):x.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}))+m[2]}
 /* the attribute as the game writes it: "Magic Break" -> "Ignores 4.14% of the enemy's Magic resistance", AVG / SD without the short form */
 function dvLine(s){const v=dvNum(s),b=/^(.+) Break$/.exec(s.n);
-  return b?`Ignores ${v} of the enemy's ${b[1]} resistance`:/^% /.test(s.n)?v+" "+s.n.slice(2):s.n.replace(/ \((AVG|SD)\)$/,"")+" +"+v}
+  return b?`Ignores ${v} of the enemy's ${b[1]} resistance`:/^% /.test(s.n)?v+" "+s.n.slice(2):s.n.replace(/ \((AVG|SD)\)$/,"").replace(/^Strong against Portals$/,"Portal Damage")+" +"+v}
 /* the tags after it: [T4] or [D-T8], then [Exalted] [Divined] */
 /* element attributes: their colour class (Burn = fire, Lightning, Poison, Curse, Magical Power = magic) */
 const dvEl=n=>/^Burn Damage/.test(n)?"el-fire":/^Lightning Damage/.test(n)?"el-bolt":/^Poison Damage/.test(n)?"el-poison":/^Curse Damage/.test(n)?"el-curse":/^Magical Power/.test(n)?"el-magic":"";   // element damage only; the Breaks keep the normal colour
@@ -2947,7 +2954,8 @@ function dvUse(o){
   if(o.v==="Annul"){const i=live[Math.floor(Math.random()*live.length)],old=dvS[i];dvS[i]={p:1};dvAnn++;return[`<b>${esc(o.n)}</b> removed ${esc(old.n)} from slot ${i+1}`,[i]]}
   if(o.v==="Exalt"){const i=idx.find(dvFree),s=dvPick(i,Math.random()<DV_EXALT_EX);if(!s)return["Nothing left to roll",[]];dvS[i]=s;return[`<b>${esc(o.n)}</b>: slot ${i+1} ${esc(dvLine(s))} ${dvTags(s)}`,[i]]}
   if(o.v==="Chaos"){for(const i of live)dvS[i]={p:1};for(const i of live)dvS[i]=dvPick(i,true);   // emptied first, so the exalted limit counts only what stays
-    return[`<b>${esc(o.n)}</b> re-rolled slot${live.length>1?"s":""} ${live.map(i=>i+1).join(", ")}`,live]}
+    let nm="";if(Math.random()<DV_CHAOS_NORMAL){const i=live[Math.floor(Math.random()*live.length)],n=dvRoll(i,false);if(n){dvS[i]=n;nm=` · slot ${i+1} came out normal`}}
+    return[`<b>${esc(o.n)}</b> re-rolled slot${live.length>1?"s":""} ${live.map(i=>i+1).join(", ")}${nm}`,live]}
   for(const i of live){const s=dvS[i],r=dvRows((s.ex?"Exalted + Divine":"Divine")+(i>=5?" 6/7":"")).find(x=>x[0]===s.n);if(r){s.v=r[2];s.dv=1;s.t=dvTier(r[2].length)}}
   return[`<b>${esc(o.n)}</b> re-rolled ${live.map(i=>`${i+1}: T${dvS[i].t}`).join(", ")}`,live];
 }
@@ -2964,6 +2972,7 @@ function drawDv(fx=[]){
   $("dvSt").innerHTML=`<dt>Prepared slots</dt><dd>${dvS.filter(x=>x&&x.p).length}</dd><dt>Exalted (1-5 / 6-7)</dt><dd>${dvExCount()} / ${dvS.slice(5,7).filter(x=>x&&x.ex).length}</dd><dt>Annulled this session</dt><dd>${dvAnn}</dd><dt>Highest tier</dt><dd>${top?"T"+top.t+"/"+top.v.length:"–"}</dd>`;
   $("dvLog").innerHTML=dvLogL.length?dvLogL.slice(-40).reverse().map(l=>`<li>${l}</li>`).join(""):`<li class="muted">Nothing crafted yet.</li>`;
   $("dvSp").textContent=fv(dvSpent)+" Yang";
+  $("dvUsed").innerHTML=Object.entries(dvUsed).map(([n,c])=>`<li>${img(n)}<span>${esc(n)}</span><b>${c} ×</b></li>`).join("");
   const c=DV_CATS.find(x=>x[0]===dvCat),list=DV_ORBS[dvCat]||[];
   $("dvCatT").textContent=c[1];$("dvCatN").textContent=list.length||"";
   $("dvOrbs").innerHTML=list.map((x,i)=>{const p=price(x.n);return `<button class="dvo" data-o="${i}" aria-pressed="${i===dvO}">${img(x.n)}<span><b>${esc(x.n)}</b><small>${x.sc}</small></span><em class="inf" title="As many as you like${p?" · unit price "+fv(p)+" Yang":""}">∞</em></button>`}).join("")
@@ -2981,7 +2990,7 @@ function dvSide(){
 }
 $("dvPick").onclick=e=>{const b=e.target.closest("[data-it]");if(!b)return;
   if(b.dataset.it!==dvIt){dvIt=b.dataset.it;dvFresh();dvLogL.push(`${dvIt} put on the bench`)}drawDv()};
-$("dvClr").onclick=()=>{dvIt="";dvS=Array(8).fill(null);dvAnn=0;dvLogL=[];dvSpent=0;drawDv()};
+$("dvClr").onclick=()=>{dvIt="";dvS=Array(8).fill(null);dvAnn=0;dvLogL=[];dvSpent=0;dvUsed={};drawDv()};
 $("dvOrbs").onclick=e=>{const b=e.target.closest("[data-o]");if(!b)return;dvO=+b.dataset.o;
   $("dvOrbs").querySelectorAll("[data-o]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));dvSide()};
 $("v-divine").querySelector(".dvq").onclick=e=>{const b=e.target.closest("[data-q]");if(!b)return;dvQn=Math.max(1,Math.min(100,dvQn+ +b.dataset.q));drawDv()};
@@ -2990,7 +2999,7 @@ $("dvPot").oninput=()=>{const v=parse($("dvPot").value);dvPot=v>0?Math.min(v,100
 /* the big button: the picked orb, as many times as x says (stops when it can not go on) */
 $("dvGo").onclick=()=>{
   const o=dvOrb();let fx=new Set();
-  for(let k=0;k<dvQn&&!dvWhyNot(o);k++){const [l,t]=dvUse(o);dvLogL.push(l);t.forEach(i=>fx.add(i));dvSpent+=price(o.n)}
+  for(let k=0;k<dvQn&&!dvWhyNot(o);k++){const [l,t]=dvUse(o);dvLogL.push(l);t.forEach(i=>fx.add(i));dvSpent+=price(o.n);dvUsed[o.n]=(dvUsed[o.n]||0)+1}
   drawDv([...fx]);
 };
 $("dvSpend").addEventListener("change",e=>{const n=e.target.dataset.pn;if(n===undefined)return;const v=parse(e.target.value);if(v>0)P[n]=v;else delete P[n];sv("lootPrices",P);drawDv()});
@@ -3684,7 +3693,7 @@ function renderNav(){
   /* top bar: each heading opens its pages on hover / keyboard focus */
   $("topNav").innerHTML=[["tools","Tools"],["upgrade","Upgrade Cost"],["skills","Skill Booster"],["divine","Divine Simulator"],...ADM?[["admin","Control Panel"]]:[]].map(([g,l])=>{
     const kids=(GROUPS.find(x=>x[0]===g)||[])[2]||[];
-    return `<div class="tn${tnShut===g?" shut":""}" data-g="${g}"><a href="${href(g)}"${k===g||k.startsWith(g+"/")?' aria-current="page"':""}>${NI[g]}<span>${l}${g==="divine"?`<em class="beta">Soon</em>`:""}</span>${kids.length?'<i aria-hidden="true">⌄</i>':""}</a>`+
+    return `<div class="tn${tnShut===g?" shut":""}" data-g="${g}"><a href="${href(g)}"${k===g||k.startsWith(g+"/")?' aria-current="page"':""}>${NI[g]}<span>${l}</span>${kids.length?'<i aria-hidden="true">⌄</i>':""}</a>`+
       (kids.length?`<div class="tdd"><div>${kids.map(([kk,kl])=>`<a href="${href(kk)}"${kk===k?' aria-current="page"':""}>${beta(kk,kl)}</a>`).join("")}</div></div>`:"")+`</div>`}).join("");
 }
 let lastV="";
