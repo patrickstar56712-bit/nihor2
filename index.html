@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T11:02:04Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T11:05:57Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2918,8 +2918,8 @@ const DV_ORBS={fund:[
   {n:"Annulment Orb",sc:"slots 1-7",a:0,b:7,v:"Annul",d:"Removes a random attribute from slots 1-7 and prepares its slot for an Exalted Orb.",tg:"A random attribute of slots 1-7"},
   {n:"Exalted Orb",sc:"slots 1-5",a:0,b:5,v:"Exalt",d:"Fills an empty slot of 1-5 with a new attribute: a normal or an exalted one. On a weapon only slots 1-3 take one.",tg:"First empty slot of 1-5 (1-3 on a weapon)"},
   {n:"Greater Exalted Orb",sc:"slots 6-7",a:5,b:7,v:"Exalt",d:"Fills an empty slot of 6-7 with a new attribute: a normal or an exalted one.",tg:"First empty slot of 6-7"},
-  {n:"Chaos Orb",sc:"slots 1-5",a:0,b:5,v:"Chaos",d:"Re-rolls the attribute types of slots 1-5 into exalted attributes. Each orb can turn one into a normal attribute; only when that happens, a second one gets the same chance, and so on. The Divine status is lost.",tg:"Every attribute of slots 1-5"},
-  {n:"Greater Chaos Orb",sc:"slots 6-7",a:5,b:7,v:"Chaos",d:"Re-rolls the attribute types of slots 6-7 into exalted attributes. Each orb can turn one into a normal attribute; only when that happens, a second one gets the same chance, and so on. The Divine status is lost.",tg:"Every attribute of slots 6-7"},
+  {n:"Chaos Orb",sc:"slots 1-5",a:0,b:5,v:"Chaos",d:"Re-rolls the attribute types of slots 1-5 into exalted attributes. Now and then one comes out normal: that one stays in its slot through the next Chaos Orbs, and each next orb has the same chance to add one more. The Divine status is lost.",tg:"Every attribute of slots 1-5"},
+  {n:"Greater Chaos Orb",sc:"slots 6-7",a:5,b:7,v:"Chaos",d:"Re-rolls the attribute types of slots 6-7 into exalted attributes. Now and then one comes out normal: that one stays in its slot through the next Chaos Orbs, and each next orb has the same chance to add one more. The Divine status is lost.",tg:"Every attribute of slots 6-7"},
   {n:"Divine Orb",sc:"slots 1-5",a:0,b:5,v:"Divine",d:"Keeps the types and re-rolls every value of slots 1-5 anywhere from T1 to T10. Good values can go down; above T5 is not guaranteed.",tg:"Every attribute of slots 1-5"},
   {n:"Greater Divine Orb",sc:"slots 6-7",a:5,b:7,v:"Divine",d:"Keeps the types and re-rolls every value of slots 6-7 anywhere from T1 to T10.",tg:"Every attribute of slots 6-7"}]};
 /* a slot: null = never held anything, {p:1} = prepared (annulled), or an attribute {n, v: tier values, t: tier, ex: exalted, dv: divine} */
@@ -2961,6 +2961,7 @@ function dvWhyNot(o){
   if(o.v==="Exalt"){if(DV_NOEX.has(dvIt))return`A ${dvIt.toLowerCase()} takes no exalted attributes`;
     if(!idx.some(dvFree))return"No empty slot in "+(dvIt==="Weapon"&&o.a===0?"slots 1-3 (a weapon uses only these)":o.sc);
     return""}
+  if(o.v==="Chaos"&&idx.some(i=>dvAt(i))&&!idx.some(i=>dvAt(i)&&!dvAt(i).lk))return"Only normal attributes from Chaos left in "+o.sc+": they stay";
   return idx.some(i=>dvAt(i))?"":"No attribute to re-roll in "+o.sc;
 }
 /* one use of an orb: changes the slots and returns the log line and the slots it touched */
@@ -2968,11 +2969,10 @@ function dvUse(o){
   const idx=[...Array(o.b-o.a)].map((_,k)=>o.a+k);let live=idx.filter(i=>dvAt(i));
   if(o.v==="Annul"){const i=live[Math.floor(Math.random()*live.length)],old=dvS[i];dvS[i]={p:1};dvAnn++;return[`<b>${esc(o.n)}</b> removed ${esc(old.n)} from slot ${i+1}`,[i]]}
   if(o.v==="Exalt"){const i=idx.find(dvFree),s=dvPick(i,Math.random()<DV_EXALT_EX);if(!s)return["Nothing left to roll",[]];dvS[i]=s;return[`<b>${esc(o.n)}</b>: slot ${i+1} ${esc(dvLine(s))} ${dvTags(s)}`,[i]]}
-  if(o.v==="Chaos"){
+  if(o.v==="Chaos"){live=live.filter(i=>!dvS[i].lk);   // a normal attribute a Chaos Orb made stays where it is (one an Exalted Orb gave is re-rolled)
     for(const i of live)dvS[i]={p:1};for(const i of live)dvS[i]=dvPick(i,true);   // emptied first, so the exalted limit counts only what stays
-    /* one attribute comes out normal at the set chance; only if it did, a second one gets the same chance, then a third ... */
-    const left=[...live],nn=[];while(left.length&&Math.random()*100<DVCH){const i=left.splice(Math.floor(Math.random()*left.length),1)[0],n=dvRoll(i,false);if(!n)break;dvS[i]=n;nn.push(i+1)}
-    const nm=nn.length?` · slot${nn.length>1?"s":""} ${nn.sort((a,b)=>a-b).join(", ")} came out normal`:"";
+    /* at the set chance one of them comes out normal, and it then stays through the next Chaos Orbs */
+    let nm="";if(live.length&&Math.random()*100<DVCH){const i=live[Math.floor(Math.random()*live.length)],n=dvRoll(i,false);if(n){n.lk=1;dvS[i]=n;nm=` · slot ${i+1} came out normal and stays`}}
     return[`<b>${esc(o.n)}</b> re-rolled slot${live.length>1?"s":""} ${live.map(i=>i+1).join(", ")}${nm}`,live]}
   for(const i of live){const s=dvS[i],r=dvRows((s.ex?"Exalted + Divine":"Divine")+(i>=5?" 6/7":"")).find(x=>x[0]===s.n);if(r){s.v=r[2];s.dv=1;s.t=dvTier(r[2].length)}}
   return[`<b>${esc(o.n)}</b> re-rolled ${live.map(i=>`${i+1}: T${dvS[i].t}`).join(", ")}`,live];
