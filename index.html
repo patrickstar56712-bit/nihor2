@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T07:44:16Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-07T07:47:30Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1103,20 +1103,20 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 }
 
 /* divine simulator: a crafting bench in the game's style */
-.dv{display:grid;grid-template-columns:210px 300px minmax(0,1fr);gap:8px;margin-top:12px}
+.dv{display:grid;grid-template-columns:210px minmax(340px,1fr) minmax(0,1.15fr);gap:8px;margin-top:12px}
 .dvp{background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
 .dvw,.dvbar{grid-column:1/-1}
 .dvh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:6px;margin-bottom:8px;border-bottom:1px solid color-mix(in srgb,var(--gold) 45%,var(--line))}
 .dvh b{color:var(--gold);font-size:14px}.dvh small{color:var(--mute);font-size:12px}
 .dvh2{margin-top:14px}
 .dvsh{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:10px 0 6px}
-.dvwb{display:grid;grid-template-columns:190px minmax(0,1fr) 230px;gap:14px}
+.dvwb{display:grid;grid-template-columns:230px minmax(0,1fr) 230px;gap:14px}
 .dvbench{display:flex;flex-direction:column;gap:8px}
 .dvpl{height:120px;border-radius:8px;border:1px solid var(--line);background:linear-gradient(180deg,color-mix(in srgb,var(--ink) 6%,transparent),transparent);display:grid;place-items:center}
 .dvpl .ic{height:64px;max-width:80px;margin:0}
 .dvpl i{font-style:normal;font-size:40px;font-weight:800;color:var(--gold)}
 .dvnm{font-weight:700;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:4px}
-.dvpick{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.dvpick button{padding:5px 2px;font-size:11.5px}
+.dvpick{display:flex;flex-wrap:wrap;gap:5px}.dvpick button{flex:1 1 auto;padding:5px 7px;font-size:12px}
 .dvband{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:8px 0 4px}
 .dvband:first-child{margin-top:0}
 .dvband.r{color:var(--teal)}.dvband.g{color:var(--vio)}
@@ -1138,9 +1138,9 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 .dvc em{font-style:normal;color:var(--gold);font-weight:800;font-size:13px}
 .dvc[aria-pressed=true]{border-color:var(--gold);color:var(--gold);box-shadow:inset 3px 0 var(--gold);background:color-mix(in srgb,var(--gold) 10%,var(--panel))}
 .dvo{display:flex;align-items:center;gap:10px;width:100%;padding:6px 10px;margin-bottom:5px;border-radius:7px;text-align:left}
-.dvo .ic{height:30px;max-width:30px;margin:0}
-.dvo span{display:flex;flex-direction:column;flex:1;min-width:0}.dvo b{font-size:13.5px}.dvo small{font-size:11px;color:var(--mute);font-weight:500}
-.dvo em{font-style:normal;font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;color:var(--gold);border:1px solid color-mix(in srgb,var(--gold) 50%,var(--line))}
+.dvo .ic{flex:none;height:30px;max-width:30px;margin:0}
+.dvo span{display:flex;flex-direction:column;flex:1;min-width:0}.dvo b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dvo small{font-size:11px;color:var(--mute);font-weight:500}
+.dvo em{flex:none;font-style:normal;font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;color:var(--gold);border:1px solid color-mix(in srgb,var(--gold) 50%,var(--line))}
 .dvo em.inf{font-size:16px;line-height:1;padding:0 8px 2px;color:var(--teal);border-color:color-mix(in srgb,var(--teal) 50%,var(--line))}
 .dvo[aria-pressed=true]{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 10%,var(--panel))}
 .dvrh{display:flex;align-items:center;gap:12px}
@@ -2853,6 +2853,8 @@ $("pgTot").addEventListener("input",e=>{
 let DVB=null;
 const dvLoad=()=>DVB?Promise.resolve(DVB):fetch("divine-bonuses.json").then(r=>r.json()).then(d=>DVB=d);
 const DV_W={5:[40,30,18,9,3],10:[20,18,15,13,11,9,7,4,2,1]},DV_WG={5:[10,25,30,25,10],10:[5,7,9,11,13,15,14,12,9,5]};
+const DV_EXMAX={Weapon:3};   // Exalted attributes an item can hold in slots 1-5 (5 unless named here)
+const dvExMax=()=>DV_EXMAX[dvIt]||5;
 const DV_ITEMS=["Weapon","Armor","Helmet","Shield","Shoes","Bracelet","Necklace","Earrings"];   // the items with Exalted attributes
 const DV_BANDS=[["Normal band","slots 1-5",0,5,""],["Rare band","slots 6-7",5,7,"r"],["Godly band","slot 8",7,8,"g"]];
 const DV_CATS=[["fund","Fundamentals","the orbs you know"],["tgt","Targeted","you pick the slot"],["inf","Influence","bind and re-roll"],["asc","Ascension","push the tier"],
@@ -2886,6 +2888,7 @@ const dvOrb=()=>(DV_ORBS[dvCat]||[])[dvO];
 function dvWhyNot(o){
   if(!o)return"Pick an orb";if(!dvIt)return"No item on the bench";if(!DVB)return"Loading the bonuses…";
   const band=dvS.slice(o.a,o.b);
+  if(o.v==="Exalt"&&o.a===0&&dvExMax()<5&&band.filter(Boolean).length>=dvExMax())return`${dvIt==="Weapon"?"A weapon":"This item"} takes at most ${dvExMax()} Exalted attributes`;
   if(o.v==="Exalt"){if(!band.some(s=>!s))return"No empty slot in "+o.sc;const own=new Set(dvS.filter(Boolean).map(s=>s.n));
     return dvRows(dvPool(o.a)).some(r=>!own.has(r[0]))?"":`No ${dvPool(o.a)} attribute left for this item`}
   return band.some(Boolean)?"":"No attribute in "+o.sc;
@@ -2904,8 +2907,8 @@ function drawDv(fx=[]){
   $("dvPl").innerHTML=dvIt?`<i>${dvIt[0]}</i>`:"";
   $("dvNm").textContent=dvIt||"No item on the bench";
   $("dvPick").innerHTML=DV_ITEMS.map(n=>`<button data-it="${n}" aria-pressed="${n===dvIt}">${n}</button>`).join("");
-  $("dvSlots").innerHTML=DV_BANDS.map(([l,r,a,b,c])=>`<div class="dvband ${c}">${l} · ${r}</div>`+dvS.slice(a,b).map((s,j)=>{const i=a+j;
-    return `<div class="dvsl${fx.includes(i)&&$("dvAnim").checked?" fx":""}"><span>${i+1}</span>${s?`<span>${esc(s.n)}</span><span class="v">${dvVal(s)}</span><span class="t ${dvTc(s)}" title="Tier ${s.t} of ${s.v.length}">T${s.t}${s.dv?"/"+s.v.length:""}</span>`:`<span class="e">– empty –</span>`}</div>`}).join("")).join("");
+  $("dvSlots").innerHTML=DV_BANDS.map(([l,r,a,b,c])=>`<div class="dvband ${c}">${l} · ${r}</div>`+dvS.slice(a,b).map((s,j)=>{const i=a+j,lock=!s&&i<5&&i>=dvExMax()&&!!dvIt;
+    return `<div class="dvsl${fx.includes(i)&&$("dvAnim").checked?" fx":""}"><span>${i+1}</span>${s?`<span>${esc(s.n)}</span><span class="v">${dvVal(s)}</span><span class="t ${dvTc(s)}" title="Tier ${s.t} of ${s.v.length}">T${s.t}${s.dv?"/"+s.v.length:""}</span>`:(lock?`<span class="e">– locked for a ${dvIt.toLowerCase()} –</span>`:`<span class="e">– empty –</span>`)}</div>`}).join("")).join("");
   const top=dvS.filter(Boolean).reduce((m,s)=>!m||s.t/s.v.length>m.t/m.v.length?s:m,null);
   $("dvSt").innerHTML=`<dt>Annulled, restorable</dt><dd>${dvBank} / ${dvAnn}</dd><dt>Influences bound</dt><dd>0 / 8</dd><dt>Slots filled</dt><dd>${dvS.filter(Boolean).length} / 8</dd><dt>Highest tier</dt><dd>${top?"T"+top.t+"/"+top.v.length:"–"}</dd>`;
   $("dvLog").innerHTML=dvLogL.length?dvLogL.slice(-40).reverse().map(l=>`<li>${l}</li>`).join(""):`<li class="muted">Nothing crafted yet.</li>`;
