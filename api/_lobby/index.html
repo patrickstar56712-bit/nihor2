@@ -231,7 +231,7 @@ main.enter .card{animation:fadeUp .55s calc(.16s + var(--i,0) * .07s) var(--ease
 .rvid.ig{--ct:56px;--cb:320px;--trim:12px;--w:min(100cqw,540px);width:var(--w);height:calc(var(--w) * 1.25 - var(--trim));aspect-ratio:auto;background:#000}
 .rvid.ig iframe{position:absolute;left:0;top:calc(-1 * var(--ct));width:100%;height:calc(100% + var(--ct) + var(--cb));border:0}
 .rvmiss{position:absolute;inset:0;margin:auto;width:fit-content;height:fit-content;padding:10px 16px;font-weight:700}
-.rvopen{position:absolute;right:10px;bottom:10px;z-index:3;padding:6px 10px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font-size:12px;font-weight:700;text-decoration:none;border:1px solid rgba(255,255,255,.25)}.rvopen:hover{border-color:var(--gold)}
+.rvopen{position:absolute;right:10px;bottom:10px;z-index:3;display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:linear-gradient(45deg,#f09433,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888);color:#fff;font-size:12.5px;font-weight:800;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.45)}.rvopen svg{width:15px;height:15px}.rvopen:hover{filter:brightness(1.1)}
 .rli.wait{opacity:.75}.rli.wait em::before{content:"…";color:var(--mute)}
 .rvmiss{color:var(--mute);font-size:13px;text-align:center;padding:0 20px}
 /* theatre: players | tall video | arrows on the far right */
@@ -638,7 +638,7 @@ const reelOf=(r,i)=>{const t=r.players.find(p=>p.u===r.tg);return t?t.s[i]:""};
 function mkSlide(r,i){
   const d=document.createElement("div"),c=reelOf(r,i);d.className="rslide";d.dataset.i=i;
   if(i===NREEL){d.classList.add("rvs");d.innerHTML=`<div class="rvcont">${voteBox(r)}</div>`;return d}   // after the 10th reel: the vote
-  d.innerHTML=c?`<iframe src="${reelEmbed(c)}" title="Reels ${i+1}" scrolling="no" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe><a class="rvopen" href="${reelUrl(c)}" target="_blank" rel="noopener" title="Burada oynamıyorsa Instagram'da aç">Instagram'da aç ↗</a>`:`<p class="rvmiss">Bu reels bulunamadı.</p>`;
+  d.innerHTML=c?`<iframe src="${reelEmbed(c)}" title="Reels ${i+1}" scrolling="no" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe><a class="rvopen" href="${reelUrl(c)}" target="_blank" rel="noopener" title="Burada oynamıyorsa Instagram'da aç"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="#fff" stroke-width="2.2"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="#fff" stroke-width="2.2"/><circle cx="17.3" cy="6.7" r="1.3" fill="#fff"/></svg>Instagram'da aç ↗</a>`:`<p class="rvmiss">Bu reels bulunamadı.</p>`;
   return d;
 }
 /* the embed is 540px wide; its media box is 4:5 (675px) with the 9:16 video in the middle and black bars beside it.
