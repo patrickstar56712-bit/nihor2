@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-07T19:27:08Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-08T09:50:20Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -475,6 +475,7 @@ main[id^=v-]{margin:18px auto 28px;padding:28px 20px 44px;background:color-mix(i
 .chip.noimg .nm,.mn.noimg .nm{display:inline}
 /* material tile: picture with the count as a badge at its bottom-right */
 .dchips:has(.mc){gap:10px 14px}
+.chip.pgq{gap:6px;padding:4px 8px 4px 5px}.chip.pgq .ic{height:28px;max-width:30px}.chip.pgq input{width:64px;padding:3px 6px;text-align:right;font-weight:700;color:var(--gold)}.chip.pgq.y input{width:90px}
 .chip.mc{position:relative;width:44px;height:44px;padding:4px;justify-content:center}
 .chip.mc .ic{height:32px;max-width:36px}
 .chip.mc>b{position:absolute;right:-7px;bottom:-7px;z-index:1;padding:1px 5px;border-radius:6px;background:var(--gold);color:#fff;font-size:11px;line-height:1.3}
@@ -2862,18 +2863,26 @@ const pgTotal=()=>{const r=new Map();let y=0;for(const e of PG){y+=e.y;for(const
   return{y,r:[...r].sort((a,b)=>b[1]*skPr(b[0])-a[1]*skPr(a[0])||b[1]-a[1])}};
 function pgCost(){const {y,r}=pgTotal(),m=r.reduce((a,[n,c])=>a+c*skPr(n),0);
   for(const [id,v] of [["pY",y],["pM",m],["pT",y+m]]){const el=$(id);el.dataset.v=v;el.textContent=fv(v)}}
-function drawPg(){
+/* the totals only (a typed count redraws these, not the list, so the box keeps its focus) */
+function drawPgTot(){
   const {y,r}=pgTotal(),any=PG.length;
   $("pgClr").hidden=!PG.length;$("pgCnt").textContent=PG.length?`${PG.length} item${PG.length===1?"":"s"}`:"";
   $("pgTot").innerHTML=!any?`<p class="muted">Nothing added yet. Press <b>+ Add progress</b> under the cost on an Upgrade Cost page or in the Skill Booster.</p>`
     :`<div class="skdh"><b>All together</b><span class="sksub">${f(r.length)} material${r.length===1?"":"s"}${y?` · <b>${fk(y)}</b> Yang`:""}</span></div>`+
      (r.length?`<div class="skmg">${r.map(([n,c],i)=>skmRow(n,c,esc(n),i)).join("")}</div>`:"");
+  pgCost();
+}
+function drawPg(){
+  drawPgTot();
   $("pgList").innerHTML=PG.map((e,i)=>`<div class="pge" style="--i:${Math.min(i,12)}"><span class="pgi"><i>${esc((e.n.trim()[0]||"?").toUpperCase())}</i>${e.im?`<img class="ic" src="${e.im}" alt="">`:img(e.ic)}</span>`+
     `<div class="pgh"><b>${esc(e.n)}</b><small>${esc(e.k)}${e.s?" · "+esc(e.s):""} · ${new Date(e.t).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</small></div>`+
     `<button class="xb" data-pgx="${e.id}" aria-label="Remove ${esc(e.n)}" title="Remove from the Progress List">✕</button>`+
-    `<div class="dchips">${e.m.map(([n,c])=>mchip(n,c)).join("")}${e.y?`<span class="chip y"><b>${fk(e.y)}</b><span>Yang</span></span>`:""}</div></div>`).join("");
-  pgCost();
+    `<div class="dchips">${e.m.map(([n,c],k)=>`<label class="chip pgq" title="${esc(n)}">${img(n)}<span class="nm">${esc(n)}</span><input data-pge="${e.id}" data-pgm="${k}" value="${c}" inputmode="numeric" aria-label="${esc(n)} count"></label>`).join("")}<label class="chip pgq y" title="Yang"><input data-pge="${e.id}" data-pgm="y" value="${e.y?fp(e.y):""}" placeholder="0" inputmode="decimal" aria-label="Yang"><span>Yang</span></label></div></div>`).join("");
 }
+/* a count typed in an entry: the entry and the totals follow */
+$("pgList").addEventListener("input",e=>{const t=e.target,x=PG.find(p=>p.id===t.dataset.pge);if(!x)return;
+  const v=Math.max(0,parse(t.value)||0);if(t.dataset.pgm==="y")x.y=v;else{const m=x.m[+t.dataset.pgm];if(m)m[1]=Math.round(v)}
+  pgSave();drawPgTot()});
 $("pgList").onclick=e=>{const b=e.target.closest("[data-pgx]");if(!b)return;PG=PG.filter(x=>x.id!==b.dataset.pgx);pgSave();drawPg()};
 $("pgClr").onclick=e=>{const b=e.currentTarget;
   if(!b.classList.contains("armed")){b.classList.add("armed");b.textContent="Click again to clear all";setTimeout(()=>{b.classList.remove("armed");b.textContent="Clear all"},4000);return}
