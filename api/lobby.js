@@ -6,6 +6,8 @@
                                          5 wrong passwords from one address lock it for 15 minutes; 5 new accounts per address per hour
    POST /api/lobby {logout: true}     -> this browser's lobby cookie ends
    GET  /api/lobby?users=1            -> (lobby admin) every account: [{u, name, created, admin}]
+   GET  /api/lobby?check=<code>       -> (signed in) can this Instagram post be shown here: {ok} or {ok: false, why: "broken" | "photo"}
+                                         (Instagram's own embed page tells it; when Instagram does not answer the link is let through)
    POST /api/lobby {deleteUser: u}    -> (lobby admin) removes that account and signs it out everywhere (admins can not be removed)
    POST /api/lobby {renameUser: {u, to}} -> (lobby admin) a new name for an account; it stays signed in (an admin's name can change only in its capitals)
    Passwords are kept as scrypt hashes with their own salt. */
@@ -118,6 +120,18 @@ export default async function handler(req, res) {
   try {
     await setup();
     if (req.method === "GET") {
+      if (req.query?.check) {   // a reels link before it is saved in a room
+        if (!await signedIn(req)) return res.status(401).json({ error: "Not signed in" });
+        const c = String(req.query.check);
+        if (!/^[A-Za-z0-9_-]{5,40}$/.test(c)) return res.status(400).json({ ok: false, why: "broken" });
+        try {
+          const r = await fetch(`https://www.instagram.com/p/${c}/embed/`, { signal: AbortSignal.timeout(5000) });
+          const t = r.ok ? await r.text() : "";
+          if (/EmbedBrokenMedia/.test(t)) return res.status(200).json({ ok: false, why: "broken" });
+          if (/EmbeddedMediaImage/.test(t) && !/EmbeddedMediaVideo|video_url|"is_video":true/.test(t)) return res.status(200).json({ ok: false, why: "photo" });
+          return res.status(200).json({ ok: true, unknown: !t });
+        } catch (e) { return res.status(200).json({ ok: true, unknown: true }) }
+      }
       if (req.query?.users) {   // the accounts, for the lobby's Kontrol paneli
         const me = await signedIn(req);
         if (!me || !me.admin) return res.status(403).json({ error: "Sadece admin" });

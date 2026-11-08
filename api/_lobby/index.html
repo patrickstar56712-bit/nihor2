@@ -231,6 +231,8 @@ main.enter .card{animation:fadeUp .55s calc(.16s + var(--i,0) * .07s) var(--ease
 .rvid.ig{--ct:56px;--cb:320px;--trim:12px;--w:min(100cqw,540px);width:var(--w);height:calc(var(--w) * 1.25 - var(--trim));aspect-ratio:auto;background:#000}
 .rvid.ig iframe{position:absolute;left:0;top:calc(-1 * var(--ct));width:100%;height:calc(100% + var(--ct) + var(--cb));border:0}
 .rvmiss{position:absolute;inset:0;margin:auto;width:fit-content;height:fit-content;padding:10px 16px;font-weight:700}
+.rvopen{position:absolute;right:10px;bottom:10px;z-index:3;padding:6px 10px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font-size:12px;font-weight:700;text-decoration:none;border:1px solid rgba(255,255,255,.25)}.rvopen:hover{border-color:var(--gold)}
+.rli.wait{opacity:.75}.rli.wait em::before{content:"…";color:var(--mute)}
 .rvmiss{color:var(--mute);font-size:13px;text-align:center;padding:0 20px}
 /* theatre: players | tall video | arrows on the far right */
 main#v-room.wide{max-width:1600px;padding-top:12px;padding-bottom:12px}
@@ -636,7 +638,7 @@ const reelOf=(r,i)=>{const t=r.players.find(p=>p.u===r.tg);return t?t.s[i]:""};
 function mkSlide(r,i){
   const d=document.createElement("div"),c=reelOf(r,i);d.className="rslide";d.dataset.i=i;
   if(i===NREEL){d.classList.add("rvs");d.innerHTML=`<div class="rvcont">${voteBox(r)}</div>`;return d}   // after the 10th reel: the vote
-  d.innerHTML=c?`<iframe src="${reelEmbed(c)}" title="Reels ${i+1}" scrolling="no" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`:`<p class="rvmiss">Bu reels bulunamadı.</p>`;
+  d.innerHTML=c?`<iframe src="${reelEmbed(c)}" title="Reels ${i+1}" scrolling="no" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe><a class="rvopen" href="${reelUrl(c)}" target="_blank" rel="noopener" title="Burada oynamıyorsa Instagram'da aç">Instagram'da aç ↗</a>`:`<p class="rvmiss">Bu reels bulunamadı.</p>`;
   return d;
 }
 /* the embed is 540px wide; its media box is 4:5 (675px) with the 9:16 video in the middle and black bars beside it.
@@ -753,11 +755,22 @@ function drawRoom(force){
     `</section></div>`;
   if(keep){const i=b.querySelector(`[data-li="${keep[0]}"]`);if(i){i.value=keep[1];i.focus();try{i.setSelectionRange(keep[2],keep[2])}catch(e){}rlCheck(i,false)}}
 }
-/* a typed / pasted link: a valid one is saved at once, an empty box clears its slot */
+/* Instagram posts checked on the server (deleted, private or a photo can not be shown here): code -> "ok" or why not */
+const RLC=new Map(),RLW={broken:"Bu video açılmıyor: silinmiş ya da hesap gizli",photo:"Bu bir fotoğraf, reels değil"};
+function rlVerify(c,k){
+  if(RLC.has(c)||RLC.get(c+"?"))return;RLC.set(c+"?",1);
+  fetch("/api/lobby?check="+encodeURIComponent(c),{cache:"no-store"}).then(r=>r.json()).then(d=>RLC.set(c,d.ok?"ok":RLW[d.why]||"Bu video açılmıyor"),()=>RLC.set(c,"ok"))
+    .finally(()=>{RLC.delete(c+"?");const j=$("roomBody").querySelector(`[data-li="${k}"]`);if(j&&reelCode(j.value)===c)rlCheck(j,true)});
+}
+/* a typed / pasted link: a valid one is saved at once (after the check above), an empty box clears its slot */
 function rlCheck(i,save){
   const r=rmGet(RC),me=r&&r.players.find(p=>p.u===ME());if(!me||r.st!=="lobby")return;
-  const k=+i.dataset.li,c=reelCode(i.value),dup=!c?"":me.s.some((x,j)=>j!==k&&x===c)?"Bu linki zaten ekledin":r.players.some(p=>p.u!==ME()&&p.s.includes(c))?"Bu linki odada başka biri ekledi":"",[cl,tip]=rlSt(i.value,c,dup);
-  const l=i.closest(".rli");l.classList.toggle("ok",cl==="ok");l.classList.toggle("bad",cl==="bad");l.title=tip;
+  const k=+i.dataset.li,c=reelCode(i.value),dup=!c?"":me.s.some((x,j)=>j!==k&&x===c)?"Bu linki zaten ekledin":r.players.some(p=>p.u!==ME()&&p.s.includes(c))?"Bu linki odada başka biri ekledi":"",[cl0,tip0]=rlSt(i.value,c,dup);let cl=cl0,tip=tip0;
+  const l=i.closest(".rli");
+  if(cl==="ok"){const st=RLC.get(c);
+    if(st===undefined){l.classList.remove("ok","bad");l.classList.add("wait");l.title="Kontrol ediliyor…";rlVerify(c,k);return}
+    if(st!=="ok"){cl="bad";tip=st}}
+  l.classList.remove("wait");l.classList.toggle("ok",cl==="ok");l.classList.toggle("bad",cl==="bad");l.title=tip;
   if(!save)return;
   const v=cl==="ok"?c:"";
   if(me.s[k]===v)return;
