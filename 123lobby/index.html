@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="black">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>123 Lobby</title>
+<link rel="icon" type="image/png" href="png/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens ---------- */
+:root{--bg:#000;--panel:#0e0e0e;--ink:#f2f2f2;--mute:#9a9a9a;--line:#2a2a2a;--gold:#e5a93d;--jade:#5fc2a6;--hl:#241f10;--ease:cubic-bezier(.22,1,.36,1);color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth;background:#070514}
+body{margin:0;background:transparent;color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif;font-variant-numeric:tabular-nums;min-height:100vh}
+/* wallpaper: png/bg.jpg (a dark gradient shows until the picture is there) */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+  background:linear-gradient(rgba(6,4,18,.2),rgba(6,4,18,.2)),url(png/bg.jpg) center/cover no-repeat,
+    radial-gradient(900px 600px at 15% 0%,color-mix(in srgb,var(--gold) 22%,transparent),transparent 70%),
+    radial-gradient(800px 600px at 90% 20%,color-mix(in srgb,var(--jade) 18%,transparent),transparent 70%),#070514}
+::selection{background:var(--gold);color:#fff}
+button{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer;transition:background-color .2s,border-color .2s,color .2s,transform .15s var(--ease)}
+button:hover{border-color:var(--gold)}
+button:active{transform:scale(.96)}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+input{font:inherit}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes menuIn{from{opacity:0;transform:translateY(-6px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes shine{to{background-position:300% center}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--gold) 45%,transparent)}50%{box-shadow:0 0 0 8px transparent}}
+
+/* ---------- top bar ---------- */
+.top{position:sticky;top:0;z-index:25;height:56px;background:color-mix(in srgb,var(--bg) 42%,transparent);-webkit-backdrop-filter:blur(12px) saturate(1.4);backdrop-filter:blur(12px) saturate(1.4);border-bottom:1px solid var(--line)}
+.top .in{max-width:1120px;height:100%;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+.top .brand{justify-self:start}
+.brand{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:20px;color:var(--gold);text-decoration:none;letter-spacing:-.01em;white-space:nowrap;transition:letter-spacing .3s var(--ease)}
+.brand::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--gold);animation:pulse 2.4s ease-in-out infinite}
+.brand:has(img)::before{display:none}
+.brand img{width:36px;height:36px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));transition:transform .3s var(--ease)}
+.brand:hover{letter-spacing:.02em}
+.brand:hover img{transform:rotate(-8deg) scale(1.08)}
+#topNav{display:flex;justify-content:center;gap:2px;min-width:0}   /* the middle column: always in the centre of the bar */
+.tn{position:relative}
+#topNav a{display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:10px;color:var(--ink);text-decoration:none;font-size:15px;font-weight:600;white-space:nowrap;transition:background-color .2s,color .2s}
+#topNav a svg{width:17px;height:17px;color:var(--mute);transition:color .2s}
+#topNav a:hover{background:color-mix(in srgb,var(--gold) 12%,transparent);color:var(--gold)}
+#topNav a:hover svg,#topNav a[aria-current=page] svg{color:var(--gold)}
+#topNav a[aria-current=page]{background:color-mix(in srgb,var(--gold) 16%,transparent);color:var(--gold);box-shadow:inset 0 -2px var(--gold)}
+#topNav .tn>a i{font-style:normal;font-size:12px;line-height:1;margin:-5px 0 0 -2px;color:var(--mute);transition:transform .2s,color .2s}
+.tn:hover>a i,.tn:focus-within>a i{transform:rotate(180deg) translateY(-4px);color:var(--gold)}
+.tdd{position:absolute;left:0;top:100%;padding-top:8px;min-width:100%;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .16s,transform .16s,visibility 0s .16s;z-index:30}
+.tn:hover .tdd,.tn:focus-within .tdd{opacity:1;visibility:visible;transform:none;transition:opacity .16s,transform .16s}
+.tn.shut .tdd{opacity:0;visibility:hidden}
+.tdd>div{display:grid;gap:2px;padding:6px;border-radius:12px;border:1px solid var(--line);background:color-mix(in srgb,var(--bg) 92%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 12px 30px rgba(0,0,0,.35)}
+#topNav .tdd a{padding:8px 12px;font-size:14px;font-weight:600;border-radius:8px;box-shadow:none}
+#topR{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.ilk{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;text-decoration:none;color:var(--ink);font:800 17px/1 Georgia,"Times New Roman",serif;
+  background:color-mix(in srgb,var(--ink) 5%,transparent);border:1px solid color-mix(in srgb,var(--line) 85%,transparent);transition:transform .25s var(--ease),border-color .2s,background .2s,color .2s}
+.ilk svg{width:20px;height:20px}
+.ilk.dc{color:#5865f2}
+.ilk:hover{transform:translateY(-2px);border-color:var(--gold);background:color-mix(in srgb,var(--gold) 10%,transparent)}
+.ilk.wk:hover{color:var(--gold)}
+/* settings */
+.set{position:relative}
+#setB{display:flex;align-items:center;gap:8px;height:34px;padding:0 12px;border-radius:10px;font-size:14px;background:color-mix(in srgb,var(--ink) 5%,transparent);border:1px solid color-mix(in srgb,var(--line) 85%,transparent)}
+#setB svg{width:18px;height:18px;color:var(--gold);transition:transform .4s var(--ease)}
+#setB:hover svg,#setB[aria-expanded=true] svg{transform:rotate(60deg)}
+#setB[aria-expanded=true]{border-color:var(--gold);color:var(--gold)}
+#setP{position:absolute;right:0;top:100%;padding-top:6px;z-index:30;animation:menuIn .22s var(--ease);transform-origin:top right}
+.tmb{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;width:230px;display:flex;flex-direction:column;gap:10px;box-shadow:0 12px 32px rgba(0,0,0,.25)}
+.tmb h3{margin:0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.cpk{display:flex;align-items:center;justify-content:space-between;font-size:14px;color:var(--mute)}
+.cpk input{width:46px;height:30px;padding:2px;cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.sws{display:flex;flex-wrap:wrap;gap:6px}
+.sws button{width:28px;height:28px;padding:0;border-radius:50%;border:2px solid var(--line);background:linear-gradient(135deg,var(--a) 50%,var(--b) 50%)}
+.sws button:hover{transform:scale(1.12)}
+.sws button[aria-pressed=true]{border-color:var(--ink)}
+#cRst{font-size:13px;padding:6px 10px}
+@media (max-width:900px){#topNav a span,#setB span{display:none}#topNav a{padding:7px 10px}}
+@media (max-width:480px){.brand{font-size:0;gap:0}#topNav{gap:0}.top .in{gap:8px}#topNav a{padding:7px 8px}#topNav .tn>a i{display:none}#topR{gap:5px}.ilk{width:32px;height:32px}}
+
+/* ---------- pages ---------- */
+main{max-width:980px;margin:0 auto;padding:28px 16px 64px}
+main.enter{animation:fadeUp .45s var(--ease) both}
+main.enter .hero h1{animation:fadeUp .6s var(--ease) both,shine 10s linear infinite}
+main.enter .hero p{animation:fadeUp .6s .08s var(--ease) both}
+main.enter .card{animation:fadeUp .55s calc(.16s + var(--i,0) * .07s) var(--ease) both}
+.hero{padding:28px 0 8px}
+.hrow{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px}
+.hero h1{margin:0 0 4px;font-size:clamp(40px,10vw,72px);font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(90deg,var(--ink) 0%,var(--gold) 30%,var(--jade) 50%,var(--gold) 70%,var(--ink) 100%);background-size:300% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 10s linear infinite}
+.hero p{color:var(--mute);font-size:18px;max-width:560px;margin:8px 0 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:20px}
+.card{position:relative;overflow:hidden;display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 40px 16px 16px;color:var(--ink);text-decoration:none;transition:transform .3s var(--ease),border-color .25s,box-shadow .3s}
+.card::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--gold) 16%,transparent),transparent 70%)}
+.card::after{content:"→";position:absolute;right:16px;top:16px;font-size:18px;color:var(--gold);opacity:.45;transition:transform .3s var(--ease),opacity .3s}
+.card:hover,.card:focus-visible{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 14px 30px -12px color-mix(in srgb,var(--gold) 45%,transparent)}
+.card:hover::before,.card:focus-visible::before{opacity:1}
+.card:hover::after,.card:focus-visible::after{transform:translateX(4px);opacity:1}
+.card b,.card span{position:relative}
+.card b{display:block;font-size:18px;margin-bottom:4px}
+.card span{color:var(--mute);font-size:14px}
+
+/* content pages: plain, your own design goes here */
+.page{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;margin-top:24px}
+.page h1{margin:0 0 8px;font-size:28px}
+.page p{margin:0;color:var(--mute)}
+
+/* create room */
+.rm{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:16px;margin-top:24px;align-items:start}
+@media (max-width:760px){.rm{grid-template-columns:minmax(0,1fr)}}
+.rmc,.rml{background:color-mix(in srgb,var(--panel) 90%,transparent);border:1px solid var(--line);border-radius:14px;padding:20px}
+.rmc h1{margin:0 0 4px;font-size:24px}
+.rms{margin:0 0 18px;color:var(--mute);font-size:14px}
+#rmF{display:flex;flex-direction:column;gap:14px}
+.rmf{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--mute)}
+.rmf input{padding:9px 11px;font-size:15px;color:var(--ink);background:color-mix(in srgb,var(--ink) 5%,transparent);border:1px solid var(--line);border-radius:9px}
+.rmf input:focus{outline:0;border-color:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 20%,transparent)}
+.rmcap{display:flex;align-items:center;gap:8px}
+.rmcap button{width:34px;height:34px;padding:0;font-size:18px;line-height:1}
+.rmcap button:disabled{opacity:.35;cursor:not-allowed}
+.rmcap output{min-width:2.5ch;text-align:center;font-size:20px;font-weight:800;color:var(--ink)}
+.rmcap small{font-weight:500}
+.rmseg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:3px;border-radius:10px;border:1px solid var(--line);background:color-mix(in srgb,var(--ink) 4%,transparent)}
+.rmseg button{border:0;background:none;padding:7px;font-size:13px;border-radius:7px}
+.rmseg button[aria-pressed=true]{background:var(--gold);color:#fff;font-weight:700}
+#rmM,.rmm{font-size:13px;color:#ff6b6b}
+#rmM:empty,.rmm:empty{display:none}
+.rmgo{padding:11px;font-weight:700;color:#fff;background:var(--gold);border-color:var(--gold)}
+.rmgo:hover{box-shadow:0 8px 20px -8px var(--gold)}
+.rml h2{margin:0 0 14px;font-size:17px}
+.rml h2 small{color:var(--mute);font-weight:500;font-size:13px}
+#rmList{display:flex;flex-direction:column;gap:8px}
+.rmi{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--ink) 3%,transparent);animation:fadeUp .35s var(--ease) both}
+.rmi.new{border-color:var(--gold)}
+.rmav{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;font-weight:800;color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,transparent)}
+.rmh{display:flex;flex-direction:column;min-width:0}
+.rmh b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rmh small{color:var(--mute);font-size:12px}
+.rma{display:flex;gap:6px;align-items:center}
+.rma button{padding:5px 9px;font-size:12px}
+.rmcode{font-family:ui-monospace,monospace;letter-spacing:.08em;font-weight:700;color:var(--jade)}
+.rmx:hover,.rmx.armed{color:#ff6b6b;border-color:#ff6b6b}
+.rmlg{margin:0;padding:9px 11px;border-radius:9px;font-size:13px;color:var(--gold);background:color-mix(in srgb,var(--gold) 10%,transparent);border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line))}
+.rmside{display:flex;flex-direction:column;gap:16px;min-width:0}
+.jnf{display:flex;gap:8px}
+.jnf input{flex:1;min-width:0;padding:9px 11px;font-size:15px;font-family:ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);background:color-mix(in srgb,var(--ink) 5%,transparent);border:1px solid var(--line);border-radius:9px}
+.jnf input:focus{outline:0;border-color:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 20%,transparent)}
+.jnf .rmgo{padding:9px 16px}
+#jnM{display:block;margin-top:8px;font-size:13px;color:#ff6b6b}
+#jnM:empty{display:none}
+.rbtn{display:inline-flex;align-items:center;padding:5px 11px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;color:#fff;background:var(--gold);border:1px solid var(--gold)}
+.rbtn:hover{box-shadow:0 6px 16px -8px var(--gold)}
+.rtag{display:inline-block;padding:1px 7px;border-radius:999px;font-size:10.5px;font-weight:700;border:1px solid var(--line);color:var(--mute)}
+.rtag.play{color:var(--jade);border-color:color-mix(in srgb,var(--jade) 50%,var(--line))}
+
+/* room */
+.rbox{max-width:440px;margin:40px auto 0;text-align:center;background:color-mix(in srgb,var(--panel) 90%,transparent);border:1px solid var(--line);border-radius:14px;padding:26px 22px}
+.rbox h1{margin:0 0 6px;font-size:24px}
+.rbox p{margin:0 0 16px;color:var(--mute);font-size:14px}
+.rbox form{display:flex;flex-direction:column;gap:10px;text-align:left}
+.rbox .rmgo{width:100%}
+.rhd{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin:12px 0 16px}
+.rhd small{color:var(--mute);font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.rhd h1{margin:0;font-size:clamp(22px,4vw,30px)}
+.rhm{display:flex;align-items:center;gap:8px}
+.rhm button{padding:6px 11px;font-size:13px}
+.rgrid{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:760px){.rgrid{grid-template-columns:minmax(0,1fr)}}
+.rpl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.rpl li{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:9px 10px 13px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.rpl li.ok{border-color:color-mix(in srgb,var(--jade) 55%,var(--line))}
+.pav{position:relative;flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;overflow:hidden;font-weight:800;font-size:16px;color:#fff;
+  background:linear-gradient(135deg,hsl(var(--h,40) 65% 50%),hsl(calc(var(--h,40) + 40) 65% 38%));box-shadow:0 0 0 2px color-mix(in srgb,var(--line) 80%,transparent)}
+.pav img{width:100%;height:100%;object-fit:cover}
+.pavc{position:relative;cursor:pointer;border-radius:50%}
+.pavc i{position:absolute;right:-3px;bottom:-3px;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;font-style:normal;font-size:10px;color:#fff;background:var(--gold);box-shadow:0 0 0 2px var(--panel)}
+.pavc:hover .pav{box-shadow:0 0 0 2px var(--gold)}
+.ppan{position:sticky;top:72px}
+.rpl li.voted{border-color:color-mix(in srgb,#22c55e 70%,var(--line));background:color-mix(in srgb,#22c55e 14%,transparent)}
+.rpl li.voted .rpn b{color:#4ade80}
+.vtag{font-size:11px;font-weight:700;color:#4ade80}
+.rpl li.voted .pav{box-shadow:0 0 0 2px #22c55e}
+.rcol{display:flex;flex-direction:column;gap:16px;min-width:0}
+.vgrid{display:flex;flex-wrap:wrap;justify-content:center;gap:14px}
+.vopt{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:86px;max-width:140px;padding:8px 4px;border:0;background:none;border-radius:12px}
+.vopt .pav{width:64px;height:64px;font-size:24px;transition:box-shadow .2s,transform .2s var(--ease)}
+.vopt .vn{font-size:13px;font-weight:600;line-height:1.25;text-align:center;overflow-wrap:anywhere}   /* the whole name, on two lines if needed */
+.vopt:hover .pav{box-shadow:0 0 0 3px var(--gold);transform:translateY(-2px)}
+.vopt.sel .pav{box-shadow:0 0 0 3px #22c55e}
+.vopt.sel .vn{color:#4ade80}
+.rend{margin:0;max-width:none}
+.rpn{display:flex;flex-direction:column;min-width:0}
+.rpn b{font-size:14px;line-height:1.25;overflow-wrap:anywhere}
+.rpn em{font-style:normal;font-size:11px;color:var(--gold);font-weight:700}
+.rpc{font-size:13px;font-weight:700;color:var(--mute)}
+.rpl li.ok .rpc{color:var(--jade)}
+.rpl li>i{position:absolute;left:0;bottom:0;height:3px;width:var(--p);background:linear-gradient(90deg,var(--gold),var(--jade));transition:width .4s var(--ease)}
+.rlinks{display:flex;flex-direction:column;gap:6px}
+.rli{display:flex;align-items:center;gap:8px;padding:4px 8px 4px 4px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--ink) 4%,transparent);transition:border-color .2s}
+.rli:focus-within{border-color:var(--gold)}
+.rli.ok{border-color:color-mix(in srgb,var(--jade) 55%,var(--line))}
+.rli.bad{border-color:#ff6b6b}
+.rli b{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:7px;font-size:12px;color:var(--mute);background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.rli input{flex:1;min-width:0;padding:6px 2px;border:0;background:none;color:var(--ink);font-size:13px}
+.rli input:focus{outline:0}
+.rli em{flex:none;width:18px;font-style:normal;font-weight:800;text-align:center}
+.rli.ok em::before{content:"✓";color:var(--jade)}
+.rli.bad em::before{content:"!";color:#ff6b6b}
+.rupm{margin:10px 0 0;font-size:13px;color:var(--mute)}
+.rstart{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:14px}
+.rstart small{font-size:13px;color:var(--mute)}
+.rmgo:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.rplay{display:flex;flex-direction:column;align-items:center;gap:12px}
+.rq{margin:0;font-size:22px;font-weight:800}
+.rdots{display:flex;gap:6px}
+.rdots i{width:22px;height:5px;border-radius:3px;background:color-mix(in srgb,var(--ink) 15%,transparent)}
+.rdots i.d{background:var(--jade)}
+.rdots i.c{background:var(--gold)}
+.rvid{position:relative;width:min(100%,340px);aspect-ratio:9/16;border-radius:16px;overflow:hidden;background:#000;border:1px solid var(--line);box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+/* Instagram player cropped: --ct hides its header (the account), --cb its footer; the video in between stays clickable */
+/* the embed shows the video at 4:5: the box has the same shape, up to 540px wide (the widest the embed goes);
+   --trim cuts the few pixels of the footer that still showed under the video */
+.rplay{container-type:inline-size}
+.rvid.ig{--ct:56px;--cb:320px;--trim:12px;--w:min(100cqw,540px);width:var(--w);height:calc(var(--w) * 1.25 - var(--trim));aspect-ratio:auto;background:#000}
+.rvid.ig iframe{position:absolute;left:0;top:calc(-1 * var(--ct));width:100%;height:calc(100% + var(--ct) + var(--cb));border:0}
+.rvmiss{position:absolute;inset:0;margin:auto;width:fit-content;height:fit-content;padding:10px 16px;font-weight:700}
+.rvmiss{color:var(--mute);font-size:13px;text-align:center;padding:0 20px}
+/* theatre: players | tall video | arrows on the far right */
+main#v-room.wide{max-width:1600px;padding-top:12px;padding-bottom:12px}
+.rth{display:grid;grid-template-columns:minmax(0,250px) minmax(0,1fr) auto;gap:16px;align-items:start;touch-action:pan-x}
+@media (max-width:860px){.rth{grid-template-columns:minmax(0,1fr) auto}.rth>#rPan{grid-column:1/-1;order:2}}
+.rcen{display:flex;flex-direction:column;align-items:center;gap:10px;min-width:0}
+.rtop{position:absolute;left:0;top:0;z-index:2;display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 12px 26px;pointer-events:none;
+  background:linear-gradient(rgba(0,0,0,.55),transparent);border-radius:10px 10px 0 0}
+.rtop .rq{font-size:17px;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.rleft{display:flex;flex-direction:column;gap:12px;min-width:0}
+.rinfo{display:flex;flex-direction:column;gap:6px;padding:14px 16px}
+.rinfo small{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.rinfo b{font-size:18px;overflow-wrap:anywhere}
+.rinfo .rhm{flex-wrap:wrap;gap:6px}
+.rinfo .rhm button{padding:5px 9px;font-size:12px}
+.rinfo #rCnt{margin:4px 0 0;font-size:12px;text-align:left}
+.rwrap{position:relative;display:flex;align-items:flex-end;justify-content:center;gap:14px}
+.rstage{position:relative;overflow:hidden;border-radius:10px;background:#000;box-shadow:0 30px 70px -30px rgba(0,0,0,.9);width:360px;height:640px}
+.rstage .rslide iframe{position:absolute;border:0;width:540px;height:1240px;transform-origin:0 0;transform:scale(var(--k,1));
+  left:calc((var(--sw,360px) - 540px * var(--k,1)) / 2);top:calc(-56px * var(--k,1))}
+.rside{display:flex;flex-direction:column;align-items:center;gap:12px;padding-bottom:6px;min-width:56px}
+.rside b{font-size:15px;font-weight:800;color:var(--ink);padding:6px 10px;border-radius:999px;background:color-mix(in srgb,var(--ink) 8%,transparent)}
+.rside .rmgo{padding:8px 14px}
+.rth>.rnav{align-self:center;position:sticky;top:45vh}
+
+.rslide{position:absolute;inset:0;overflow:hidden;transition:transform .5s cubic-bezier(.22,1,.36,1);will-change:transform;background:#000}
+.rnav{display:flex;flex-direction:column;gap:12px}
+.rslide.rvs{background:radial-gradient(120% 80% at 50% 0%,color-mix(in srgb,var(--gold) 18%,var(--panel)),var(--panel));display:grid;place-items:center;overflow:auto}
+.rvcont{width:100%;padding:18px}
+.rvs .vbox{background:none;border:0;padding:0;text-align:center}
+.rvs .vbox h2{font-size:20px;margin-bottom:20px}
+.rvs .vbox h2 small{display:block;margin-top:4px}
+.rdots i.v{width:10px;border-radius:50%;background:color-mix(in srgb,var(--gold) 30%,transparent)}
+.rdots i.v.c{background:var(--gold)}
+.rnav button{display:grid;place-items:center;width:46px;height:46px;padding:0;border-radius:50%;background:color-mix(in srgb,var(--ink) 8%,transparent);border-color:color-mix(in srgb,var(--line) 85%,transparent)}
+.rnav button:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.rnav button:disabled{opacity:.3;cursor:not-allowed}
+.rnav svg{width:24px;height:24px}
+.rctl{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.rctl button{padding:9px 16px}
+
+/* login: button in the top bar and the sign-in page */
+/* same button and drop-down box as Settings */
+#lgB{display:flex;align-items:center;gap:8px;height:34px;padding:0 12px;border-radius:10px;font-size:14px;white-space:nowrap;background:color-mix(in srgb,var(--ink) 5%,transparent);border:1px solid color-mix(in srgb,var(--line) 85%,transparent)}
+#lgB svg{width:18px;height:18px;color:var(--gold)}
+#lgB[aria-expanded=true]{border-color:var(--gold);color:var(--gold)}
+#lgD{position:absolute;right:0;top:100%;padding-top:6px;z-index:30;animation:menuIn .22s var(--ease);transform-origin:top right}
+@media (max-width:900px){#lgB span{display:none}}
+.lgb form,.lgb #lgIn{display:flex;flex-direction:column;gap:10px}
+.lgl{display:flex;flex-direction:column;gap:5px;font-size:14px;color:var(--mute)}
+.lgl input{padding:7px 10px;font-size:14px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;transition:border-color .2s,box-shadow .2s}
+.lgl input:focus{outline:0;border-color:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 20%,transparent)}
+.lgb output{font-size:13px;color:#ff6b6b}
+.lgb output:empty{display:none}
+.lgb .go{font-size:13px;padding:6px 10px;font-weight:700;color:#fff;background:var(--gold);border-color:var(--gold)}
+.lgw{margin:0;font-size:14px;color:var(--mute)}
+.lgw b{color:var(--gold)}
+.lgadm{justify-content:center;padding:7px 10px;font-size:13px}
+.admw{margin-top:24px;background:color-mix(in srgb,var(--panel) 90%,transparent);border:1px solid var(--line);border-radius:14px;padding:20px}
+.admh{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px}
+.admh h1{margin:0 0 4px;font-size:24px}
+.admh p{margin:0}
+#admQ{flex:0 1 240px;padding:8px 11px;font-size:14px;color:var(--ink);background:color-mix(in srgb,var(--ink) 5%,transparent);border:1px solid var(--line);border-radius:9px}
+#admQ:focus{outline:0;border-color:var(--gold)}
+.admc{margin:0 0 10px}
+.admg{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:10px}
+.admu{display:flex;align-items:center;gap:14px;padding:12px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--ink) 3%,transparent)}
+.admav .pav{width:64px;height:64px;font-size:24px}
+.admi{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.admi small{font-size:11.5px}
+.admn{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.admn b{font-size:16px}
+.admn input{flex:1;min-width:0;padding:6px 9px;font-size:14px;color:var(--ink);background:color-mix(in srgb,var(--ink) 5%,transparent);border:1px solid var(--line);border-radius:8px}
+.admn input:focus{outline:0;border-color:var(--gold)}
+.admn button,.adma button{padding:5px 10px;font-size:12px}
+.adma{display:flex;align-items:center;gap:8px;min-height:0}
+.adm{display:inline-block;margin-left:4px;padding:1px 7px;border-radius:999px;font-style:normal;font-size:10px;font-weight:800;letter-spacing:.06em;color:#fff;background:var(--gold);vertical-align:1px}
+#lgOut{font-size:13px;padding:6px 10px}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="in">
+    <a class="brand" href="#/"><img src="png/logo.png" alt="" onerror="this.remove()">123 Lobby</a>
+    <nav id="topNav" aria-label="Menü"></nav>
+    <div id="topR">
+      <div class="set" id="lg">
+        <button id="lgB" aria-expanded="false" aria-controls="lgD"></button>
+        <div id="lgD" hidden><div class="tmb lgb" role="group" aria-label="Giriş yap">
+          <form id="lgF" novalidate>
+            <h3>Giriş yap</h3>
+            <label class="lgl">Kullanıcı adı <input id="lgU" autocomplete="username" maxlength="40"></label>
+            <label class="lgl">Şifre <input id="lgP" type="password" autocomplete="current-password" placeholder="Basit şifre yazın"></label>
+            <output id="lgM" aria-live="polite"></output>
+            <button class="go">Giriş yap</button>
+          </form>
+          <div id="lgIn" hidden>
+            <h3>Hesap</h3>
+            <p class="lgw">Giriş yapıldı: <b id="lgN"></b> <em class="adm" id="lgA" hidden>ADMIN</em></p>
+            <a class="rbtn lgadm" id="lgAdm" href="#/admin" hidden>Kontrol paneli</a>
+            <button id="lgOut">Çıkış yap</button>
+          </div>
+        </div></div>
+      </div>
+      <div class="set" id="set">
+        <button id="setB" aria-expanded="false" aria-controls="setP"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Ayarlar</span></button>
+        <div id="setP" hidden><div class="tmb" role="group" aria-label="Ayarlar">
+          <h3>Tema</h3>
+          <label class="cpk">Ana renk <input type="color" id="c1"></label>
+          <label class="cpk">İkinci renk <input type="color" id="c2"></label>
+          <div class="sws" id="sws"></div>
+          <button id="cRst">Varsayılana dön</button>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="v-home">
+  <section class="hero"><div class="hrow"><h1>123 Lobby</h1></div><p>Kısa bir açıklama yazısı buraya.</p></section>
+  <div class="cards" id="homeCards"></div>
+</main>
+
+<main id="v-ig" hidden>
+  <div class="rm">
+    <section class="rmc">
+      <h1>Oda oluştur</h1>
+      <p class="rms">Bir oda aç, kodunu arkadaşlarınla paylaş.</p>
+      <form id="rmF" novalidate>
+        <label class="rmf">Oda adı <input id="rmN" maxlength="40" placeholder="Örn. Akşam lobisi" autocomplete="off"></label>
+        <div class="rmf">Kapasite
+          <div class="rmcap"><button type="button" data-cs="-1" aria-label="Azalt">−</button><output id="rmC">4</output><button type="button" data-cs="1" aria-label="Artır">+</button><small>kişi</small></div>
+        </div>
+        <div class="rmf">Gizlilik
+          <div class="rmseg" id="rmV" role="group" aria-label="Gizlilik"><button type="button" data-v="0" aria-pressed="true">Herkese açık</button><button type="button" data-v="1" aria-pressed="false">Şifreli</button></div>
+        </div>
+        <label class="rmf" id="rmPw" hidden>Oda şifresi <input id="rmP" type="password" maxlength="40" autocomplete="new-password"></label>
+        <output id="rmM" aria-live="polite"></output>
+        <p class="rmlg" id="rmLg">Oda oluşturmak ve odalara katılmak için sağ üstten giriş yap.</p>
+        <button class="rmgo">Oda oluştur</button>
+      </form>
+    </section>
+    <div class="rmside">
+      <section class="rml">
+        <h2>Odaya katıl</h2>
+        <form id="jnF" class="jnf" novalidate><input id="jnC" maxlength="6" placeholder="Oda kodu" autocomplete="off" aria-label="Oda kodu"><button class="rmgo">Katıl</button></form>
+        <output id="jnM" aria-live="polite"></output>
+      </section>
+      <section class="rml">
+        <h2>Odalar <small id="rmCnt"></small></h2>
+        <div id="rmList"></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<main id="v-room" hidden><div id="roomBody"></div></main>
+
+<main id="v-admin" hidden>
+  <section class="admw">
+    <div class="admh"><div><h1>Kontrol paneli</h1><p class="rms">Kayıtlı kullanıcılar: adlarını ve profil resimlerini değiştirebilirsin.</p></div>
+      <input id="admQ" type="search" placeholder="Kullanıcı ara" aria-label="Kullanıcı ara" autocomplete="off"></div>
+    <div id="admBody"></div>
+  </section>
+</main>
+
+<main id="v-page" hidden>
+  <section class="page"><h1 id="pgT"></h1><p>Bu sayfa henüz boş.</p></section>
+</main>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+/* every key starts with "lb:": on preju.vercel.app/lobby this page shares the browser's storage with the main site */
+const LB="lb:";
+const ld=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(LB+k));return v==null?d:v}catch(e){return d}};
+const sv=(k,v)=>{try{localStorage.setItem(LB+k,JSON.stringify(v))}catch(e){}};
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+
+/* ---------- menu: edit this list to change the top bar, the home cards and the pages ----------
+   [key, title, icon, home card text, sub pages [[key, title], ...]] */
+const ico=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const MENU=[
+  ["instagram","Instagram",ico('<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>'),"Instagram açıklaması.",[]],
+  ["spotify","Spotify",ico('<circle cx="12" cy="12" r="9"/><path d="M7.5 9.5c3-1 6.5-.7 9 .8M8 12.5c2.5-.7 5.3-.4 7.4.8M8.6 15.4c2-.5 4-.3 5.6.6"/>'),"Spotify açıklaması.",[]]
+];
+const TITLES={};MENU.forEach(([k,t,,,kids])=>{TITLES[k]=t;kids.forEach(([kk,kt])=>TITLES[kk]=kt)});
+const cur=()=>location.hash.replace(/^#\/?/,"").replace(/\/$/,"");
+
+$("homeCards").innerHTML=MENU.map(([k,t,,d],i)=>`<a class="card" href="#/${k}" style="--i:${i}"><b>${esc(t)}</b><span>${esc(d)}</span></a>`).join("");
+
+let tnShut="";
+function renderNav(){
+  const k=cur().startsWith("oda/")?"instagram":cur();   // a room belongs to the Instagram page
+  $("topNav").innerHTML=MENU.map(([g,l,ic,,kids])=>
+    `<div class="tn${tnShut===g?" shut":""}" data-g="${g}"><a href="#/${g}"${k===g||k.startsWith(g+"/")?' aria-current="page"':""}>${ic}<span>${esc(l)}</span>${kids.length?'<i aria-hidden="true">⌄</i>':""}</a>`+
+    (kids.length?`<div class="tdd"><div>${kids.map(([kk,kl])=>`<a href="#/${kk}"${kk===k?' aria-current="page"':""}>${esc(kl)}</a>`).join("")}</div></div>`:"")+`</div>`).join("");
+}
+/* a click inside a dropdown closes it until the mouse leaves */
+$("topNav").addEventListener("click",e=>{const t=e.target.closest(".tn");if(t&&e.target.closest("a")){tnShut=t.dataset.g;t.classList.add("shut");document.activeElement.blur()}});
+$("topNav").addEventListener("mouseout",e=>{const t=e.target.closest(".tn");if(t&&!t.contains(e.relatedTarget)){tnShut="";t.classList.remove("shut")}});
+
+/* ---------- login (front end only: no server checks the password yet) ---------- */
+/* ---------- accounts ----------
+   PROTOTYPE: checked in the browser. Only a SHA-256 of "123lobby:" + password is kept here, never the password itself,
+   but someone who edits the page can still get past it: the real check moves to the server later.
+   A name listed here can only be used with its password; any other name still logs in freely while testing. */
+const ACCOUNTS={preju:{name:"Preju",hash:"f92d9248e016693b349cca26bffcc034f2af6f87c1cb9edcfc1a545f4aaca73b",admin:true}};
+function sha256(str){const b=new TextEncoder().encode(str),K=[],H=[];let n=2,c=0;const fr=x=>(x-Math.floor(x))*4294967296|0;
+while(c<64){let p=1;for(let i=2;i*i<=n;i++)if(n%i===0){p=0;break}if(p){if(c<8)H[c]=fr(Math.pow(n,1/2));K[c++]=fr(Math.pow(n,1/3))}n++}
+const l=b.length,m=new Uint8Array(((l+9+63)>>6)<<6);m.set(b);m[l]=0x80;const dv=new DataView(m.buffer);dv.setUint32(m.length-4,l*8>>>0);dv.setUint32(m.length-8,Math.floor(l*8/4294967296));
+const W=new Int32Array(64),r=(x,y)=>x>>>y|x<<(32-y);
+for(let o=0;o<m.length;o+=64){for(let i=0;i<16;i++)W[i]=dv.getInt32(o+i*4);for(let i=16;i<64;i++){const a=W[i-15],d=W[i-2];W[i]=(W[i-16]+(r(a,7)^r(a,18)^a>>>3)+W[i-7]+(r(d,17)^r(d,19)^d>>>10))|0}
+let[a,bb,cc,d,e,f,g,h]=H;for(let i=0;i<64;i++){const t1=(h+(r(e,6)^r(e,11)^r(e,25))+(e&f^~e&g)+K[i]+W[i])|0,t2=((r(a,2)^r(a,13)^r(a,22))+(a&bb^a&cc^bb&cc))|0;h=g;g=f;f=e;e=(d+t1)|0;d=cc;cc=bb;bb=a;a=(t1+t2)|0}
+H[0]=H[0]+a|0;H[1]=H[1]+bb|0;H[2]=H[2]+cc|0;H[3]=H[3]+d|0;H[4]=H[4]+e|0;H[5]=H[5]+f|0;H[6]=H[6]+g|0;H[7]=H[7]+h|0}
+return H.map(x=>(x>>>0).toString(16).padStart(8,"0")).join("")}
+/* registered users: everyone who logged in once, by lowercase name: {name, av: picture, t: first login, last: last login}.
+   PROTOTYPE: kept in localStorage (this browser only); the server keeps them later. */
+const rgAll=()=>(v=>v&&typeof v==="object"&&!Array.isArray(v)?v:{})(ld("users",{}));
+let USERS=rgAll();
+const rgSave=()=>sv("users",USERS);
+function rgTouch(name){USERS=rgAll();const k=name.toLowerCase(),u=USERS[k]||(USERS[k]={name,av:"",t:Date.now()});u.name=name;u.last=Date.now();rgSave()}
+const userAv=n=>{const u=USERS[String(n).toLowerCase()];return u&&u.av||""};
+/* a renamed user: the admin's rename reaches the tab that is logged in under the old name */
+function rgFollow(){
+  if(!USER||USERS[USER.toLowerCase()]||ACCOUNTS[USER.toLowerCase()])return false;
+  const to=(ld("userRenames",{})||{})[USER.toLowerCase()];if(!to||!USERS[to.toLowerCase()])return false;
+  USER=USERS[to.toLowerCase()].name;ss.s("user",USER);sv("user",USER);return true;
+}
+const isAdmin=()=>!!USER&&!!(ACCOUNTS[USER.toLowerCase()]||{}).admin;
+/* the name lives per tab (sessionStorage), so two tabs can be two players while testing; a new tab starts with the last login */
+const ss={g:k=>{try{return sessionStorage.getItem(LB+k)}catch(e){return null}},s:(k,v)=>{try{sessionStorage.setItem(LB+k,v)}catch(e){}}};
+let USER=ss.g("user")??ld("user","");
+if(USER&&ACCOUNTS[USER.toLowerCase()]&&ss.g("acct")!==USER.toLowerCase())USER="";   // an account name only after its password, in this tab
+const uIco=ico('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>');
+function drawLogin(){
+  $("lgB").innerHTML=uIco+`<span>${USER?esc(USER):"Giriş yap"}</span>`;$("lgB").title=USER?"Hesabım":"Giriş yap";
+  $("lgF").hidden=!!USER;$("lgIn").hidden=!USER;$("lgN").textContent=USER;
+  $("lgA").hidden=!isAdmin();$("lgAdm").hidden=!isAdmin();if(isAdmin())$("lgB").insertAdjacentHTML("beforeend",'<em class="adm">ADMIN</em>');
+}
+function openLg(on){
+  $("lgD").hidden=!on;$("lgB").setAttribute("aria-expanded",String(on));
+  if(on){openSet(false);if(!USER)setTimeout(()=>$("lgU").focus(),30)}
+}
+$("lgB").onclick=()=>openLg($("lgD").hidden);
+$("lgAdm").onclick=()=>openLg(false);
+document.addEventListener("click",e=>{if(!$("lgD").hidden&&!e.target.closest("#lg"))openLg(false)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("lgD").hidden){openLg(false);$("lgB").focus()}});
+$("lgF").onsubmit=e=>{
+  e.preventDefault();
+  const u=$("lgU").value.trim(),p=$("lgP").value;
+  if(!u||!p){$("lgM").textContent="Kullanıcı adı ve şifreyi yaz.";return}
+  const acc=ACCOUNTS[u.toLowerCase()];
+  if(acc&&sha256("123lobby:"+p)!==acc.hash){$("lgM").textContent="Şifre yanlış.";$("lgP").select();return}
+  USER=acc?acc.name:u;ss.s("acct",acc?u.toLowerCase():"");ss.s("user",USER);rgTouch(USER);sv("user",USER);$("lgP").value="";$("lgM").textContent="";drawLogin();openLg(false);refreshView();
+};
+$("lgOut").onclick=()=>{USER="";ss.s("user","");ss.s("acct","");sv("user","");drawLogin();openLg(false);refreshView()};
+if(USER){rgFollow();if(!USERS[USER.toLowerCase()])rgTouch(USER)}
+drawLogin();
+
+/* ---------- test mode ----------
+   NEED_LOGIN=false: no login needed while the site is being tested; a tab that is not logged in plays under its own
+   guest name (kept per tab, so two tabs are two players). Set it to true to let only logged-in people into rooms again. */
+const NEED_LOGIN=false;
+const MIN_PLAYERS=1;   // players needed to start; 1 while testing alone, set it back to 2 later
+const GUEST=ss.g("guest")||(n=>{ss.s("guest",n);return n})("Misafir "+(1000+Math.floor(Math.random()*9000)));
+const ME=()=>USER||(NEED_LOGIN?"":GUEST);
+
+/* ---------- rooms (Instagram page) ----------
+   PROTOTYPE: rooms are kept in localStorage, so everything works only inside this browser
+   (open several tabs and log in with a different name in each to try it with more players). A server replaces this later.
+   room: {code, n: name, cap, priv, pw, host, t, players:[{u: name, s:[10 reel shortcodes, "" = empty]}],
+          st: "lobby" | "play" | "end", tg: whose reels are shown, ix: which reel} */
+const RMIN=2,RMAX=20,NREEL=10;
+const rmFix=r=>{
+  r={st:"lobby",tg:"",ix:0,pw:"",votes:{},...r};if(!r.votes||typeof r.votes!=="object")r.votes={};r.host=r.host||r.by||"";
+  r.players=(Array.isArray(r.players)?r.players:[]).map(p=>({u:String(p.u),av:typeof p.av==="string"&&p.av.startsWith("data:image/")?p.av:"",s:Array.from({length:NREEL},(_,i)=>{const v=(p.s||[])[i];return typeof v==="string"?v:""})}));
+  return r;
+};
+const rmAll=()=>(v=>Array.isArray(v)?v.map(rmFix):[])(ld("rooms",[]));
+let ROOMS=rmAll(),rmCap=4,rmPriv=false;
+const rmSave=()=>sv("rooms",ROOMS);
+const rmGet=c=>ROOMS.find(r=>r.code===c);
+/* every change re-reads the list first, so a change made in another tab is not overwritten */
+function rmEdit(c,fn){ROOMS=rmAll();const r=rmGet(c);if(!r)return null;fn(r);rmSave();return r}
+const rmCode=()=>{const a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s;do{s=[...Array(6)].map(()=>a[Math.floor(Math.random()*a.length)]).join("")}while(ROOMS.some(r=>r.code===s));return s};
+const newPlayer=u=>({u,s:Array(NREEL).fill("")});
+const lockIco=ico('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>').replace("<svg",'<svg width="12" height="12" style="vertical-align:-1px"');
+const ST={lobby:["Bekliyor",""],play:["Oyunda","play"],end:["Bitti",""]};
+/* a click that opens the login box must wait: the page's own "click outside closes it" runs right after */
+const askLogin=()=>setTimeout(()=>openLg(true));
+const copyBtn=b=>{const t=b.textContent;try{navigator.clipboard.writeText(b.dataset.cp).then(()=>{b.textContent="Kopyalandı";setTimeout(()=>b.textContent=t,1200)},()=>{})}catch(e){}};
+/* "click again" for things that can not be undone */
+const armed=b=>{if(b.classList.contains("armed"))return true;const t=b.textContent;b.classList.add("armed");b.textContent="Emin misin?";setTimeout(()=>{b.classList.remove("armed");b.textContent=t},3000);return false};
+
+/* ---------- reels links: only the shortcode is kept (instagram.com/reel/<code>/, also /reels/, /p/, /tv/) ---------- */
+const reelCode=s=>{const m=/(?:^|\/\/|\.)instagram\.com\/(?:[A-Za-z0-9._]+\/)?(?:reels?|p|tv)\/([A-Za-z0-9_-]{5,40})/i.exec(String(s).trim());return m?m[1]:""};
+const reelUrl=c=>c?`https://www.instagram.com/reel/${c}/`:"";
+const reelEmbed=c=>`https://www.instagram.com/reel/${c}/embed/`;
+
+/* ---------- Instagram page: create, join by code, room list ---------- */
+function drawRmForm(){
+  $("rmC").textContent=rmCap;
+  $("v-ig").querySelectorAll("[data-cs]").forEach(b=>{const v=rmCap+ +b.dataset.cs;b.disabled=v<RMIN||v>RMAX});
+  $("rmV").querySelectorAll("[data-v]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.v===+rmPriv)));
+  $("rmPw").hidden=!rmPriv;$("rmLg").hidden=!!ME();
+}
+function drawRooms(){
+  ROOMS=rmAll();
+  $("rmCnt").textContent=ROOMS.length?`(${ROOMS.length})`:"";
+  $("rmList").innerHTML=ROOMS.map(r=>{const me=r.players.some(p=>p.u===ME()),[sl,sc]=ST[r.st]||ST.lobby;
+    return `<div class="rmi"><span class="rmav">${esc((r.n[0]||"?").toUpperCase())}</span>`+
+    `<div class="rmh"><b>${esc(r.n)}</b><small>${r.priv?lockIco+" Şifreli":"Herkese açık"} · ${r.players.length}/${r.cap} oyuncu · ${esc(r.host)} · <span class="rtag ${sc}">${sl}</span></small></div>`+
+    `<div class="rma"><span class="rmcode">${r.code}</span><a class="rbtn" href="#/oda/${r.code}">${me?"Gir":"Katıl"}</a>`+
+    (r.host===ME()||isAdmin()?`<button class="rmx" data-rx="${r.code}" aria-label="${esc(r.n)} odasını kapat" title="Odayı kapat">✕</button>`:"")+`</div></div>`}).join("")
+    ||`<p class="rms" style="margin:0">Henüz oda yok. Soldan ilk odanı oluştur.</p>`;
+}
+function rmClose(c){ROOMS=rmAll().filter(r=>r.code!==c);rmSave()}
+$("v-ig").addEventListener("click",e=>{
+  const c=e.target.closest("[data-cs]");if(c){rmCap=Math.max(RMIN,Math.min(RMAX,rmCap+ +c.dataset.cs));drawRmForm();return}
+  const v=e.target.closest("[data-v]");if(v){rmPriv=v.dataset.v==="1";drawRmForm();if(rmPriv)$("rmP").focus();return}
+  const x=e.target.closest("[data-rx]");if(x){if(armed(x)){rmClose(x.dataset.rx);drawRooms()}return}
+  const cp=e.target.closest("[data-cp]");if(cp)copyBtn(cp);
+});
+$("rmF").onsubmit=e=>{
+  e.preventDefault();
+  if(!ME()){$("rmM").textContent="Önce giriş yap.";askLogin();return}
+  const n=$("rmN").value.trim().replace(/\s+/g," ");
+  if(!n){$("rmM").textContent="Odaya bir ad ver.";$("rmN").focus();return}
+  if(rmPriv&&!$("rmP").value){$("rmM").textContent="Şifreli oda için bir şifre yaz.";$("rmP").focus();return}
+  ROOMS=rmAll();
+  const r=rmFix({code:rmCode(),n,cap:rmCap,priv:rmPriv,pw:rmPriv?$("rmP").value:"",host:ME(),t:Date.now(),players:[newPlayer(ME())]});
+  ROOMS.unshift(r);rmSave();
+  $("rmN").value="";$("rmP").value="";$("rmM").textContent="";
+  location.hash="#/oda/"+r.code;
+};
+$("jnF").onsubmit=e=>{
+  e.preventDefault();
+  const c=$("jnC").value.trim().toUpperCase();if(!c)return $("jnC").focus();
+  ROOMS=rmAll();if(!rmGet(c)){$("jnM").textContent="Bu kodla bir oda yok.";return}
+  $("jnM").textContent="";$("jnC").value="";location.hash="#/oda/"+c;
+};
+
+/* ---------- room page ---------- */
+let RC="",rKey="",rVkey="";
+const rlSt=(v,c,dup)=>!v.trim()?["",""]:!c?["bad","Geçerli bir Instagram reels linki değil"]:dup?["bad","Bu linki zaten ekledin"]:["ok","Tamam"];
+/* a player's picture: their own, or the first letter on a colour made from the name */
+const avHue=u=>{let h=0;for(const c of u)h=(h*31+c.charCodeAt(0))%360;return h};
+const avatar=p=>(userAv(p.u)||p.av)?`<span class="pav"><img src="${userAv(p.u)||p.av}" alt=""></span>`:`<span class="pav" style="--h:${avHue(p.u)}">${esc((p.u[0]||"?").toUpperCase())}</span>`;
+/* the left panel: everyone in the room; your own picture can be changed by clicking it */
+function playerPanel(r,lobby){
+  const cnt=p=>p.s.filter(Boolean).length;
+  return `<aside class="rml ppan"><h2>Oyuncular <small>${r.players.length}/${r.cap}</small></h2><ul class="rpl">`+
+    r.players.map(p=>{const n=cnt(p),mine=p.u===ME();
+      const vt=!lobby&&!!r.votes[p.u];
+      return `<li class="${lobby&&n>=NREEL?"ok":""}${vt?" voted":""}">`+
+        (mine?`<label class="pavc" title="Profil resmini değiştir">${avatar(p)}<input type="file" accept="image/*" data-av hidden><i aria-hidden="true">✎</i></label>`:avatar(p))+
+        `<span class="rpn"><b>${esc(p.u)}${mine?" (sen)":""}</b>${p.u===r.host?"<em>Oda sahibi</em>":""}${vt?"<small class=\"vtag\">Oy verdi ✓</small>":""}</span>`+
+        (lobby?`<span class="rpc">${n>=NREEL?"Hazır":n+"/"+NREEL}</span><i style="--p:${n/NREEL*100}%"></i>`:"")+`</li>`}).join("")+
+    `</ul></aside>`;
+}
+/* a chosen picture, cut to a 96px square so it stays small */
+/* the box under the video: everyone as a round picture with the name under it; a click is your guess (it can be changed) */
+function voteBox(r){
+  const my=r.votes[ME()]||"",n=Object.keys(r.votes).filter(u=>r.players.some(p=>p.u===u)).length;
+  return `<section class="rml vbox"><h2>Sence bu reelsler kimin? <small>${n}/${r.players.length} oy verdi</small></h2><div class="vgrid">`+
+    r.players.map(p=>`<button class="vopt${my===p.u?" sel":""}" data-vote="${esc(p.u)}" aria-pressed="${my===p.u}">${avatar(p)}<span class="vn">${esc(p.u)}</span></button>`).join("")+
+    `</div><p class="rms" style="margin:10px 0 0">${my?"Oyunu verdin. Fikrini değiştirirsen başka birine dokun.":"Tahminin kimse onun resmine dokun."}</p></section>`;
+}
+function avPick(file){
+  const u=URL.createObjectURL(file),im=new Image();
+  im.onload=()=>{const c=document.createElement("canvas"),z=96,k=Math.min(im.width,im.height);c.width=c.height=z;
+    c.getContext("2d").drawImage(im,(im.width-k)/2,(im.height-k)/2,k,k,0,0,z,z);URL.revokeObjectURL(u);
+    const d=c.toDataURL("image/jpeg",.85);
+    if(USER){USERS=rgAll();const k=USER.toLowerCase();if(USERS[k]){USERS[k].av=d;rgSave()}}
+    rmEdit(RC,x=>{const p=x.players.find(p=>p.u===ME());if(p)p.av=d});drawRoom(true)};
+  im.onerror=()=>URL.revokeObjectURL(u);im.src=u;
+}
+/* reels stack: the current one plus its neighbours, ready above / below; a change of reel slides them */
+const RM=matchMedia("(prefers-reduced-motion:reduce)");   // reduced motion: reels change without sliding
+const reelOf=(r,i)=>{const t=r.players.find(p=>p.u===r.tg);return t?t.s[i]:""};
+function mkSlide(r,i){
+  const d=document.createElement("div"),c=reelOf(r,i);d.className="rslide";d.dataset.i=i;
+  if(i===NREEL){d.classList.add("rvs");d.innerHTML=`<div class="rvcont">${voteBox(r)}</div>`;return d}   // after the 10th reel: the vote
+  d.innerHTML=c?`<iframe src="${reelEmbed(c)}" title="Reels ${i+1}" scrolling="no" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`:`<p class="rvmiss">Bu reels bulunamadı.</p>`;
+  return d;
+}
+/* the embed is 540px wide; its media box is 4:5 (675px) with the 9:16 video in the middle and black bars beside it.
+   The stage is 9:16: the embed is scaled by --k so the video fills the stage's height, and the bars fall outside its width.
+   EMB_H: the media height used (a little less than 675, so no white line of the footer shows) */
+const EMB_H=661;
+function stageFit(){
+  const st=$("rStage");if(!st)return;
+  const top=st.getBoundingClientRect().top+scrollY,side=$("rNavOk")?150:90;
+  const wrap=st.closest(".rcen"),aw=(wrap?wrap.clientWidth:innerWidth-32)-side;
+  let h=Math.min(innerHeight-Math.min(top,140)-16,1200);
+  h=Math.max(360,Math.min(h,aw*16/9));
+  const w=Math.round(h*9/16),k=h/EMB_H;
+  st.style.width=w+"px";st.style.height=Math.round(h)+"px";st.style.setProperty("--k",k);st.style.setProperty("--sw",w+"px");
+  const tp=document.querySelector(".rwrap .rtop");if(tp)tp.style.width=w+"px";   // the title bar lies on the video
+}
+addEventListener("resize",()=>stageFit());
+function stageTo(r){
+  const st=$("rStage");if(!st)return;
+  const old=+st.dataset.ix,n=r.ix,first=old<0;if(old===n)return;
+  st.dataset.ix=n;
+  const want=[n-1,n,n+1].filter(i=>i>=0&&i<=NREEL),at=(el,i,anim)=>{el.style.transition=anim?"":"none";el.style.transform=`translateY(${(i-n)*100}%)`};
+  const oldCur=[...st.children].find(el=>+el.dataset.i===old);
+  for(const el of [...st.children])if(el!==oldCur&&!want.includes(+el.dataset.i))el.remove();
+  for(const i of want)if(![...st.children].some(el=>+el.dataset.i===i)){const el=mkSlide(r,i);at(el,i,false);st.appendChild(el)}
+  void st.offsetHeight;
+  for(const el of st.children)at(el,+el.dataset.i,!first&&!RM.matches);
+  /* the reel that slid away is rebuilt (or dropped), so a video still playing there goes quiet */
+  if(oldCur)setTimeout(()=>{if(!oldCur.isConnected)return;const i=+oldCur.dataset.i,cur=+st.dataset.ix;
+    if(Math.abs(i-cur)<=1&&i!==cur){const el=mkSlide(r,i);at(el,i,false);el.style.transform=`translateY(${(i-cur)*100}%)`;oldCur.replaceWith(el)}else if(i!==cur)oldCur.remove()},RM.matches?0:520);
+  const host=r.host===ME();
+  $("rDots").innerHTML=[...Array(NREEL+1)].map((_,i)=>`<i class="${i===NREEL?"v ":""}${i<n?"d":i===n?"c":""}"></i>`).join("");
+  $("rDots").setAttribute("aria-label",n<NREEL?`${n+1}. reels / ${NREEL}`:"Oylama");
+  $("rCnt").textContent=n<NREEL?`Oynatmak için videoya dokun · `+(host?(n<NREEL-1?"geçmek için kaydır (fare tekerleği, ↑↓ ya da oklar)":"bir kez daha kaydır: oylama"):"reelsleri oda sahibi kaydırıyor")
+    :"Oylama · reelslerin kime ait olduğunu tahmin et"+(host?" · herkes oy verince Bitir":"");
+  const pv=document.querySelector("#roomBody [data-act=prev]"),nx=document.querySelector("#roomBody [data-act=next]");
+  if(pv)pv.disabled=n<=0;if(nx)nx.disabled=n>=NREEL;
+  const e=$("rEnd");if(e)e.hidden=n<NREEL;
+  const nm=$("rNum");if(nm)nm.textContent=n<NREEL?`${n+1}/${NREEL}`:"Oy";
+}
+/* the room owner moves through the reels: wheel or swipe beside the video, arrow keys, the round buttons */
+let swT=0,swY=null;
+function swipe(d){
+  const r=rmGet(RC);if(!r||r.st!=="play"||r.host!==ME())return;
+  const n=r.ix+d;if(n<0||n>NREEL)return;
+  const now=Date.now();if(now-swT<550)return;swT=now;
+  rmEdit(RC,x=>{x.ix=n});drawRoom();
+}
+document.addEventListener("wheel",e=>{const w=e.target.closest&&e.target.closest(".rth");if(!w||!$("rNavOk"))return;e.preventDefault();if(Math.abs(e.deltaY)>20)swipe(e.deltaY>0?1:-1)},{passive:false});
+document.addEventListener("touchstart",e=>{swY=e.target.closest&&e.target.closest(".rth")&&$("rNavOk")?e.touches[0].clientY:null},{passive:true});
+document.addEventListener("touchmove",e=>{if(swY!==null)e.preventDefault()},{passive:false});
+document.addEventListener("touchend",e=>{if(swY===null)return;const dy=swY-e.changedTouches[0].clientY;swY=null;if(Math.abs(dy)>50)swipe(dy>0?1:-1)});
+document.addEventListener("keydown",e=>{
+  if(!$("rNavOk")||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
+  const d={ArrowDown:1,PageDown:1,ArrowUp:-1,PageUp:-1}[e.key];if(d){e.preventDefault();swipe(d)}
+});
+function drawRoom(force){
+  ROOMS=rmAll();
+  const r=rmGet(RC),b=$("roomBody"),me=r&&ME()?r.players.find(p=>p.u===ME()):null;
+  const key=JSON.stringify([RC,ME(),r&&[r.st,r.tg,r.ix,r.players,r.host,r.cap,r.votes,r.players.map(p=>userAv(p.u))]]);
+  const vkey=JSON.stringify([RC,ME(),r&&[r.st,r.tg]]),rP=$("rPan"),rS=$("rStage");
+  if(!force&&key===rKey)return;
+  rKey=key;
+  if(!force&&r&&r.st==="play"&&vkey===rVkey&&rP&&rS){rP.innerHTML=playerPanel(r,false);rS.querySelectorAll(".rvcont").forEach(e=>e.innerHTML=voteBox(r));stageTo(r);return}
+  rVkey=vkey;
+  /* a redraw while typing a link keeps that box, its text and the cursor */
+  const ae=document.activeElement,keep=ae&&ae.dataset&&ae.dataset.li!==undefined?[ae.dataset.li,ae.value,ae.selectionStart]:null;
+  document.title=(r?r.n:"Oda")+" · 123 Lobby";
+  if(!r){b.innerHTML=`<section class="rbox"><h1>Oda bulunamadı</h1><p>Bu oda kapatılmış ya da kod yanlış.</p><a class="rbtn" href="#/instagram">Odalara dön</a></section>`;return}
+  if(!ME()){b.innerHTML=`<section class="rbox"><h1>${esc(r.n)}</h1><p>Bu odaya sadece giriş yapmış kişiler katılabilir.</p><button class="rmgo" data-act="login">Giriş yap</button></section>`;return}
+  if(!me){
+    const why=r.st!=="lobby"?"Oyun başladı, şu an katılamazsın.":r.players.length>=r.cap?"Oda dolu.":"";
+    b.innerHTML=`<section class="rbox"><h1>${esc(r.n)}</h1><p>${esc(r.host)} tarafından açıldı · ${r.players.length}/${r.cap} oyuncu${r.priv?" · Şifreli":""}</p>`+
+      (why?`<p class="rmlg">${why}</p><a class="rbtn" href="#/instagram">Odalara dön</a>`
+        :`<form id="rjF" novalidate>${r.priv?`<label class="rmf">Oda şifresi <input id="rjP" type="password" autocomplete="off"></label>`:""}<output id="rjM" class="rmm"></output><button class="rmgo">Odaya katıl</button></form>`)+`</section>`;
+    const p=$("rjP");if(p)p.focus();
+    return;
+  }
+  const host=r.host===ME();
+  const head=`<div class="rhd"><div><small>${esc(ME())}${host?" · oda sahibi":""}</small><h1>${esc(r.n)}</h1></div>`+
+    `<div class="rhm"><span class="rmcode">${r.code}</span><button data-cp="${r.code}">Kopyala</button><button class="rmx" data-act="leave">${host?"Odayı kapat":"Odadan çık"}</button></div></div>`;
+  $("v-room").classList.toggle("wide",r.st==="play");
+  if(r.st==="play"){
+    const arr=d=>ico(d?'<path d="m6 9 6 6 6-6"/>':'<path d="m6 15 6-6 6 6"/>');
+    b.innerHTML=`<div class="rth"><div class="rleft"><div class="rml rinfo"><small>${esc(ME())}${host?" · oda sahibi":""}</small><b>${esc(r.n)}</b>`+
+      `<div class="rhm"><span class="rmcode">${r.code}</span><button data-cp="${r.code}">Kopyala</button><button class="rmx" data-act="leave">${host?"Odayı kapat":"Odadan çık"}</button></div><p class="rms" id="rCnt"></p></div>`+
+      `<div id="rPan">${playerPanel(r,false)}</div></div>`+
+      `<section class="rcen">`+
+      /* the reels sit on top of each other and slide up / down like Instagram; the player is cropped so the account stays hidden */
+      `<div class="rwrap"><div class="rstage" id="rStage" data-ix="-1"></div><div class="rtop"><p class="rq">Bu reelsler kimin?</p><div class="rdots" id="rDots"></div></div>`+
+      `<div class="rside"><b id="rNum"></b>${host?`<button class="rmgo" data-act="end" id="rEnd" hidden>Bitir</button>`:""}</div></div>`+
+      `</section>`+
+      (host?`<div class="rnav" id="rNavOk"><button data-act="prev" aria-label="Önceki reels">${arr(0)}</button><button data-act="next" aria-label="Sonraki reels">${arr(1)}</button></div>`:"")+
+      `</div>`;
+    stageFit();
+    stageTo(r);
+    return;
+  }
+  if(r.st==="end"){
+    b.innerHTML=head+`<div class="rgrid">${playerPanel(r,false)}<section class="rbox rend"><h1>${NREEL} reels bitti</h1><p>Sıradaki adım (tahmin) yakında eklenecek.</p>${host?`<button class="rmgo" data-act="lobby">Lobiye dön</button>`:""}</section></div>`;
+    return;
+  }
+  /* lobby: players and how many links they added, my 10 links, start */
+  const cnt=p=>p.s.filter(Boolean).length,ready=r.players.filter(p=>cnt(p)>=NREEL).length,all=r.players.length;
+  const why=all<MIN_PLAYERS?`Oyunu başlatmak için en az ${MIN_PLAYERS} oyuncu gerekiyor.`:ready<all?`${all-ready} oyuncu henüz ${NREEL} reels linkini girmedi.`:"";
+  const mine=cnt(me);
+  b.innerHTML=head+`<div class="rgrid">`+
+    playerPanel(r,true)+
+    `<section class="rml"><h2>Reels linklerin <small id="rLc">${mine}/${NREEL}</small></h2>`+
+      `<div class="rlinks">${me.s.map((c,i)=>`<label class="rli ${c?"ok":""}"><b>${i+1}</b><input data-li="${i}" value="${esc(reelUrl(c))}" placeholder="https://www.instagram.com/reel/..." inputmode="url" autocomplete="off" spellcheck="false" aria-label="${i+1}. reels linki"><em aria-hidden="true"></em></label>`).join("")}</div>`+
+      `<p class="rupm" id="rUpM">${mine<NREEL?`Oyuna girmek için ${NREEL} Instagram reels linki gir. Kimin girdiği oyunda gizli kalır.`:"Hepsi tamam, hazırsın."}</p>`+
+      `<div class="rstart">${host?`<button class="rmgo" data-act="start"${why?" disabled":""}>Oyunu başlat</button><small>${why||"Herkes hazır!"}</small>`
+        :`<small>${why?why+" ":""}Oyunu oda sahibi başlatacak.</small>`}</div>`+
+    `</section></div>`;
+  if(keep){const i=b.querySelector(`[data-li="${keep[0]}"]`);if(i){i.value=keep[1];i.focus();try{i.setSelectionRange(keep[2],keep[2])}catch(e){}rlCheck(i,false)}}
+}
+/* a typed / pasted link: a valid one is saved at once, an empty box clears its slot */
+function rlCheck(i,save){
+  const r=rmGet(RC),me=r&&r.players.find(p=>p.u===ME());if(!me||r.st!=="lobby")return;
+  const k=+i.dataset.li,c=reelCode(i.value),dup=!!c&&me.s.some((x,j)=>j!==k&&x===c),[cl,tip]=rlSt(i.value,c,dup);
+  const l=i.closest(".rli");l.classList.toggle("ok",cl==="ok");l.classList.toggle("bad",cl==="bad");l.title=tip;
+  if(!save)return;
+  const v=cl==="ok"?c:"";
+  if(me.s[k]===v)return;
+  if(cl==="bad"&&me.s[k]==="")return;   // nothing saved yet: keep typing
+  rmEdit(RC,x=>{const p=x.players.find(p=>p.u===ME());if(p)p.s[k]=v});
+  drawRoom();
+}
+$("roomBody").addEventListener("input",e=>{if(e.target.dataset.li!==undefined)rlCheck(e.target,true)});
+/* leaving the box: a valid link is written in its short form */
+$("roomBody").addEventListener("change",e=>{if(e.target.dataset.av!==undefined){const fl=e.target.files[0];e.target.value="";if(fl&&fl.type.startsWith("image/"))avPick(fl);return}});
+$("roomBody").addEventListener("change",e=>{const i=e.target;if(i.dataset.li===undefined)return;const c=reelCode(i.value);if(c&&i.closest(".rli").classList.contains("ok"))i.value=reelUrl(c)});
+$("roomBody").addEventListener("keydown",e=>{   // Enter: next box
+  if(e.key!=="Enter"||e.target.dataset.li===undefined)return;e.preventDefault();
+  const n=$("roomBody").querySelector(`[data-li="${+e.target.dataset.li+1}"]`);if(n)n.focus();
+});
+$("roomBody").addEventListener("submit",e=>{
+  if(e.target.id!=="rjF")return;e.preventDefault();
+  ROOMS=rmAll();const r=rmGet(RC),m=$("rjM");if(!r)return drawRoom(true);
+  if(r.st!=="lobby"||r.players.length>=r.cap)return drawRoom(true);
+  if(r.priv&&$("rjP").value!==r.pw){m.textContent="Şifre yanlış.";$("rjP").select();return}
+  rmEdit(RC,x=>{if(!x.players.some(p=>p.u===ME()))x.players.push(newPlayer(ME()))});drawRoom(true);
+});
+$("roomBody").addEventListener("click",e=>{
+  const cp=e.target.closest("[data-cp]");if(cp){copyBtn(cp);return}
+  const vo=e.target.closest("[data-vote]");
+  if(vo){rmEdit(RC,x=>{if(x.st==="play"&&x.ix===NREEL&&x.players.some(p=>p.u===ME()))x.votes[ME()]=vo.dataset.vote});drawRoom();return}
+  const a=e.target.closest("[data-act]");if(!a)return;
+  const act=a.dataset.act,r=rmGet(RC);
+  if(act==="login"){askLogin();return}
+  if(!r)return;
+  const host=r.host===ME();
+  if(act==="leave"){
+    if(!armed(a))return;
+    if(host)rmClose(RC);else rmEdit(RC,x=>{x.players=x.players.filter(p=>p.u!==ME())});
+    location.hash="#/instagram";return;
+  }
+  if(!host)return;   // the rest belongs to the room's owner
+  if(act==="start"){
+    rmEdit(RC,x=>{const ok=x.players.filter(p=>p.s.every(Boolean));if(ok.length<MIN_PLAYERS||ok.length<x.players.length)return;
+      x.tg=ok[Math.floor(Math.random()*ok.length)].u;x.st="play";x.ix=0;x.votes={}});
+  }
+  else if(act==="prev"||act==="next"){swT=0;swipe(act==="next"?1:-1);return}
+  else if(act==="end")rmEdit(RC,x=>{x.st="end"});
+  else if(act==="lobby")rmEdit(RC,x=>{x.st="lobby";x.tg="";x.ix=0;x.votes={}});
+  drawRoom();
+});
+/* another tab changed the rooms: follow it */
+addEventListener("storage",e=>{
+  if(e.key!==LB+"rooms")return;
+  const k=cur();if(k==="instagram")drawRooms();else if(k.startsWith("oda/"))drawRoom();
+});
+/* ---------- control panel (admin only) ---------- */
+const fdt=t=>t?new Date(t).toLocaleString("tr-TR",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}):"–";
+function drawAdmin(){
+  const b=$("admBody");
+  if(!isAdmin()){$("admQ").hidden=true;b.innerHTML=`<div class="rbox"><h1>Sadece admin</h1><p>Bu sayfayı görmek için admin hesabıyla giriş yap.</p><button class="rmgo" data-act="login">Giriş yap</button></div>`;return}
+  $("admQ").hidden=false;
+  USERS=rgAll();
+  const q=$("admQ").value.trim().toLowerCase(),all=Object.entries(USERS).sort((a,c)=>(c[1].last||0)-(a[1].last||0));
+  const list=all.filter(([k,u])=>!q||u.name.toLowerCase().includes(q));
+  b.innerHTML=`<p class="rms admc">${all.length} kullanıcı${q?` · ${list.length} sonuç`:""}</p>`+(list.length?`<div class="admg">`+list.map(([k,u])=>{const acc=ACCOUNTS[k],p={u:u.name,av:""};
+    return `<div class="admu" data-k="${esc(k)}">`+
+      `<label class="pavc admav" title="Profil resmini değiştir">${avatar(p)}<input type="file" accept="image/*" data-uav="${esc(k)}" hidden><i aria-hidden="true">✎</i></label>`+
+      `<div class="admi"><div class="admn">${acc?`<b>${esc(u.name)}</b>${acc.admin?'<em class="adm">ADMIN</em>':""}<small class="rms">Hesap adı değiştirilemez</small>`
+        :`<input value="${esc(u.name)}" maxlength="40" data-un="${esc(k)}" aria-label="${esc(u.name)} kullanıcı adı"><button data-save="${esc(k)}">Kaydet</button>`}</div>`+
+      `<small class="rms">Kayıt: ${fdt(u.t)} · Son giriş: ${fdt(u.last)}</small>`+
+      `<div class="adma">${u.av?`<button data-rav="${esc(k)}">Resmi kaldır</button>`:""}<output class="rmm"></output></div></div></div>`}).join("")+`</div>`
+    :`<p class="rms">${q?"Aramaya uyan kullanıcı yok.":"Henüz kimse giriş yapmadı."}</p>`);
+}
+/* a new name for a user: the registry, and every room they are in (player, owner, whose reels, votes) */
+function rgRename(k,to){
+  USERS=rgAll();const u=USERS[k];if(!u)return "Kullanıcı bulunamadı.";
+  to=to.trim().replace(/\s+/g," ");const nk=to.toLowerCase(),from=u.name;
+  if(!to)return "Bir ad yaz.";if(to===from)return "";
+  if(nk!==k&&(USERS[nk]||ACCOUNTS[nk]))return "Bu ad başka birinde.";
+  if(/^misafir \d+$/i.test(to))return "Misafir adları kullanılamaz.";
+  delete USERS[k];u.name=to;USERS[nk]=u;rgSave();
+  const rn=ld("userRenames",{})||{};rn[k]=to;for(const o in rn)if(rn[o].toLowerCase()===k)rn[o]=to;sv("userRenames",rn);
+  ROOMS=rmAll();
+  for(const x of ROOMS){
+    for(const p of x.players)if(p.u===from)p.u=to;
+    if(x.host===from)x.host=to;if(x.tg===from)x.tg=to;
+    const v={};for(const [a,c] of Object.entries(x.votes||{}))v[a===from?to:a]=c===from?to:c;x.votes=v;
+  }
+  rmSave();return "";
+}
+function admPic(k,file){
+  const u=URL.createObjectURL(file),im=new Image();
+  im.onload=()=>{const c=document.createElement("canvas"),z=96,m=Math.min(im.width,im.height);c.width=c.height=z;
+    c.getContext("2d").drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,z,z);URL.revokeObjectURL(u);
+    USERS=rgAll();if(USERS[k]){USERS[k].av=c.toDataURL("image/jpeg",.85);rgSave()}drawAdmin()};
+  im.onerror=()=>URL.revokeObjectURL(u);im.src=u;
+}
+$("admQ").addEventListener("input",drawAdmin);
+$("admBody").addEventListener("change",e=>{const k=e.target.dataset.uav;if(k===undefined||!isAdmin())return;const fl=e.target.files[0];e.target.value="";if(fl&&fl.type.startsWith("image/"))admPic(k,fl)});
+$("admBody").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.dataset.un!==undefined){e.preventDefault();const b=e.target.parentElement.querySelector("[data-save]");if(b)b.click()}});
+$("admBody").addEventListener("click",e=>{
+  if(e.target.closest("[data-act=login]")){askLogin();return}
+  if(!isAdmin())return;
+  const sb=e.target.closest("[data-save]");
+  if(sb){const k=sb.dataset.save,row=sb.closest(".admu"),inp=row.querySelector("[data-un]"),err=rgRename(k,inp.value);
+    if(err){row.querySelector("output").textContent=err;inp.focus();return}drawAdmin();return}
+  const rv=e.target.closest("[data-rav]");if(rv){USERS=rgAll();const u=USERS[rv.dataset.rav];if(u){u.av="";rgSave()}drawAdmin()}
+});
+/* another tab changed the users: pictures, names, and a rename of the user logged in here */
+addEventListener("storage",e=>{
+  if(e.key!==LB+"users"&&e.key!==LB+"userRenames")return;
+  USERS=rgAll();if(rgFollow())drawLogin();
+  const k=cur();if(k==="admin")drawAdmin();else if(k.startsWith("oda/"))drawRoom();
+});
+function refreshView(){const k=cur();if(k==="admin")drawAdmin();else if(k==="instagram"){drawRmForm();drawRooms()}else if(k.startsWith("oda/"))drawRoom(true)}
+
+function route(){
+  const k=cur(),room=k.startsWith("oda/"),ig=k==="instagram",adm=k==="admin",home=!room&&!adm&&!TITLES[k];
+  const show=home?$("v-home"):ig?$("v-ig"):room?$("v-room"):adm?$("v-admin"):$("v-page");
+  for(const m of document.querySelectorAll("main")){const on=m===show;m.hidden=!on;m.classList.remove("enter");if(on){void m.offsetWidth;m.classList.add("enter")}}
+  if(ig){drawRmForm();drawRooms()}
+  if(adm)drawAdmin();
+  if(room){RC=k.slice(4).toUpperCase();drawRoom(true)}
+  if(!home&&!room&&!adm)$("pgT").textContent=TITLES[k];
+  if(!room)document.title=home?"123 Lobby":adm?"Kontrol paneli · 123 Lobby":TITLES[k]+" · 123 Lobby";
+  renderNav();window.scrollTo({top:0,behavior:"instant"});
+}
+addEventListener("hashchange",route);
+
+/* ---------- card spotlight follows the cursor ---------- */
+document.addEventListener("pointermove",e=>{
+  const c=e.target.closest&&e.target.closest(".card");if(!c)return;
+  const r=c.getBoundingClientRect();
+  c.style.setProperty("--mx",(e.clientX-r.left)+"px");c.style.setProperty("--my",(e.clientY-r.top)+"px");
+});
+
+/* ---------- accent colours ---------- */
+const ACP=[["#e5a93d","#5fc2a6"],["#3b82f6","#ec4899"],["#e11d48","#f59e0b"],["#8b5cf6","#06b6d4"],["#22c55e","#a3e635"],["#f97316","#14b8a6"]];
+let AC=ld("accent",null);
+function applyAc(){
+  const s=document.documentElement.style;
+  if(AC){s.setProperty("--gold",AC[0]);s.setProperty("--jade",AC[1]);s.setProperty("--hl",`color-mix(in srgb,${AC[0]} 14%,var(--panel))`)}
+  else["--gold","--jade","--hl"].forEach(p=>s.removeProperty(p));
+}
+function syncAc(){
+  const cs=getComputedStyle(document.documentElement),hx=(p,d)=>{const v=cs.getPropertyValue(p).trim();return/^#[0-9a-f]{6}$/i.test(v)?v:d};
+  $("c1").value=hx("--gold","#e5a93d");$("c2").value=hx("--jade","#5fc2a6");
+  $("sws").querySelectorAll("button").forEach((b,i)=>b.setAttribute("aria-pressed",String(!!AC&&AC[0]===ACP[i][0]&&AC[1]===ACP[i][1])));
+}
+function setAc(v){AC=v;sv("accent",AC);applyAc();syncAc()}
+$("sws").innerHTML=ACP.map(([a,b])=>`<button style="--a:${a};--b:${b}" aria-pressed="false" aria-label="Renkler ${a} ve ${b}" title="${a} / ${b}"></button>`).join("");
+$("sws").onclick=e=>{const b=e.target.closest("button");if(b)setAc([...ACP[[...$("sws").children].indexOf(b)]])};
+$("c1").oninput=$("c2").oninput=()=>setAc([$("c1").value,$("c2").value]);
+$("cRst").onclick=()=>setAc(null);
+function openSet(on){$("setP").hidden=!on;$("setB").setAttribute("aria-expanded",String(on));if(on)syncAc()}
+$("setB").onclick=()=>openSet($("setP").hidden);
+document.addEventListener("click",e=>{if(!$("setP").hidden&&!e.target.closest("#set"))openSet(false)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("setP").hidden){openSet(false);$("setB").focus()}});
+
+applyAc();route();
+</script>
+</body>
+</html>
