@@ -1,5 +1,5 @@
 /* 123 Lobby behind accounts (its files live in api/_lobby/, which Vercel does not serve by itself).
-   GET  /123lobby/          (rewritten here)        -> the lobby with a valid lobby cookie, else the sign-in / sign-up page
+   GET  /123lobby/<page>    (rewritten here)        -> the lobby with a valid lobby cookie, else the sign-in / sign-up page (every page of the lobby is a path, no #/)
    GET  /123lobby/png/<f>   (rewritten here, ?f=<f>) -> a lobby picture, only with a valid lobby cookie (the wallpaper always, for the sign-in page)
    POST /api/lobby {register: {u, p}} -> makes an account and signs in
    POST /api/lobby {login: {u, p}}    -> signs in: lobby cookie (random token, HttpOnly, 30 days; only its hash is stored)
@@ -54,7 +54,7 @@ const TYPES = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "
 const PUBLIC = new Set(["bg.jpg", "favicon.png"]);   // the wallpaper and the tab icon of the sign-in page
 
 const SIGNIN = `<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex"><title>123 Lobby · Giriş</title><link rel="icon" type="image/png" href="png/favicon.png">
+<meta name="robots" content="noindex"><base href="/123lobby/"><title>123 Lobby · Giriş</title><link rel="icon" type="image/png" href="png/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
 <style>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>123 Lobby</title>
+<base href="/123lobby/"><title>123 Lobby</title>
 <link rel="icon" type="image/png" href="png/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -318,7 +318,7 @@ main#v-room.wide{max-width:1600px;padding-top:12px;padding-bottom:12px}
 <body>
 <header class="top">
   <div class="in">
-    <a class="brand" href="#/"><img src="png/logo.png" alt="" onerror="this.remove()">123 Lobby</a>
+    <a class="brand" href="./"><img src="png/logo.png" alt="" onerror="this.remove()">123 Lobby</a>
     <nav id="topNav" aria-label="Menü"></nav>
     <div id="topR">
       <div class="set" id="lg">
@@ -334,7 +334,7 @@ main#v-room.wide{max-width:1600px;padding-top:12px;padding-bottom:12px}
           <div id="lgIn" hidden>
             <h3>Hesap</h3>
             <p class="lgw">Giriş yapıldı: <b id="lgN"></b> <em class="adm" id="lgA" hidden>ADMIN</em></p>
-            <a class="rbtn lgadm" id="lgAdm" href="#/admin" hidden>Kontrol paneli</a>
+            <a class="rbtn lgadm" id="lgAdm" href="admin" hidden>Kontrol paneli</a>
             <button id="lgOut">Çıkış yap</button>
           </div>
         </div></div>
@@ -422,19 +422,29 @@ const MENU=[
   ["spotify","Spotify",ico('<circle cx="12" cy="12" r="9"/><path d="M7.5 9.5c3-1 6.5-.7 9 .8M8 12.5c2.5-.7 5.3-.4 7.4.8M8.6 15.4c2-.5 4-.3 5.6.6"/>'),"Spotify açıklaması.",[]]
 ];
 const TITLES={};MENU.forEach(([k,t,,,kids])=>{TITLES[k]=t;kids.forEach(([kk,kt])=>TITLES[kk]=kt)});
-const cur=()=>location.hash.replace(/^#\/?/,"").replace(/\/$/,"");
+/* the page is the path after /123lobby/ (no #/ in the link); old #/ links move to the path once */
+const BASE="/123lobby/";
+if(/^#\/./.test(location.hash))history.replaceState(null,"",BASE+location.hash.slice(2));
+const cur=()=>decodeURIComponent(location.pathname.startsWith(BASE)?location.pathname.slice(BASE.length):"").replace(/\/$/,"");
+function go(p){history.pushState(null,"",BASE+p);route()}
+/* a click on a link of the lobby changes the page without loading it again */
+document.addEventListener("click",e=>{
+  const a=e.target.closest("a[href]");if(!a||e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||a.target)return;
+  const u=new URL(a.href,location.href);if(u.origin!==location.origin||!u.pathname.startsWith(BASE))return;
+  e.preventDefault();if(u.pathname!==location.pathname)go(u.pathname.slice(BASE.length));else route();
+});
 
 /* the brand marks on the home cards */
 const BRAND={instagram:'<svg viewBox="0 0 48 48" aria-hidden="true"><defs><radialGradient id="igG" cx="30%" cy="107%" r="150%"><stop offset="0" stop-color="#fdf497"/><stop offset=".05" stop-color="#fdf497"/><stop offset=".45" stop-color="#fd5949"/><stop offset=".6" stop-color="#d6249f"/><stop offset=".9" stop-color="#285AEB"/></radialGradient></defs><rect width="48" height="48" rx="12" fill="url(#igG)"/><rect x="11" y="11" width="26" height="26" rx="8" fill="none" stroke="#fff" stroke-width="3.2"/><circle cx="24" cy="24" r="6.4" fill="none" stroke="#fff" stroke-width="3.2"/><circle cx="31.6" cy="16.4" r="2" fill="#fff"/></svg>',
   spotify:'<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="24" fill="#1ed760"/><path d="M12.5 18.6c7.6-2.3 16.3-1.6 23 2.2M13.8 25c6.3-1.8 13.4-1.2 18.9 1.9M15 31c5-1.3 10.3-.9 14.6 1.5" fill="none" stroke="#000" stroke-width="3.2" stroke-linecap="round"/></svg>'};
-$("homeCards").innerHTML=MENU.map(([k,t,,d],i)=>`<a class="card${BRAND[k]?" bc":""}" href="#/${k}" style="--i:${i}">${BRAND[k]?`<i class="bmark">${BRAND[k]}</i>`:""}<b>${esc(t)}</b><span>${esc(d)}</span></a>`).join("");
+$("homeCards").innerHTML=MENU.map(([k,t,,d],i)=>`<a class="card${BRAND[k]?" bc":""}" href="${k}" style="--i:${i}">${BRAND[k]?`<i class="bmark">${BRAND[k]}</i>`:""}<b>${esc(t)}</b><span>${esc(d)}</span></a>`).join("");
 
 let tnShut="";
 function renderNav(){
   const k=cur().startsWith("oda/")?"instagram":cur();   // a room belongs to the Instagram page
   $("topNav").innerHTML=MENU.map(([g,l,ic,,kids])=>
-    `<div class="tn${tnShut===g?" shut":""}" data-g="${g}"><a href="#/${g}"${k===g||k.startsWith(g+"/")?' aria-current="page"':""}>${ic}<span>${esc(l)}</span>${kids.length?'<i aria-hidden="true">⌄</i>':""}</a>`+
-    (kids.length?`<div class="tdd"><div>${kids.map(([kk,kl])=>`<a href="#/${kk}"${kk===k?' aria-current="page"':""}>${esc(kl)}</a>`).join("")}</div></div>`:"")+`</div>`).join("");
+    `<div class="tn${tnShut===g?" shut":""}" data-g="${g}"><a href="${g}"${k===g||k.startsWith(g+"/")?' aria-current="page"':""}>${ic}<span>${esc(l)}</span>${kids.length?'<i aria-hidden="true">⌄</i>':""}</a>`+
+    (kids.length?`<div class="tdd"><div>${kids.map(([kk,kl])=>`<a href="${kk}"${kk===k?' aria-current="page"':""}>${esc(kl)}</a>`).join("")}</div></div>`:"")+`</div>`).join("");
 }
 /* a click inside a dropdown closes it until the mouse leaves */
 $("topNav").addEventListener("click",e=>{const t=e.target.closest(".tn");if(t&&e.target.closest("a")){tnShut=t.dataset.g;t.classList.add("shut");document.activeElement.blur()}});
@@ -555,7 +565,7 @@ function drawRooms(){
   $("rmList").innerHTML=ROOMS.map(r=>{const me=r.players.some(p=>p.u===ME()),[sl,sc]=ST[r.st]||ST.lobby;
     return `<div class="rmi"><span class="rmav">${esc((r.n[0]||"?").toUpperCase())}</span>`+
     `<div class="rmh"><b>${esc(r.n)}</b><small>${r.priv?lockIco+" Şifreli":"Herkese açık"} · ${r.players.length}/${r.cap} oyuncu · ${esc(r.host)} · <span class="rtag ${sc}">${sl}</span></small></div>`+
-    `<div class="rma"><span class="rmcode">${r.code}</span><a class="rbtn" href="#/oda/${r.code}">${me?"Gir":"Katıl"}</a>`+
+    `<div class="rma"><span class="rmcode">${r.code}</span><a class="rbtn" href="oda/${r.code}">${me?"Gir":"Katıl"}</a>`+
     (r.host===ME()||isAdmin()?`<button class="rmx" data-rx="${r.code}" aria-label="${esc(r.n)} odasını kapat" title="Odayı kapat">✕</button>`:"")+`</div></div>`}).join("")
     ||`<p class="rms" style="margin:0">Henüz oda yok. Soldan ilk odanı oluştur.</p>`;
 }
@@ -576,13 +586,13 @@ $("rmF").onsubmit=e=>{
   const r=rmFix({code:rmCode(),n,cap:rmCap,priv:rmPriv,pw:rmPriv?$("rmP").value:"",host:ME(),t:Date.now(),players:[newPlayer(ME())]});
   ROOMS.unshift(r);rmSave();
   $("rmN").value="";$("rmP").value="";$("rmM").textContent="";
-  location.hash="#/oda/"+r.code;
+  go("oda/"+r.code);
 };
 $("jnF").onsubmit=e=>{
   e.preventDefault();
   const c=$("jnC").value.trim().toUpperCase();if(!c)return $("jnC").focus();
   ROOMS=rmAll();if(!rmGet(c)){$("jnM").textContent="Bu kodla bir oda yok.";return}
-  $("jnM").textContent="";$("jnC").value="";location.hash="#/oda/"+c;
+  $("jnM").textContent="";$("jnC").value="";go("oda/"+c);
 };
 
 /* ---------- room page ---------- */
@@ -695,12 +705,12 @@ function drawRoom(force){
   /* a redraw while typing a link keeps that box, its text and the cursor */
   const ae=document.activeElement,keep=ae&&ae.dataset&&ae.dataset.li!==undefined?[ae.dataset.li,ae.value,ae.selectionStart]:null;
   document.title=(r?r.n:"Oda")+" · 123 Lobby";
-  if(!r){b.innerHTML=`<section class="rbox"><h1>Oda bulunamadı</h1><p>Bu oda kapatılmış ya da kod yanlış.</p><a class="rbtn" href="#/instagram">Odalara dön</a></section>`;return}
+  if(!r){b.innerHTML=`<section class="rbox"><h1>Oda bulunamadı</h1><p>Bu oda kapatılmış ya da kod yanlış.</p><a class="rbtn" href="instagram">Odalara dön</a></section>`;return}
   if(!ME()){b.innerHTML=`<section class="rbox"><h1>${esc(r.n)}</h1><p>Bu odaya sadece giriş yapmış kişiler katılabilir.</p><button class="rmgo" data-act="login">Giriş yap</button></section>`;return}
   if(!me){
     const why=r.st!=="lobby"?"Oyun başladı, şu an katılamazsın.":r.players.length>=r.cap?"Oda dolu.":"";
     b.innerHTML=`<section class="rbox"><h1>${esc(r.n)}</h1><p>${esc(r.host)} tarafından açıldı · ${r.players.length}/${r.cap} oyuncu${r.priv?" · Şifreli":""}</p>`+
-      (why?`<p class="rmlg">${why}</p><a class="rbtn" href="#/instagram">Odalara dön</a>`
+      (why?`<p class="rmlg">${why}</p><a class="rbtn" href="instagram">Odalara dön</a>`
         :`<form id="rjF" novalidate>${r.priv?`<label class="rmf">Oda şifresi <input id="rjP" type="password" autocomplete="off"></label>`:""}<output id="rjM" class="rmm"></output><button class="rmgo">Odaya katıl</button></form>`)+`</section>`;
     const p=$("rjP");if(p)p.focus();
     return;
@@ -782,7 +792,7 @@ $("roomBody").addEventListener("click",e=>{
   if(act==="leave"){
     if(!armed(a))return;
     if(host)rmClose(RC);else rmEdit(RC,x=>{x.players=x.players.filter(p=>p.u!==ME())});
-    location.hash="#/instagram";return;
+    go("instagram");return;
   }
   if(!host)return;   // the rest belongs to the room's owner
   if(act==="start"){
@@ -886,7 +896,7 @@ function route(){
   if(!room)document.title=home?"123 Lobby":adm?"Kontrol paneli · 123 Lobby":TITLES[k]+" · 123 Lobby";
   renderNav();window.scrollTo({top:0,behavior:"instant"});
 }
-addEventListener("hashchange",route);
+addEventListener("popstate",route);
 
 /* ---------- card spotlight follows the cursor ---------- */
 document.addEventListener("pointermove",e=>{
