@@ -81,7 +81,7 @@ input:focus{outline:2px solid var(--gold);outline-offset:1px}
   <form id="fUp" hidden>
     <label>Kullanıcı adı<input name="u" autocomplete="username" minlength="3" maxlength="20" pattern="[A-Za-z0-9_.\\-]{3,20}" required></label>
     <small>3-20 karakter: harf, rakam, _ . -</small>
-    <label>Şifre<input name="p" type="password" autocomplete="new-password" minlength="6" maxlength="100" required></label>
+    <label>Basit şifre yazın<input name="p" type="password" autocomplete="new-password" minlength="6" maxlength="100" required></label>
     <label>Şifre (tekrar)<input name="p2" type="password" autocomplete="new-password" minlength="6" maxlength="100" required></label>
     <button class="go">Kayıt ol</button><div class="e" role="alert"></div>
   </form>
