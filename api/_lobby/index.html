@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
 <style>
 /* ---------- tokens ---------- */
-:root{--bg:#000;--panel:#0e0e0e;--ink:#f2f2f2;--mute:#9a9a9a;--line:#2a2a2a;--gold:#e5a93d;--jade:#5fc2a6;--hl:#241f10;--ease:cubic-bezier(.22,1,.36,1);color-scheme:dark}
+:root{--bg:#000;--panel:#0e0e0e;--ink:#f2f2f2;--mute:#9a9a9a;--line:#2a2a2a;--gold:#8b5cf6;--jade:#06b6d4;--hl:#1c1530;--ease:cubic-bezier(.22,1,.36,1);color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{scroll-behavior:smooth;background:#070514}
@@ -896,8 +896,9 @@ document.addEventListener("pointermove",e=>{
 });
 
 /* ---------- accent colours ---------- */
-const ACP=[["#e5a93d","#5fc2a6"],["#3b82f6","#ec4899"],["#e11d48","#f59e0b"],["#8b5cf6","#06b6d4"],["#22c55e","#a3e635"],["#f97316","#14b8a6"]];
+const ACP=[["#8b5cf6","#06b6d4"],["#3b82f6","#ec4899"],["#e11d48","#f59e0b"],["#e5a93d","#5fc2a6"],["#22c55e","#a3e635"],["#f97316","#14b8a6"]];
 let AC=ld("accent",null);
+if(!ld("acV2",false)){AC=null;sv("accent",null);sv("acV2",true)}   // the default became violet / cyan: everyone starts on it once
 function applyAc(){
   const s=document.documentElement.style;
   if(AC){s.setProperty("--gold",AC[0]);s.setProperty("--jade",AC[1]);s.setProperty("--hl",`color-mix(in srgb,${AC[0]} 14%,var(--panel))`)}
@@ -905,7 +906,7 @@ function applyAc(){
 }
 function syncAc(){
   const cs=getComputedStyle(document.documentElement),hx=(p,d)=>{const v=cs.getPropertyValue(p).trim();return/^#[0-9a-f]{6}$/i.test(v)?v:d};
-  $("c1").value=hx("--gold","#e5a93d");$("c2").value=hx("--jade","#5fc2a6");
+  $("c1").value=hx("--gold","#8b5cf6");$("c2").value=hx("--jade","#06b6d4");
   $("sws").querySelectorAll("button").forEach((b,i)=>b.setAttribute("aria-pressed",String(!!AC&&AC[0]===ACP[i][0]&&AC[1]===ACP[i][1])));
 }
 function setAc(v){AC=v;sv("accent",AC);applyAc();syncAc()}

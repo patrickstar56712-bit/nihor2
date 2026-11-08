@@ -58,7 +58,7 @@ const SIGNIN = `<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><meta
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
 <style>
-:root{--panel:#0e0e0e;--ink:#f2f2f2;--mute:#9a9a9a;--line:#2a2a2a;--gold:#e5a93d;--jade:#5fc2a6;--hl:#241f10;color-scheme:dark}
+:root{--panel:#0e0e0e;--ink:#f2f2f2;--mute:#9a9a9a;--line:#2a2a2a;--gold:#8b5cf6;--jade:#06b6d4;--hl:#1c1530;color-scheme:dark}
 *{box-sizing:border-box}[hidden]{display:none!important}
 html{background:#070514}
 body{margin:0;min-height:100vh;display:grid;place-items:center;padding:16px;background:transparent;color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif}
