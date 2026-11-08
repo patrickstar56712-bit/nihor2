@@ -295,6 +295,8 @@ main#v-room.wide{max-width:1600px;padding-top:12px;padding-bottom:12px}
 .admh p{margin:0}
 #admQ{flex:0 1 240px;padding:8px 11px;font-size:14px;color:var(--ink);background:color-mix(in srgb,var(--ink) 5%,transparent);border:1px solid var(--line);border-radius:9px}
 #admQ:focus{outline:0;border-color:var(--gold)}
+.admx{color:#ff7b7b;border-color:color-mix(in srgb,#ff7b7b 45%,var(--line))}.admx:hover{border-color:#ff7b7b}
+.admsure{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px;color:#ff9b9b}
 .admc{margin:0 0 10px}
 .admg{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:10px}
 .admu{display:flex;align-items:center;gap:14px;padding:12px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--ink) 3%,transparent)}
@@ -393,7 +395,7 @@ main#v-room.wide{max-width:1600px;padding-top:12px;padding-bottom:12px}
 
 <main id="v-admin" hidden>
   <section class="admw">
-    <div class="admh"><div><h1>Kontrol paneli</h1><p class="rms">Kayıtlı kullanıcılar: adlarını ve profil resimlerini değiştirebilirsin.</p></div>
+    <div class="admh"><div><h1>Kontrol paneli</h1><p class="rms">Kayıtlı kullanıcılar: profil resimlerini değiştirebilir, kullanıcıları silebilirsin.</p></div>
       <input id="admQ" type="search" placeholder="Kullanıcı ara" aria-label="Kullanıcı ara" autocomplete="off"></div>
     <div id="admBody"></div>
   </section>
@@ -804,16 +806,28 @@ function drawAdmin(){
   if(!isAdmin()){$("admQ").hidden=true;b.innerHTML=`<div class="rbox"><h1>Sadece admin</h1><p>Bu sayfayı görmek için admin hesabıyla giriş yap.</p><button class="rmgo" data-act="login">Giriş yap</button></div>`;return}
   $("admQ").hidden=false;
   USERS=rgAll();
-  const q=$("admQ").value.trim().toLowerCase(),all=Object.entries(USERS).sort((a,c)=>(c[1].last||0)-(a[1].last||0));
+  if(SRV&&!SRVU){b.innerHTML=`<p class="rms">Hesaplar yükleniyor…</p>`;admLoad();return}
+  const all=SRV?SRVU.map(a=>{const l=USERS[a.u]||{};return[a.u,{...l,name:a.name,t:l.t||Date.parse(a.created.replace(" ","T")+"Z"),srv:1,admin:a.admin}]})
+    :Object.entries(USERS).sort((a,c)=>(c[1].last||0)-(a[1].last||0));
+  const q=$("admQ").value.trim().toLowerCase();
   const list=all.filter(([k,u])=>!q||u.name.toLowerCase().includes(q));
-  b.innerHTML=`<p class="rms admc">${all.length} kullanıcı${q?` · ${list.length} sonuç`:""}</p>`+(list.length?`<div class="admg">`+list.map(([k,u])=>{const acc=ACCOUNTS[k],p={u:u.name,av:""};
+  b.innerHTML=`<p class="rms admc">${all.length} kullanıcı${q?` · ${list.length} sonuç`:""}</p>`+(list.length?`<div class="admg">`+list.map(([k,u])=>{const acc=u.srv?{admin:u.admin}:ACCOUNTS[k],p={u:u.name,av:""};
     return `<div class="admu" data-k="${esc(k)}">`+
       `<label class="pavc admav" title="Profil resmini değiştir">${avatar(p)}<input type="file" accept="image/*" data-uav="${esc(k)}" hidden><i aria-hidden="true">✎</i></label>`+
       `<div class="admi"><div class="admn">${acc?`<b>${esc(u.name)}</b>${acc.admin?'<em class="adm">ADMIN</em>':""}<small class="rms">Hesap adı değiştirilemez</small>`
         :`<input value="${esc(u.name)}" maxlength="40" data-un="${esc(k)}" aria-label="${esc(u.name)} kullanıcı adı"><button data-save="${esc(k)}">Kaydet</button>`}</div>`+
       `<small class="rms">Kayıt: ${fdt(u.t)} · Son giriş: ${fdt(u.last)}</small>`+
-      `<div class="adma">${u.av?`<button data-rav="${esc(k)}">Resmi kaldır</button>`:""}<output class="rmm"></output></div></div></div>`}).join("")+`</div>`
+      `<div class="adma">${u.av?`<button data-rav="${esc(k)}">Resmi kaldır</button>`:""}${acc&&acc.admin?"":admDel===k?`<span class="admsure">Emin misin? <button class="admx" data-delok="${esc(k)}">Evet, sil</button><button data-delno>Vazgeç</button></span>`:`<button class="admx" data-del="${esc(k)}">Kullanıcıyı sil</button>`}<output class="rmm"></output></div></div></div>`}).join("")+`</div>`
     :`<p class="rms">${q?"Aramaya uyan kullanıcı yok.":"Henüz kimse giriş yapmadı."}</p>`);
+}
+/* accounts from the server (lobby admin only), and the one waiting for "Emin misin?" */
+let SRVU=null,admDel="";
+async function admLoad(){try{const r=await fetch("/api/lobby?users=1",{cache:"no-store"});SRVU=r.ok?await r.json():[]}catch(e){SRVU=[]}drawAdmin()}
+async function admRemove(k,row){
+  if(SRV){try{const r=await fetch("/api/lobby",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({deleteUser:k})});
+    if(!r.ok){const d=await r.json().catch(()=>({}));row.querySelector("output").textContent=d.error||"Silinemedi.";return}}
+    catch(e){row.querySelector("output").textContent="Sunucuya ulaşılamadı.";return}}
+  USERS=rgAll();delete USERS[k];rgSave();admDel="";SRVU=null;drawAdmin();
 }
 /* a new name for a user: the registry, and every room they are in (player, owner, whose reels, votes) */
 function rgRename(k,to){
@@ -848,6 +862,9 @@ $("admBody").addEventListener("click",e=>{
   const sb=e.target.closest("[data-save]");
   if(sb){const k=sb.dataset.save,row=sb.closest(".admu"),inp=row.querySelector("[data-un]"),err=rgRename(k,inp.value);
     if(err){row.querySelector("output").textContent=err;inp.focus();return}drawAdmin();return}
+  const dl=e.target.closest("[data-del]");if(dl){admDel=dl.dataset.del;drawAdmin();return}
+  if(e.target.closest("[data-delno]")){admDel="";drawAdmin();return}
+  const ok=e.target.closest("[data-delok]");if(ok){ok.disabled=true;admRemove(ok.dataset.delok,ok.closest(".admu"));return}
   const rv=e.target.closest("[data-rav]");if(rv){USERS=rgAll();const u=USERS[rv.dataset.rav];if(u){u.av="";rgSave()}drawAdmin()}
 });
 /* another tab changed the users: pictures, names, and a rename of the user logged in here */

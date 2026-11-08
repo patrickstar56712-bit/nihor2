@@ -5,6 +5,8 @@
    POST /api/lobby {login: {u, p}}    -> signs in: lobby cookie (random token, HttpOnly, 30 days; only its hash is stored)
                                          5 wrong passwords from one address lock it for 15 minutes; 5 new accounts per address per hour
    POST /api/lobby {logout: true}     -> this browser's lobby cookie ends
+   GET  /api/lobby?users=1            -> (lobby admin) every account: [{u, name, created, admin}]
+   POST /api/lobby {deleteUser: u}    -> (lobby admin) removes that account and signs it out everywhere (admins can not be removed)
    Passwords are kept as scrypt hashes with their own salt. */
 import { readFileSync } from "node:fs";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
@@ -115,6 +117,12 @@ export default async function handler(req, res) {
   try {
     await setup();
     if (req.method === "GET") {
+      if (req.query?.users) {   // the accounts, for the lobby's Kontrol paneli
+        const me = await signedIn(req);
+        if (!me || !me.admin) return res.status(403).json({ error: "Sadece admin" });
+        const rows = (await client().execute("SELECT u, name, created FROM lobby_users ORDER BY created DESC")).rows;
+        return res.status(200).json(rows.map(x => ({ u: String(x.u), name: String(x.name), created: String(x.created), admin: ADMINS.has(String(x.u)) })));
+      }
       const f = String(req.query?.f || "");
       if (f) {   // a picture of the lobby
         const m = /^[a-z0-9_-]+\.([a-z]+)$/i.exec(f), ty = m && TYPES[m[1].toLowerCase()];
@@ -128,6 +136,16 @@ export default async function handler(req, res) {
     }
     if (req.method !== "POST") return res.status(405).json({ error: "GET or POST" });
     const b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
+    if (typeof b.deleteUser === "string") {
+      const me = await signedIn(req), u = b.deleteUser.trim().toLowerCase();
+      if (!me || !me.admin) return res.status(403).json({ error: "Sadece admin" });
+      if (ADMINS.has(u)) return res.status(400).json({ error: "Admin hesabı silinemez" });
+      await client().batch([
+        { sql: "DELETE FROM lobby_sessions WHERE u = ?", args: [u] },
+        { sql: "DELETE FROM lobby_users WHERE u = ?", args: [u] }
+      ], "write");
+      return res.status(200).json({ ok: true });
+    }
     if (b.logout) {
       const t = tok(req);
       if (t) await client().execute({ sql: "DELETE FROM lobby_sessions WHERE h = ?", args: [hash(t)] });
