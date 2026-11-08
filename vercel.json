@@ -2,13 +2,17 @@
   "functions": {
     "api/admin.js": {
       "includeFiles": "api/_panel/**"
+    },
+    "api/lobby.js": {
+      "includeFiles": "api/_lobby/**"
     }
   },
   "redirects": [
     { "source": "/123lobby", "destination": "/123lobby/", "permanent": false }
   ],
   "rewrites": [
-    { "source": "/123lobby/", "destination": "/123lobby/index.html" },
+    { "source": "/123lobby/", "destination": "/api/lobby" },
+    { "source": "/123lobby/png/:f", "destination": "/api/lobby?f=:f" },
     { "source": "/((?!api/|123lobby/)[^.]*)", "destination": "/index.html" }
   ]
 }
