@@ -42,10 +42,10 @@ async function startSession(res, u) {
 
 const file = p => readFileSync(new URL("./_lobby/" + p, import.meta.url));
 const TYPES = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif", svg: "image/svg+xml" };
-const PUBLIC = new Set(["bg.jpg"]);   // the wallpaper of the sign-in page
+const PUBLIC = new Set(["bg.jpg", "favicon.png"]);   // the wallpaper and the tab icon of the sign-in page
 
 const SIGNIN = `<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex"><title>123 Lobby · Giriş</title>
+<meta name="robots" content="noindex"><title>123 Lobby · Giriş</title><link rel="icon" type="image/png" href="png/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
 <style>
