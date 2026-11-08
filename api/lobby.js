@@ -7,6 +7,7 @@
    POST /api/lobby {logout: true}     -> this browser's lobby cookie ends
    GET  /api/lobby?users=1            -> (lobby admin) every account: [{u, name, created, admin}]
    POST /api/lobby {deleteUser: u}    -> (lobby admin) removes that account and signs it out everywhere (admins can not be removed)
+   POST /api/lobby {renameUser: {u, to}} -> (lobby admin) a new name for an account; it stays signed in (an admin's name can change only in its capitals)
    Passwords are kept as scrypt hashes with their own salt. */
 import { readFileSync } from "node:fs";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
@@ -136,6 +137,20 @@ export default async function handler(req, res) {
     }
     if (req.method !== "POST") return res.status(405).json({ error: "GET or POST" });
     const b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
+    if (b.renameUser && typeof b.renameUser === "object") {
+      const me = await signedIn(req), u = String(b.renameUser.u || "").trim().toLowerCase(), to = String(b.renameUser.to || "").trim(), nu = to.toLowerCase();
+      if (!me || !me.admin) return res.status(403).json({ error: "Sadece admin" });
+      if (!U_OK.test(to)) return res.status(400).json({ error: "Ad 3-20 karakter olmalı: harf, rakam, _ . -" });
+      if (ADMINS.has(u) && nu !== u) return res.status(400).json({ error: "Admin hesabının adı sadece büyük/küçük harf olarak değişebilir" });
+      if (ADMINS.has(nu) && nu !== u) return res.status(400).json({ error: "Bu ad ayrılmış" });
+      if (!(await client().execute({ sql: "SELECT 1 FROM lobby_users WHERE u = ?", args: [u] })).rows.length) return res.status(404).json({ error: "Kullanıcı bulunamadı" });
+      if (nu !== u && (await client().execute({ sql: "SELECT 1 FROM lobby_users WHERE u = ?", args: [nu] })).rows.length) return res.status(409).json({ error: "Bu ad başka birinde" });
+      await client().batch([
+        { sql: "UPDATE lobby_users SET u = ?, name = ? WHERE u = ?", args: [nu, to, u] },
+        { sql: "UPDATE lobby_sessions SET u = ? WHERE u = ?", args: [nu, u] }
+      ], "write");
+      return res.status(200).json({ ok: true, u: nu, name: to });
+    }
     if (typeof b.deleteUser === "string") {
       const me = await signedIn(req), u = b.deleteUser.trim().toLowerCase();
       if (!me || !me.admin) return res.status(403).json({ error: "Sadece admin" });

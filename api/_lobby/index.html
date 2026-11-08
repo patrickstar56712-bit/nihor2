@@ -395,7 +395,7 @@ main#v-room.wide{max-width:1600px;padding-top:12px;padding-bottom:12px}
 
 <main id="v-admin" hidden>
   <section class="admw">
-    <div class="admh"><div><h1>Kontrol paneli</h1><p class="rms">Kayıtlı kullanıcılar: profil resimlerini değiştirebilir, kullanıcıları silebilirsin.</p></div>
+    <div class="admh"><div><h1>Kontrol paneli</h1><p class="rms">Kayıtlı kullanıcılar: adlarını ve profil resimlerini değiştirebilir, kullanıcıları silebilirsin.</p></div>
       <input id="admQ" type="search" placeholder="Kullanıcı ara" aria-label="Kullanıcı ara" autocomplete="off"></div>
     <div id="admBody"></div>
   </section>
@@ -597,7 +597,7 @@ $("jnF").onsubmit=e=>{
 
 /* ---------- room page ---------- */
 let RC="",rKey="",rVkey="";
-const rlSt=(v,c,dup)=>!v.trim()?["",""]:!c?["bad","Geçerli bir Instagram reels linki değil"]:dup?["bad","Bu linki zaten ekledin"]:["ok","Tamam"];
+const rlSt=(v,c,dup)=>!v.trim()?["",""]:!c?["bad","Geçerli bir Instagram reels linki değil"]:dup?["bad",dup]:["ok","Tamam"];
 /* a player's picture: their own, or the first letter on a colour made from the name */
 const avHue=u=>{let h=0;for(const c of u)h=(h*31+c.charCodeAt(0))%360;return h};
 const avatar=p=>(userAv(p.u)||p.av)?`<span class="pav"><img src="${userAv(p.u)||p.av}" alt=""></span>`:`<span class="pav" style="--h:${avHue(p.u)}">${esc((p.u[0]||"?").toUpperCase())}</span>`;
@@ -756,7 +756,7 @@ function drawRoom(force){
 /* a typed / pasted link: a valid one is saved at once, an empty box clears its slot */
 function rlCheck(i,save){
   const r=rmGet(RC),me=r&&r.players.find(p=>p.u===ME());if(!me||r.st!=="lobby")return;
-  const k=+i.dataset.li,c=reelCode(i.value),dup=!!c&&me.s.some((x,j)=>j!==k&&x===c),[cl,tip]=rlSt(i.value,c,dup);
+  const k=+i.dataset.li,c=reelCode(i.value),dup=!c?"":me.s.some((x,j)=>j!==k&&x===c)?"Bu linki zaten ekledin":r.players.some(p=>p.u!==ME()&&p.s.includes(c))?"Bu linki odada başka biri ekledi":"",[cl,tip]=rlSt(i.value,c,dup);
   const l=i.closest(".rli");l.classList.toggle("ok",cl==="ok");l.classList.toggle("bad",cl==="bad");l.title=tip;
   if(!save)return;
   const v=cl==="ok"?c:"";
@@ -821,13 +821,13 @@ function drawAdmin(){
     :Object.entries(USERS).sort((a,c)=>(c[1].last||0)-(a[1].last||0));
   const q=$("admQ").value.trim().toLowerCase();
   const list=all.filter(([k,u])=>!q||u.name.toLowerCase().includes(q));
-  b.innerHTML=`<p class="rms admc">${all.length} kullanıcı${q?` · ${list.length} sonuç`:""}</p>`+(list.length?`<div class="admg">`+list.map(([k,u])=>{const acc=u.srv?{admin:u.admin}:ACCOUNTS[k],p={u:u.name,av:""};
+  b.innerHTML=`<p class="rms admc">${all.length} kullanıcı${q?` · ${list.length} sonuç`:""}</p>`+(list.length?`<div class="admg">`+list.map(([k,u])=>{const acc=u.srv?null:ACCOUNTS[k],adm=u.srv?u.admin:!!(acc&&acc.admin),p={u:u.name,av:""};
     return `<div class="admu" data-k="${esc(k)}">`+
       `<label class="pavc admav" title="Profil resmini değiştir">${avatar(p)}<input type="file" accept="image/*" data-uav="${esc(k)}" hidden><i aria-hidden="true">✎</i></label>`+
-      `<div class="admi"><div class="admn">${acc?`<b>${esc(u.name)}</b>${acc.admin?'<em class="adm">ADMIN</em>':""}<small class="rms">Hesap adı değiştirilemez</small>`
-        :`<input value="${esc(u.name)}" maxlength="40" data-un="${esc(k)}" aria-label="${esc(u.name)} kullanıcı adı"><button data-save="${esc(k)}">Kaydet</button>`}</div>`+
+      `<div class="admi"><div class="admn">${acc?`<b>${esc(u.name)}</b>${adm?'<em class="adm">ADMIN</em>':""}<small class="rms">Hesap adı değiştirilemez</small>`
+        :`<input value="${esc(u.name)}" maxlength="${u.srv?20:40}" data-un="${esc(k)}" aria-label="${esc(u.name)} kullanıcı adı"><button data-save="${esc(k)}">Kaydet</button>${adm?'<em class="adm">ADMIN</em>':""}`}</div>`+
       `<small class="rms">Kayıt: ${fdt(u.t)} · Son giriş: ${fdt(u.last)}</small>`+
-      `<div class="adma">${u.av?`<button data-rav="${esc(k)}">Resmi kaldır</button>`:""}${acc&&acc.admin?"":admDel===k?`<span class="admsure">Emin misin? <button class="admx" data-delok="${esc(k)}">Evet, sil</button><button data-delno>Vazgeç</button></span>`:`<button class="admx" data-del="${esc(k)}">Kullanıcıyı sil</button>`}<output class="rmm"></output></div></div></div>`}).join("")+`</div>`
+      `<div class="adma">${u.av?`<button data-rav="${esc(k)}">Resmi kaldır</button>`:""}${adm?"":admDel===k?`<span class="admsure">Emin misin? <button class="admx" data-delok="${esc(k)}">Evet, sil</button><button data-delno>Vazgeç</button></span>`:`<button class="admx" data-del="${esc(k)}">Kullanıcıyı sil</button>`}<output class="rmm"></output></div></div></div>`}).join("")+`</div>`
     :`<p class="rms">${q?"Aramaya uyan kullanıcı yok.":"Henüz kimse giriş yapmadı."}</p>`);
 }
 /* accounts from the server (lobby admin only), and the one waiting for "Emin misin?" */
@@ -838,6 +838,16 @@ async function admRemove(k,row){
     if(!r.ok){const d=await r.json().catch(()=>({}));row.querySelector("output").textContent=d.error||"Silinemedi.";return}}
     catch(e){row.querySelector("output").textContent="Sunucuya ulaşılamadı.";return}}
   USERS=rgAll();delete USERS[k];rgSave();admDel="";SRVU=null;drawAdmin();
+}
+async function admRenameSrv(k,to,row,inp){
+  const out=row.querySelector("output"),a=SRVU.find(x=>x.u===k);if(!a||to===a.name)return;
+  try{const r=await fetch("/api/lobby",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({renameUser:{u:k,to}})});
+    const d=await r.json().catch(()=>({}));if(!r.ok){out.textContent=d.error||"Kaydedilemedi.";inp.focus();return}}
+  catch(e){out.textContent="Sunucuya ulaşılamadı.";return}
+  USERS=rgAll();if(!USERS[k]){USERS[k]={name:a.name,av:"",t:Date.now()};rgSave()}
+  rgRename(k,to);   // the rooms and pictures kept here follow the new name
+  if(SRV&&SRV.name.toLowerCase()===k){SRV.name=to;USER=to;drawLogin()}
+  SRVU=null;drawAdmin();
 }
 /* a new name for a user: the registry, and every room they are in (player, owner, whose reels, votes) */
 function rgRename(k,to){
@@ -870,7 +880,9 @@ $("admBody").addEventListener("click",e=>{
   if(e.target.closest("[data-act=login]")){askLogin();return}
   if(!isAdmin())return;
   const sb=e.target.closest("[data-save]");
-  if(sb){const k=sb.dataset.save,row=sb.closest(".admu"),inp=row.querySelector("[data-un]"),err=rgRename(k,inp.value);
+  if(sb){const k=sb.dataset.save,row=sb.closest(".admu"),inp=row.querySelector("[data-un]");
+    if(SRV&&SRVU&&SRVU.some(a=>a.u===k)){admRenameSrv(k,inp.value.trim(),row,inp);return}
+    const err=rgRename(k,inp.value);
     if(err){row.querySelector("output").textContent=err;inp.focus();return}drawAdmin();return}
   const dl=e.target.closest("[data-del]");if(dl){admDel=dl.dataset.del;drawAdmin();return}
   if(e.target.closest("[data-delno]")){admDel="";drawAdmin();return}
