@@ -103,6 +103,9 @@ main.enter .card{animation:fadeUp .55s calc(.16s + var(--i,0) * .07s) var(--ease
 .card b,.card span{position:relative}
 .card b{display:block;font-size:18px;margin-bottom:4px}
 .card span{color:var(--mute);font-size:14px}
+.card.bc{display:grid;grid-template-columns:44px minmax(0,1fr);column-gap:14px;align-items:center}
+.card.bc .bmark{grid-row:1/3;width:44px;height:44px;display:block}.card.bc .bmark svg{width:100%;height:100%;display:block}
+.card.bc b{margin-bottom:2px}
 
 /* content pages: plain, your own design goes here */
 .page{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;margin-top:24px}
@@ -419,7 +422,10 @@ const MENU=[
 const TITLES={};MENU.forEach(([k,t,,,kids])=>{TITLES[k]=t;kids.forEach(([kk,kt])=>TITLES[kk]=kt)});
 const cur=()=>location.hash.replace(/^#\/?/,"").replace(/\/$/,"");
 
-$("homeCards").innerHTML=MENU.map(([k,t,,d],i)=>`<a class="card" href="#/${k}" style="--i:${i}"><b>${esc(t)}</b><span>${esc(d)}</span></a>`).join("");
+/* the brand marks on the home cards */
+const BRAND={instagram:'<svg viewBox="0 0 48 48" aria-hidden="true"><defs><radialGradient id="igG" cx="30%" cy="107%" r="150%"><stop offset="0" stop-color="#fdf497"/><stop offset=".05" stop-color="#fdf497"/><stop offset=".45" stop-color="#fd5949"/><stop offset=".6" stop-color="#d6249f"/><stop offset=".9" stop-color="#285AEB"/></radialGradient></defs><rect width="48" height="48" rx="12" fill="url(#igG)"/><rect x="11" y="11" width="26" height="26" rx="8" fill="none" stroke="#fff" stroke-width="3.2"/><circle cx="24" cy="24" r="6.4" fill="none" stroke="#fff" stroke-width="3.2"/><circle cx="31.6" cy="16.4" r="2" fill="#fff"/></svg>',
+  spotify:'<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="24" fill="#1ed760"/><path d="M12.5 18.6c7.6-2.3 16.3-1.6 23 2.2M13.8 25c6.3-1.8 13.4-1.2 18.9 1.9M15 31c5-1.3 10.3-.9 14.6 1.5" fill="none" stroke="#000" stroke-width="3.2" stroke-linecap="round"/></svg>'};
+$("homeCards").innerHTML=MENU.map(([k,t,,d],i)=>`<a class="card${BRAND[k]?" bc":""}" href="#/${k}" style="--i:${i}">${BRAND[k]?`<i class="bmark">${BRAND[k]}</i>`:""}<b>${esc(t)}</b><span>${esc(d)}</span></a>`).join("");
 
 let tnShut="";
 function renderNav(){
