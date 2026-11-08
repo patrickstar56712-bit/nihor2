@@ -8,7 +8,7 @@
    Passwords are kept as scrypt hashes with their own salt. */
 import { readFileSync } from "node:fs";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
-import { client, missing, hash } from "./_db.js";
+import { client, missing, hash, isAdmin } from "./_db.js";
 
 const TRIES = 5, LOCK = 15 * 60, AGE = 30 * 86400, REGS = 5;
 const cookie = (v, age) => `nh_lb=${v}; Path=/; Max-Age=${age}; HttpOnly; Secure; SameSite=Lax`;
@@ -16,6 +16,8 @@ const tok = req => (/(?:^|;\s*)nh_lb=([0-9a-f]{64})(?:;|$)/.exec(req.headers.coo
 const ipOf = req => String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() || req.socket?.remoteAddress || "?";
 const pwHash = (p, salt) => scryptSync(p, salt, 32).toString("hex");
 const U_OK = /^[a-zA-Z0-9_.-]{3,20}$/;
+/* lobby admins (lowercase names); such a name can be signed up only from a browser signed in to the tracker's Control Panel */
+const ADMINS = new Set((process.env.LOBBY_ADMINS || "preju").split(",").map(s => s.trim().toLowerCase()).filter(Boolean));
 
 let ready;
 const setup = () => ready ??= (async () => {
@@ -29,11 +31,16 @@ const setup = () => ready ??= (async () => {
   await client().execute("DELETE FROM lobby_sessions WHERE u = ''");
 })().catch(e => { ready = null; throw e });
 
+/* the signed-in user {u, name, admin}, or null */
 async function signedIn(req) {
   const t = tok(req);
-  if (!t) return false;
-  return (await client().execute({ sql: "SELECT 1 FROM lobby_sessions s JOIN lobby_users u ON u.u = s.u WHERE s.h = ?", args: [hash(t)] })).rows.length > 0;
+  if (!t) return null;
+  const row = (await client().execute({ sql: "SELECT u.u, u.name FROM lobby_sessions s JOIN lobby_users u ON u.u = s.u WHERE s.h = ?", args: [hash(t)] })).rows[0];
+  return row ? { u: String(row.u), name: String(row.name), admin: ADMINS.has(String(row.u)) } : null;
 }
+/* the lobby page, told who is signed in (it then shows that user, not its own login box) */
+const lobbyPage = me => file("index.html").toString("utf8").replace("<head>",
+  "<head><script>window.LB_ME=" + JSON.stringify({ name: me.name, admin: me.admin }).replace(/</g, "\\u003c") + "</script>");
 async function startSession(res, u) {
   const t = randomBytes(32).toString("hex");
   await client().execute({ sql: "INSERT INTO lobby_sessions (h, u) VALUES (?, ?)", args: [hash(t), u] });
@@ -116,7 +123,8 @@ export default async function handler(req, res) {
         try { res.setHeader("Content-Type", ty); return res.status(200).send(file("png/" + f)) } catch (e) { return res.status(404).send("Not found") }
       }
       res.setHeader("Content-Type", "text/html; charset=utf-8");
-      return res.status(200).send(await signedIn(req) ? file("index.html") : SIGNIN);
+      const me = await signedIn(req);
+      return res.status(200).send(me ? lobbyPage(me) : SIGNIN);
     }
     if (req.method !== "POST") return res.status(405).json({ error: "GET or POST" });
     const b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
@@ -130,6 +138,7 @@ export default async function handler(req, res) {
     if (b.register && typeof b.register === "object") {
       const name = String(b.register.u || "").trim(), p = String(b.register.p || ""), u = name.toLowerCase();
       if (!U_OK.test(name)) return res.status(400).json({ error: "Kullanıcı adı 3-20 karakter olmalı: harf, rakam, _ . -" });
+      if (ADMINS.has(u) && !await isAdmin(req)) return res.status(403).json({ error: "Bu kullanıcı adı ayrılmış" });
       if (p.length < 6 || p.length > 100) return res.status(400).json({ error: "Şifre en az 6 karakter olmalı" });
       const n = Number((await client().execute({ sql: "SELECT COUNT(*) AS n FROM lobby_users WHERE ip = ? AND created > datetime('now', '-1 hour')", args: [ip] })).rows[0].n);
       if (n >= REGS) return res.status(429).json({ error: "Bu adresten çok fazla kayıt açıldı · biraz sonra tekrar dene" });

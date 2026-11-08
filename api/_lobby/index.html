@@ -455,15 +455,17 @@ function rgTouch(name){USERS=rgAll();const k=name.toLowerCase(),u=USERS[k]||(USE
 const userAv=n=>{const u=USERS[String(n).toLowerCase()];return u&&u.av||""};
 /* a renamed user: the admin's rename reaches the tab that is logged in under the old name */
 function rgFollow(){
-  if(!USER||USERS[USER.toLowerCase()]||ACCOUNTS[USER.toLowerCase()])return false;
+  if(SRV||!USER||USERS[USER.toLowerCase()]||ACCOUNTS[USER.toLowerCase()])return false;
   const to=(ld("userRenames",{})||{})[USER.toLowerCase()];if(!to||!USERS[to.toLowerCase()])return false;
   USER=USERS[to.toLowerCase()].name;ss.s("user",USER);sv("user",USER);return true;
 }
-const isAdmin=()=>!!USER&&!!(ACCOUNTS[USER.toLowerCase()]||{}).admin;
+/* signed in on the server (api/lobby.js puts window.LB_ME in the page): that account is the user here, in every tab */
+const SRV=window.LB_ME&&typeof window.LB_ME.name==="string"?window.LB_ME:null;
+const isAdmin=()=>SRV?!!SRV.admin:!!USER&&!!(ACCOUNTS[USER.toLowerCase()]||{}).admin;
 /* the name lives per tab (sessionStorage), so two tabs can be two players while testing; a new tab starts with the last login */
 const ss={g:k=>{try{return sessionStorage.getItem(LB+k)}catch(e){return null}},s:(k,v)=>{try{sessionStorage.setItem(LB+k,v)}catch(e){}}};
-let USER=ss.g("user")??ld("user","");
-if(USER&&ACCOUNTS[USER.toLowerCase()]&&ss.g("acct")!==USER.toLowerCase())USER="";   // an account name only after its password, in this tab
+let USER=SRV?SRV.name:ss.g("user")??ld("user","");
+if(!SRV&&USER&&ACCOUNTS[USER.toLowerCase()]&&ss.g("acct")!==USER.toLowerCase())USER="";   // an account name only after its password, in this tab
 const uIco=ico('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>');
 function drawLogin(){
   $("lgB").innerHTML=uIco+`<span>${USER?esc(USER):"Giriş yap"}</span>`;$("lgB").title=USER?"Hesabım":"Giriş yap";
@@ -486,7 +488,9 @@ $("lgF").onsubmit=e=>{
   if(acc&&sha256("123lobby:"+p)!==acc.hash){$("lgM").textContent="Şifre yanlış.";$("lgP").select();return}
   USER=acc?acc.name:u;ss.s("acct",acc?u.toLowerCase():"");ss.s("user",USER);rgTouch(USER);sv("user",USER);$("lgP").value="";$("lgM").textContent="";drawLogin();openLg(false);refreshView();
 };
-$("lgOut").onclick=()=>{USER="";ss.s("user","");ss.s("acct","");sv("user","");drawLogin();openLg(false);refreshView()};
+$("lgOut").onclick=async()=>{
+  if(SRV){try{await fetch("/api/lobby",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({logout:true})})}catch(e){}location.reload();return}   // back to the sign-in page
+  USER="";ss.s("user","");ss.s("acct","");sv("user","");drawLogin();openLg(false);refreshView()};
 if(USER){rgFollow();if(!USERS[USER.toLowerCase()])rgTouch(USER)}
 drawLogin();
 
