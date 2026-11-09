@@ -108,6 +108,36 @@ main.enter .card{animation:fadeUp .55s calc(.16s + var(--i,0) * .07s) var(--ease
 .card.bc b{margin-bottom:2px}
 
 /* content pages: plain, your own design goes here */
+/* guest profile */
+.prch{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:999px;font-weight:700;font-size:14px}
+.prav1{display:block;width:28px;height:28px;border-radius:50%;overflow:hidden}.prav1 svg,.pav.av svg{width:100%;height:100%;display:block}
+.prov{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:16px;background:rgba(4,2,12,.72);backdrop-filter:blur(6px)}
+.prbox{width:100%;max-width:440px;display:grid;gap:12px;padding:22px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+.prbox h2{margin:0;font-size:20px}.prbox input{width:100%}
+.prav{display:grid;grid-template-columns:repeat(8,1fr);gap:7px}
+.prav button{padding:0;aspect-ratio:1;border-radius:50%;overflow:hidden;border:2px solid transparent;background:none}
+.prav button svg{width:100%;height:100%;display:block}
+.prav button[aria-checked=true]{border-color:var(--gold);box-shadow:0 0 0 2px color-mix(in srgb,var(--gold) 40%,transparent);transform:scale(1.06)}
+.prgo{display:flex;justify-content:flex-end;gap:8px}.prgo .rmgo{padding:9px 20px}
+#prM{color:#ff7b7b;font-size:13px;min-height:1em}
+@media (max-width:420px){.prav{grid-template-columns:repeat(4,1fr)}.prch span:last-child{display:none}.prch{padding:4px}}
+/* O mu? Bu mu? rooms */
+.obfr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:end;padding:16px;margin-bottom:20px;border:1px solid color-mix(in srgb,var(--gold) 40%,var(--line));border-radius:14px;background:color-mix(in srgb,var(--panel) 92%,transparent)}
+.obfr h2{margin:0 0 4px;font-size:18px}.obfrr{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px}
+.obsz button[aria-pressed=true]{border-color:var(--gold);color:var(--gold)}
+.objn{display:flex;align-items:flex-end;gap:8px}.objn input{width:110px;text-transform:uppercase;letter-spacing:.1em}
+.obsh{font-size:18px;margin:0 0 10px}.obe{color:#ff7b7b;font-size:13px;margin:8px 0 0}
+.obrh{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}.obrh h1{margin:2px 0 0;font-size:24px}
+.obra{display:flex;gap:8px}
+.obpl{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.obpl li{display:flex;align-items:center;gap:7px;padding:4px 10px 4px 4px;border:1px solid var(--line);border-radius:999px;background:color-mix(in srgb,var(--panel) 90%,transparent);font-size:13px;font-weight:700}
+.obpl .pav{width:28px;height:28px}.obpl em{font-style:normal;color:var(--gold)}.obpl li.away{opacity:.45}.obpl li.vt{border-color:#22c55e}
+.obwait{margin-top:18px;display:grid;gap:10px;justify-items:start}
+.obtop{justify-content:space-between}
+.obc.mine{border-color:var(--jade);box-shadow:0 0 0 2px color-mix(in srgb,var(--jade) 50%,transparent)}
+.obc.lead{border-color:var(--gold)}.obc.lose{opacity:.55}.obc:disabled{cursor:default;transform:none}
+.obvt{display:flex;justify-content:center;flex-wrap:wrap;gap:4px;min-height:30px;padding:0 8px 10px}.pav.sm{width:30px;height:30px}
+@media (max-width:640px){.obfr{grid-template-columns:1fr}}
 /* O mu? Bu mu? */
 .obh h1{margin:0 0 6px;font-size:30px}.obh{margin-bottom:18px}
 .obts{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
@@ -346,6 +376,7 @@ main#v-room.wide{max-width:1600px;padding-top:12px;padding-bottom:12px}
     <a class="brand" href="./"><img src="png/logo.png" alt="" onerror="this.remove()">123 Lobby</a>
     <nav id="topNav" aria-label="Menü"></nav>
     <div id="topR">
+      <button class="prch" id="prB" hidden title="Profilini değiştir"></button>
       <div class="set" id="lg">
         <button id="lgB" aria-expanded="false" aria-controls="lgD"></button>
         <div id="lgD" hidden><div class="tmb lgb" role="group" aria-label="Giriş yap">
@@ -426,6 +457,13 @@ main#v-room.wide{max-width:1600px;padding-top:12px;padding-bottom:12px}
   </section>
 </main>
 
+<div class="prov" id="prO" hidden><form class="prbox" id="prF" novalidate>
+  <h2>Kendine bir ad ve avatar seç</h2><p class="rms">Sadece bu sekmede durur: siteyi kapatınca silinir.</p>
+  <label class="lgl">Kullanıcı adı <input id="prN" maxlength="20" autocomplete="off" placeholder="Örn. Ayşe"></label>
+  <div class="prav" id="prA" role="radiogroup" aria-label="Avatar"></div>
+  <output id="prM" aria-live="polite"></output>
+  <div class="prgo"><button type="button" id="prX">Vazgeç</button><button class="rmgo" id="prS">Devam</button></div>
+</form></div>
 <main id="v-ob" hidden>
   <section class="obw" id="obBody"></section>
 </main>
@@ -544,13 +582,70 @@ $("lgOut").onclick=async()=>{
 if(USER){rgFollow();if(!USERS[USER.toLowerCase()])rgTouch(USER)}
 drawLogin();
 
+/* ---------- avatars (drawn here) and the guest profile ----------
+   A profile is a name and an avatar, kept in sessionStorage: it lasts while the tab is open and goes with it. */
+const AVC=[["#f97316","#fb923c"],["#8b5cf6","#a78bfa"],["#06b6d4","#22d3ee"],["#22c55e","#4ade80"],["#ec4899","#f472b6"],["#eab308","#facc15"],["#3b82f6","#60a5fa"],["#ef4444","#f87171"],
+  ["#14b8a6","#2dd4bf"],["#a855f7","#c084fc"],["#64748b","#94a3b8"],["#f59e0b","#fbbf24"],["#10b981","#34d399"],["#6366f1","#818cf8"],["#e11d48","#fb7185"],["#0ea5e9","#38bdf8"]];
+/* each avatar: [ears, eyes, mouth, extra] */
+const AVK=[["cat","dot","w",""],["bear","dot","smile","blush"],["bunny","happy","smile","blush"],["none","glass","smirk",""],["horn","dot","grin",""],["antenna","big","o",""],
+  ["none","wink","tongue",""],["fox","dot","w",""],["panda","dot","smile",""],["none","happy","grin","crown"],["none","big","smile","halo"],["cat","happy","o","blush"],
+  ["frog","big","smile",""],["bear","glass","grin",""],["none","dot","flat","cap"],["bunny","wink","smile",""]];
+let AVN=0;   // every drawn avatar gets its own gradient id (one inside a hidden element would not paint for the others)
+function avSvg(i){
+  i=((+i||0)%16+16)%16;const g="avg"+(++AVN);const [c1,c2]=AVC[i],[ea,ey,mo,ex]=AVK[i],F="#ffe9d6",D="#2b1d14",E=[];
+  const ear={cat:'<path d="M14 22 18 6 28 17Z M50 22 46 6 36 17Z" fill="'+F+'"/>',bear:'<circle cx="17" cy="17" r="7" fill="'+F+'"/><circle cx="47" cy="17" r="7" fill="'+F+'"/>',
+    bunny:'<rect x="19" y="1" width="8" height="22" rx="4" fill="'+F+'"/><rect x="37" y="1" width="8" height="22" rx="4" fill="'+F+'"/>',horn:'<path d="M18 18 14 6 24 15Z M46 18 50 6 40 15Z" fill="#fff4"/>',
+    antenna:'<path d="M32 13V5" stroke="'+F+'" stroke-width="2.5"/><circle cx="32" cy="5" r="3" fill="#fff"/>',fox:'<path d="M12 24 15 5 28 16Z M52 24 49 5 36 16Z" fill="#fff8"/>',
+    panda:'<circle cx="17" cy="17" r="7" fill="'+D+'"/><circle cx="47" cy="17" r="7" fill="'+D+'"/>',frog:'<circle cx="22" cy="17" r="8" fill="'+F+'"/><circle cx="42" cy="17" r="8" fill="'+F+'"/>',none:""}[ea];
+  const eye={dot:'<circle cx="25" cy="32" r="3" fill="'+D+'"/><circle cx="39" cy="32" r="3" fill="'+D+'"/>',happy:'<path d="M21 33q4-5 8 0M35 33q4-5 8 0" stroke="'+D+'" stroke-width="2.6" fill="none" stroke-linecap="round"/>',
+    glass:'<rect x="18" y="28" width="12" height="8" rx="3" fill="'+D+'"/><rect x="34" y="28" width="12" height="8" rx="3" fill="'+D+'"/><path d="M30 31h4" stroke="'+D+'" stroke-width="2"/>',
+    big:'<circle cx="25" cy="31" r="5" fill="#fff"/><circle cx="39" cy="31" r="5" fill="#fff"/><circle cx="26" cy="32" r="2.6" fill="'+D+'"/><circle cx="40" cy="32" r="2.6" fill="'+D+'"/>',
+    wink:'<circle cx="25" cy="32" r="3" fill="'+D+'"/><path d="M35 32h8" stroke="'+D+'" stroke-width="2.6" stroke-linecap="round"/>'}[ey];
+  const mouth={w:'<path d="M27 41q2.5 3 5 0q2.5 3 5 0" stroke="'+D+'" stroke-width="2.2" fill="none" stroke-linecap="round"/>',smile:'<path d="M26 40q6 6 12 0" stroke="'+D+'" stroke-width="2.6" fill="none" stroke-linecap="round"/>',
+    smirk:'<path d="M27 42q7 2 11-3" stroke="'+D+'" stroke-width="2.6" fill="none" stroke-linecap="round"/>',grin:'<path d="M25 39h14q-1 8-7 8t-7-8Z" fill="'+D+'"/><path d="M27 40h10v2H27Z" fill="#fff"/>',
+    o:'<ellipse cx="32" cy="42" rx="3.5" ry="4.5" fill="'+D+'"/>',tongue:'<path d="M26 40q6 6 12 0" stroke="'+D+'" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M30 43h5v3a2.5 2.5 0 0 1-5 0Z" fill="#f43f5e"/>',
+    flat:'<path d="M27 42h10" stroke="'+D+'" stroke-width="2.6" stroke-linecap="round"/>'}[mo];
+  const extra={blush:'<circle cx="20" cy="39" r="3" fill="#f9a8d4" opacity=".8"/><circle cx="44" cy="39" r="3" fill="#f9a8d4" opacity=".8"/>',
+    crown:'<path d="M20 14 24 5 32 11 40 5 44 14Z" fill="#facc15" stroke="#b45309" stroke-width="1"/>',halo:'<ellipse cx="32" cy="8" rx="12" ry="3.5" fill="none" stroke="#fde68a" stroke-width="2.5"/>',
+    cap:'<path d="M14 22q18-16 36 0Z" fill="'+D+'"/><path d="M46 21h10" stroke="'+D+'" stroke-width="4" stroke-linecap="round"/>',"":""}[ex];
+  return `<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${g}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>`+
+    `<rect width="64" height="64" fill="url(#${g})"/>${ear}<circle cx="32" cy="36" r="18" fill="${F}"/>${eye}${mouth}${extra}</svg>`;
+}
+const avOf=p=>{const m=/^a:(\d+)$/.exec(p&&p.av||"");return m?+m[1]:-1};
+let PROF=(()=>{try{const p=JSON.parse(sessionStorage.getItem(LB+"prof"));return p&&p.id&&p.name?p:null}catch(e){return null}})();
+const profSave=()=>{try{sessionStorage.setItem(LB+"prof",JSON.stringify(PROF))}catch(e){}};
+const meName=()=>SRV?SRV.name:PROF?PROF.name:"";
+const meObj=()=>PROF?{id:PROF.id,name:meName(),av:PROF.av}:null;
+let prAfter=null,prSel=0;
+/* the profile window: asked once per tab before a game; after it the page goes on */
+function openProf(after){
+  prAfter=after||null;prSel=PROF?PROF.av:Math.floor(Math.random()*16);
+  $("prN").value=meName();$("prN").disabled=!!SRV;$("prM").textContent="";
+  $("prA").innerHTML=AVC.map((_,i)=>`<button type="button" role="radio" aria-checked="${i===prSel}" data-avs="${i}" aria-label="Avatar ${i+1}">${avSvg(i)}</button>`).join("");
+  $("prX").hidden=!PROF;$("prO").hidden=false;setTimeout(()=>(SRV?$("prS"):$("prN")).focus(),30);
+}
+const closeProf=()=>{$("prO").hidden=true};
+$("prA").onclick=e=>{const b=e.target.closest("[data-avs]");if(!b)return;prSel=+b.dataset.avs;$("prA").querySelectorAll("[data-avs]").forEach(x=>x.setAttribute("aria-checked",String(x===b)))};
+$("prX").onclick=closeProf;
+$("prF").onsubmit=e=>{e.preventDefault();
+  const n=SRV?SRV.name:$("prN").value.trim().replace(/\s+/g," ");
+  if(n.length<2||n.length>20){$("prM").textContent="Ad 2-20 karakter olmalı.";$("prN").focus();return}
+  const old=PROF;PROF={id:old?old.id:[...crypto.getRandomValues(new Uint8Array(10))].map(x=>(x%36).toString(36)).join(""),name:n,av:prSel};profSave();
+  if(old)rmRefreshMe(old.name);   // Instagram rooms here get the new picture
+  closeProf();drawProf();const f=prAfter;prAfter=null;if(f)f();else route();
+};
+function drawProf(){const b=$("prB");b.hidden=!PROF;if(PROF)b.innerHTML=`<span class="prav1">${avSvg(PROF.av)}</span><span>${esc(meName())}</span>`}
+$("prB").onclick=()=>openProf();
+document.addEventListener("click",e=>{if(e.target.closest("[data-prof]"))openProf()});
+/* pages that need a profile */
+const needProf=k=>/^(instagram|spotify|omubumu)$|^(oda|ob)\//.test(k);
+
 /* ---------- test mode ----------
    NEED_LOGIN=false: no login needed while the site is being tested; a tab that is not logged in plays under its own
    guest name (kept per tab, so two tabs are two players). Set it to true to let only logged-in people into rooms again. */
 const NEED_LOGIN=false;
 const MIN_PLAYERS=1;   // players needed to start; 1 while testing alone, set it back to 2 later
-const GUEST=ss.g("guest")||(n=>{ss.s("guest",n);return n})("Misafir "+(1000+Math.floor(Math.random()*9000)));
-const ME=()=>USER||(NEED_LOGIN?"":GUEST);
+const ME=()=>meName();   // the profile's name (an admin's account name); "" until a profile is made
 
 /* ---------- rooms (Instagram page) ----------
    PROTOTYPE: rooms are kept in localStorage, so everything works only inside this browser
@@ -560,7 +655,7 @@ const ME=()=>USER||(NEED_LOGIN?"":GUEST);
 const RMIN=2,RMAX=20,NREEL=10;
 const rmFix=r=>{
   r={st:"lobby",tg:"",ix:0,pw:"",votes:{},...r};if(!r.votes||typeof r.votes!=="object")r.votes={};r.host=r.host||r.by||"";
-  r.players=(Array.isArray(r.players)?r.players:[]).map(p=>({u:String(p.u),av:typeof p.av==="string"&&p.av.startsWith("data:image/")?p.av:"",s:Array.from({length:NREEL},(_,i)=>{const v=(p.s||[])[i];return typeof v==="string"?v:""})}));
+  r.players=(Array.isArray(r.players)?r.players:[]).map(p=>({u:String(p.u),av:typeof p.av==="string"&&(p.av.startsWith("data:image/")||/^a:\d+$/.test(p.av))?p.av:"",s:Array.from({length:NREEL},(_,i)=>{const v=(p.s||[])[i];return typeof v==="string"?v:""})}));
   return r;
 };
 const rmAll=()=>(v=>Array.isArray(v)?v.map(rmFix):[])(ld("rooms",[]));
@@ -570,7 +665,9 @@ const rmGet=c=>ROOMS.find(r=>r.code===c);
 /* every change re-reads the list first, so a change made in another tab is not overwritten */
 function rmEdit(c,fn){ROOMS=rmAll();const r=rmGet(c);if(!r)return null;fn(r);rmSave();return r}
 const rmCode=()=>{const a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s;do{s=[...Array(6)].map(()=>a[Math.floor(Math.random()*a.length)]).join("")}while(ROOMS.some(r=>r.code===s));return s};
-const newPlayer=u=>({u,s:Array(NREEL).fill("")});
+const newPlayer=u=>({u,av:PROF?"a:"+PROF.av:"",s:Array(NREEL).fill("")});
+/* a new avatar: every Instagram room here where this name plays */
+function rmRefreshMe(old){ROOMS=rmAll();let ch=0;for(const x of ROOMS)for(const p of x.players)if(p.u===old||p.u===ME()){p.av="a:"+PROF.av;ch=1}if(ch)rmSave()}
 const lockIco=ico('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>').replace("<svg",'<svg width="12" height="12" style="vertical-align:-1px"');
 const ST={lobby:["Bekliyor",""],play:["Oyunda","play"],end:["Bitti",""]};
 /* a click that opens the login box must wait: the page's own "click outside closes it" runs right after */
@@ -632,7 +729,7 @@ let RC="",rKey="",rVkey="";
 const rlSt=(v,c,dup)=>!v.trim()?["",""]:!c?["bad","Geçerli bir Instagram reels linki değil"]:dup?["bad",dup]:["ok","Tamam"];
 /* a player's picture: their own, or the first letter on a colour made from the name */
 const avHue=u=>{let h=0;for(const c of u)h=(h*31+c.charCodeAt(0))%360;return h};
-const avatar=p=>(userAv(p.u)||p.av)?`<span class="pav"><img src="${userAv(p.u)||p.av}" alt=""></span>`:`<span class="pav" style="--h:${avHue(p.u)}">${esc((p.u[0]||"?").toUpperCase())}</span>`;
+const avatar=p=>avOf(p)>=0?`<span class="pav av">${avSvg(avOf(p))}</span>`:(userAv(p.u)||p.av)?`<span class="pav"><img src="${userAv(p.u)||p.av}" alt=""></span>`:`<span class="pav" style="--h:${avHue(p.u)}">${esc((p.u[0]||"?").toUpperCase())}</span>`;
 /* the left panel: everyone in the room; your own picture can be changed by clicking it */
 function playerPanel(r,lobby){
   const cnt=p=>p.s.filter(Boolean).length;
@@ -640,7 +737,7 @@ function playerPanel(r,lobby){
     r.players.map(p=>{const n=cnt(p),mine=p.u===ME();
       const vt=!lobby&&!!r.votes[p.u];
       return `<li class="${lobby&&n>=NREEL?"ok":""}${vt?" voted":""}">`+
-        (mine?`<label class="pavc" title="Profil resmini değiştir">${avatar(p)}<input type="file" accept="image/*" data-av hidden><i aria-hidden="true">✎</i></label>`:avatar(p))+
+        (mine?`<button type="button" class="pavc" data-prof title="Profilini değiştir">${avatar(p)}<i aria-hidden="true">✎</i></button>`:avatar(p))+
         `<span class="rpn"><b>${esc(p.u)}${mine?" (sen)":""}</b>${p.u===r.host?"<em>Oda sahibi</em>":""}${vt?"<small class=\"vtag\">Oy verdi ✓</small>":""}</span>`+
         (lobby?`<span class="rpc">${n>=NREEL?"Hazır":n+"/"+NREEL}</span><i style="--p:${n/NREEL*100}%"></i>`:"")+`</li>`}).join("")+
     `</ul></aside>`;
@@ -941,15 +1038,17 @@ addEventListener("storage",e=>{
 function refreshView(){const k=cur();if(k==="admin")drawAdmin();else if(k==="instagram"){drawRmForm();drawRooms()}else if(k.startsWith("oda/"))drawRoom(true)}
 
 function route(){
-  const k=cur(),room=k.startsWith("oda/"),ig=k==="instagram",adm=k==="admin",ob=k==="omubumu",home=!room&&!adm&&!TITLES[k];
+  const k=cur(),room=k.startsWith("oda/"),ig=k==="instagram",adm=k==="admin",ob=k==="omubumu"||k.startsWith("ob/"),home=!room&&!adm&&!ob&&!TITLES[k];
   const show=home?$("v-home"):ig?$("v-ig"):room?$("v-room"):adm?$("v-admin"):ob?$("v-ob"):$("v-page");
   for(const m of document.querySelectorAll("main")){const on=m===show;m.hidden=!on;m.classList.remove("enter");if(on){void m.offsetWidth;m.classList.add("enter")}}
   if(ig){drawRmForm();drawRooms()}
   if(adm)drawAdmin();
   if(ob)drawOb();
+  if(!ob)obStop();
+  if(needProf(k)&&!PROF)openProf();else if(!needProf(k)&&!PROF)closeProf();
   if(room){RC=k.slice(4).toUpperCase();drawRoom(true)}
-  if(!home&&!room&&!adm)$("pgT").textContent=TITLES[k];
-  if(!room)document.title=home?"123 Lobby":adm?"Kontrol paneli · 123 Lobby":TITLES[k]+" · 123 Lobby";
+  if(!home&&!room&&!adm&&!ob)$("pgT").textContent=TITLES[k];
+  if(!room)document.title=home?"123 Lobby":adm?"Kontrol paneli · 123 Lobby":ob?"O mu? Bu mu? · 123 Lobby":TITLES[k]+" · 123 Lobby";
   renderNav();window.scrollTo({top:0,behavior:"instant"});
 }
 addEventListener("popstate",route);
@@ -969,10 +1068,82 @@ function obChoose(side){
   if(OB.k*2>=OB.round.length){OB.round=OB.next;OB.next=[];OB.k=0}
   drawOb();
 }
+/* ---------- O mu? Bu mu? rooms (on the server: everyone votes on each pair, the pick with more votes goes on) ---------- */
+let OBR=null,obTm=0,obCode="",obBusy=false,obErr="",obSize=16,obTi=0;
+const obApi=(o)=>fetch("/api/lobby",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({ob:{...o,me:meObj()}})}).then(async x=>{const d=await x.json().catch(()=>({}));if(!x.ok)throw Object.assign(new Error(d.error||"Olmadı"),{room:d.room,code:x.status});return d});
+function obStop(){clearTimeout(obTm);obTm=0;obCode=""}
+async function obPoll(){
+  clearTimeout(obTm);if(!obCode||!PROF)return;
+  try{const x=await fetch(`/api/lobby?ob=${obCode}&me=${PROF.id}`,{cache:"no-store"});
+    if(x.status===404){OBR=null;obErr="Oda bulunamadı: kapanmış ya da kod yanlış.";drawOb();return}
+    OBR=await x.json();obErr="";
+    if(!OBR.players.some(p=>p.id===PROF.id)){await obApi({op:"join",code:obCode}).then(d=>OBR=d).catch(e=>{obErr=e.message;OBR=null})}
+  }catch(e){}
+  if(cur()==="ob/"+obCode)drawOb();
+  if(obCode)obTm=setTimeout(obPoll,1500);
+}
+async function obDo(o){if(obBusy)return;obBusy=true;try{OBR=await obApi({...o,code:obCode});obErr=""}catch(e){obErr=e.message;if(e.room)OBR=e.room}obBusy=false;drawOb()}
+/* leaving the site: out of the room at once (the server also drops a player who is quiet for 20 s) */
+addEventListener("pagehide",()=>{if(obCode&&PROF)try{navigator.sendBeacon("/api/lobby",new Blob([JSON.stringify({ob:{op:"leave",code:obCode,me:meObj()}})],{type:"application/json"}))}catch(e){}});
+const obTour=id=>OBT.find(t=>t.id===id);
+const obPl=(r,id)=>r.players.find(p=>p.id===id);
+const obAv=(p,cls="")=>`<span class="pav av ${cls}" title="${esc(p.name)}">${avSvg(p.av)}</span>`;
+function drawObRoom(b){
+  const code=cur().slice(3).toUpperCase();
+  if(!PROF){b.innerHTML="";return}
+  if(obCode!==code){obCode=code;OBR=null;obErr="";b.innerHTML=`<p class="rms">Odaya bağlanılıyor…</p>`;obPoll();return}
+  if(!OBR){b.innerHTML=obErr?`<section class="rbox"><h1>Odaya girilemedi</h1><p>${esc(obErr)}</p><a class="rbtn" href="omubumu">O mu? Bu mu?'ya dön</a></section>`:`<p class="rms">Odaya bağlanılıyor…</p>`;return}
+  const r=OBR,t=obTour(r.t),host=r.host===PROF.id,live=r.players.filter(p=>p.here);
+  if(!t){b.innerHTML=`<section class="rbox"><h1>Bu turnuva artık yok</h1><a class="rbtn" href="omubumu">Geri dön</a></section>`;return}
+  const link=location.origin+"/123lobby/ob/"+r.code;
+  const head=`<div class="obrh"><div><small class="rms">${esc(t.n)} · ${r.size} seçenek</small><h1>Oda <span class="rmcode">${r.code}</span></h1></div>`+
+    `<div class="obra"><button data-cp="${esc(link)}" data-obcp>Linki kopyala</button><button data-obd="leave">Odadan çık</button></div></div>`;
+  const voted=id=>r.votes[id]!==undefined;
+  const pls=`<ul class="obpl">${r.players.map(p=>`<li class="${p.here?"":"away"}${r.st==="play"&&voted(p.id)?" vt":""}">${obAv(p)}<span>${esc(p.name)}${p.id===PROF.id?" (sen)":""}</span>${p.id===r.host?'<em title="Oda sahibi">★</em>':""}</li>`).join("")}</ul>`;
+  const err=obErr?`<p class="obe">${esc(obErr)}</p>`:"";
+  if(r.st==="lobby"){
+    b.innerHTML=head+pls+err+`<div class="obwait">${host?`<p class="rms">Arkadaşların bu kodla ya da linkle katılabilir. Herkes gelince başlat.</p><button class="rmgo" data-obd="start">Başlat (${live.length} kişi)</button>`
+      :`<p class="rms">Oda sahibinin başlatması bekleniyor…</p>`}</div>`;return}
+  if(r.st==="end"){const w=r.champ,f=r.last&&r.last.w===w?(r.last.a===w?r.last.b:r.last.a):null;
+    b.innerHTML=head+`<div class="obend"><h1>Kazanan</h1><figure class="obwin"><img src="${obPic(t,w)}" alt=""><figcaption>${esc(t.items[w])}</figcaption></figure>`+
+      (f!=null?`<p class="rms">Finalde yenilen: <b>${esc(t.items[f])}</b></p>`:"")+
+      `<div class="obact">${host?'<button class="rmgo" data-obd="restart">Yeni tur</button>':'<p class="rms">Oda sahibi yeni bir tur başlatabilir.</p>'}</div></div>`+pls;return}
+  const n=r.round.length,a=r.round[r.k*2],c=r.round[r.k*2+1],my=r.votes[PROF.id],rev=!!r.rev;
+  const done=(r.size-n)+r.k,cnt=live.filter(p=>voted(p.id)).length;
+  const who=side=>rev?r.players.filter(p=>r.votes[p.id]===side):[];
+  b.innerHTML=head+`<div class="obtop"><div><b>${obRoundName(n)} · ${r.k+1}/${n/2}</b><small class="rms">${rev?"Oylar":cnt+"/"+live.length+" kişi oy verdi"}</small></div>`+
+    (host&&!rev&&cnt>0&&cnt<live.length?`<button data-obd="skip" title="Oy vermeyenleri beklemeden geç">Beklemeden geç</button>`:"")+`</div>`+
+    `<div class="obbar"><i style="width:${done/(r.size-1)*100}%"></i></div>`+err+
+    `<div class="obvs${rev?" rev":""}">${[a,c].map((x,i)=>{const w=who(i),lead=rev&&w.length>=who(1-i).length;
+      return `<button class="obc${my===i?" mine":""}${rev?(lead?" lead":" lose"):""}" data-obv="${i}"${rev?" disabled":""}><img src="${obPic(t,x)}" alt=""><span>${esc(t.items[x])}</span>`+
+        `<span class="obvt">${rev?(w.length?w.map(p=>obAv(p,"sm")).join(""):'<small class="rms">oy yok</small>'):my===i?'<small class="rms">Senin seçimin</small>':""}</span></button>`}).join('<em class="obor">VS</em>')}</div>`+pls;
+}
+$("obBody").addEventListener("click",e=>{
+  const v=e.target.closest("[data-obv]");if(v&&OBR&&OBR.st==="play"&&!OBR.rev){OBR.votes[PROF.id]=+v.dataset.obv;drawOb();obDo({op:"vote",side:+v.dataset.obv});return}
+  const cp=e.target.closest("[data-obcp]");if(cp){copyBtn(cp);return}
+  const d=e.target.closest("[data-obd]");if(!d)return;const a=d.dataset.obd;
+  if(a==="leave"){const c=obCode;obApi({op:"leave",code:c}).catch(()=>{});obStop();OBR=null;go("omubumu");return}
+  if(a==="restart"){obDo({op:"lobby"});return}
+  obDo({op:a});
+});
+async function obCreate(btn){
+  if(!PROF){openProf(()=>obCreate(btn));return}
+  const t=OBT[obTi];btn.disabled=true;
+  try{const d=await obApi({op:"create",t:t.id,n:t.items.length,size:obSize});go("ob/"+d.code)}catch(e){obErr=e.message;drawOb()}
+  btn.disabled=false;
+}
 function drawOb(){
   const b=$("obBody");
+  if(cur().startsWith("ob/")){drawObRoom(b);return}
   if(!OB){
-    b.innerHTML=`<div class="obh"><h1>O mu? Bu mu?</h1><p class="rms">Bir turnuva seç. İkisinden birini seç, seçtiğin bir sonraki tura geçer; sonunda bir tane kalır.</p></div>`+
+    const ts=OBT[obTi],szs=[8,16,32,64,128,256].filter(n=>n<=ts.items.length);if(!szs.includes(obSize))obSize=szs[Math.min(1,szs.length-1)];
+    b.innerHTML=`<div class="obh"><h1>O mu? Bu mu?</h1><p class="rms">İkisinden birini seç, seçtiğin bir sonraki tura geçer; sonunda bir tane kalır.</p></div>`+
+      `<section class="obfr"><div><h2>Arkadaşlarla oyna</h2><p class="rms">Bir oda kur, kodu paylaş. Herkes her eşleşmede oy verir, çok oy alan geçer.</p>`+
+      `<div class="obfrr">${OBT.length>1?`<select id="obTs" aria-label="Turnuva">${OBT.map((x,i)=>`<option value="${i}"${i===obTi?" selected":""}>${esc(x.n)}</option>`).join("")}</select>`:`<b>${esc(ts.n)}</b>`}`+
+      `<span class="obsz">${szs.map(n=>`<button data-obz="${n}" aria-pressed="${n===obSize}">${n}</button>`).join("")}</span><button class="rmgo" id="obMk">Oda kur</button></div>`+
+      (obErr?`<p class="obe">${esc(obErr)}</p>`:"")+`</div>`+
+      `<form class="objn" id="obJn"><label class="lgl">Koda katıl <input id="obJc" maxlength="8" placeholder="ABCDE" autocomplete="off" spellcheck="false"></label><button class="rmgo">Katıl</button></form></section>`+
+      `<h2 class="obsh">Tek başına oyna</h2>`+
       `<div class="obts">${OBT.map((t,ti)=>{const sizes=[8,16,32,64,128,256].filter(n=>n<=t.items.length);
         return `<div class="obt"><div class="obcv">${[0,1,2,3].map(i=>`<img src="${obPic(t,i)}" alt="" loading="lazy">`).join("")}</div>`+
           `<div class="obti"><b>${esc(t.n)}</b><small class="rms">${t.items.length} seçenek</small><div class="obsz">${sizes.map(n=>`<button data-obs="${ti}:${n}">${n}</button>`).join("")}</div></div></div>`}).join("")}</div>`;
@@ -991,13 +1162,19 @@ function drawOb(){
     `<div class="obvs">${[a,c].map((x,i)=>`<button class="obc" data-obc="${i}"><img src="${obPic(t,x)}" alt=""><span>${esc(t.items[x])}</span></button>`).join('<em class="obor">VS</em>')}</div>`;
 }
 $("obBody").addEventListener("click",e=>{
+  const z=e.target.closest("[data-obz]");if(z){obSize=+z.dataset.obz;drawOb();return}
+  if(e.target.closest("#obMk")){obCreate(e.target.closest("#obMk"));return}
   const s=e.target.closest("[data-obs]");if(s){const [ti,n]=s.dataset.obs.split(":").map(Number);obStart(ti,n);window.scrollTo({top:0});return}
   const c=e.target.closest("[data-obc]");if(c&&OB&&OB.round.length>1){obChoose(+c.dataset.obc);return}
   const a=e.target.closest("[data-oba]");if(!a)return;
   if(a.dataset.oba==="again"&&OB)obStart(OB.t,OB.size);else{OB=null;drawOb()}
 });
+$("obBody").addEventListener("change",e=>{if(e.target.id==="obTs"){obTi=+e.target.value;drawOb()}});
+$("obBody").addEventListener("submit",e=>{if(e.target.id!=="obJn")return;e.preventDefault();const c=$("obJc").value.trim().toUpperCase();if(c)go("ob/"+c)});
 /* keys: left / right pick */
-document.addEventListener("keydown",e=>{if(cur()!=="omubumu"||!OB||OB.round.length<2||e.target.closest("input,textarea"))return;
+document.addEventListener("keydown",e=>{if(e.target.closest("input,textarea,select"))return;
+  if(cur().startsWith("ob/")&&OBR&&OBR.st==="play"&&!OBR.rev&&(e.key==="ArrowLeft"||e.key==="ArrowRight")){const v=e.key==="ArrowRight"?1:0;OBR.votes[PROF.id]=v;drawOb();obDo({op:"vote",side:v});return}
+  if(cur()!=="omubumu"||!OB||OB.round.length<2||e.target.closest("input,textarea"))return;
   if(e.key==="ArrowLeft"||e.key==="1")obChoose(0);else if(e.key==="ArrowRight"||e.key==="2")obChoose(1)});
 
 /* ---------- card spotlight follows the cursor ---------- */
@@ -1031,7 +1208,7 @@ $("setB").onclick=()=>openSet($("setP").hidden);
 document.addEventListener("click",e=>{if(!$("setP").hidden&&!e.target.closest("#set"))openSet(false)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("setP").hidden){openSet(false);$("setB").focus()}});
 
-applyAc();route();
+applyAc();drawProf();route();
 </script>
 </body>
 </html>

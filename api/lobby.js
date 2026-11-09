@@ -11,10 +11,15 @@
                                          (Instagram's own embed page tells it; when Instagram does not answer the link is let through)
    POST /api/lobby {deleteUser: u}    -> (lobby admin) removes that account and signs it out everywhere (admins can not be removed)
    POST /api/lobby {renameUser: {u, to}} -> (lobby admin) a new name for an account; it stays signed in (an admin's name can change only in its capitals)
+   GET  /api/lobby?ob=<code>&me=<id> -> an O mu? Bu mu? room (the player is marked as here); 404 when there is none
+   POST /api/lobby {ob: {op: "create", me, t, n, size}} -> a new room, the player is its owner: {code}
+   POST /api/lobby {ob: {op, code, me, ...}}           -> join / leave / vote {side} / start / lobby / skip (api/_obroom.js has the rules)
+   Rooms live in lobby_rooms (one JSON per room, saved only when its version is still the one read) and go after 6 quiet hours.
    Passwords are kept as scrypt hashes with their own salt. */
 import { readFileSync } from "node:fs";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { client, missing, hash, isAdmin } from "./_db.js";
+import * as OBR from "./_obroom.js";
 
 const TRIES = 5, LOCK = 15 * 60, AGE = 30 * 86400, REGS = 5;
 const cookie = (v, age) => `nh_lb=${v}; Path=/; Max-Age=${age}; HttpOnly; Secure; SameSite=Lax`;
@@ -30,7 +35,8 @@ const setup = () => ready ??= (async () => {
   await client().batch([
     "CREATE TABLE IF NOT EXISTS lobby_users (u TEXT PRIMARY KEY, name TEXT NOT NULL, salt TEXT NOT NULL, ph TEXT NOT NULL, ip TEXT NOT NULL DEFAULT '', created TEXT NOT NULL DEFAULT (datetime('now')))",
     "CREATE TABLE IF NOT EXISTS lobby_sessions (h TEXT PRIMARY KEY, u TEXT NOT NULL DEFAULT '', created TEXT NOT NULL DEFAULT (datetime('now')))",
-    "CREATE TABLE IF NOT EXISTS lobby_fails (ip TEXT PRIMARY KEY, n INTEGER NOT NULL DEFAULT 0, until INTEGER NOT NULL DEFAULT 0)"
+    "CREATE TABLE IF NOT EXISTS lobby_fails (ip TEXT PRIMARY KEY, n INTEGER NOT NULL DEFAULT 0, until INTEGER NOT NULL DEFAULT 0)",
+    "CREATE TABLE IF NOT EXISTS lobby_rooms (code TEXT PRIMARY KEY, game TEXT NOT NULL, data TEXT NOT NULL, v INTEGER NOT NULL DEFAULT 0, updated INTEGER NOT NULL DEFAULT 0)"
   ], "write");
   /* a lobby_sessions table from the first (one password) version has no user column */
   try { await client().execute("ALTER TABLE lobby_sessions ADD COLUMN u TEXT NOT NULL DEFAULT ''") } catch (e) {}
@@ -47,6 +53,21 @@ async function signedIn(req) {
 /* the lobby page, told who is signed in (it then shows that user, not its own login box) */
 const lobbyPage = me => me ? file("index.html").toString("utf8").replace("<head>",
   "<head><script>window.LB_ME=" + JSON.stringify({ name: me.name, admin: me.admin }).replace(/</g, "\\u003c") + "</script>") : file("index.html");
+/* read a room, let fn change it (true = save), save it only if nobody saved it meanwhile (else read again); an empty room goes */
+async function obChange(code, fn) {
+  if (!/^[A-Z0-9]{4,8}$/.test(code)) return null;
+  for (let i = 0; i < 5; i++) {
+    const row = (await client().execute({ sql: "SELECT data, v FROM lobby_rooms WHERE code = ? AND game = 'ob'", args: [code] })).rows[0];
+    if (!row) return null;
+    const rm = JSON.parse(String(row.data)), now = Date.now();
+    if (!fn(rm, now)) return OBR.view(rm, now);
+    if (!rm.players.length) { await client().execute({ sql: "DELETE FROM lobby_rooms WHERE code = ?", args: [code] }); return null }
+    const v = Number(row.v) + 1;rm.v = v;
+    const x = await client().execute({ sql: "UPDATE lobby_rooms SET data = ?, v = ?, updated = ? WHERE code = ? AND v = ?", args: [JSON.stringify(rm), v, now, code, Number(row.v)] });
+    if (x.rowsAffected) return OBR.view(rm, now);
+  }
+  throw new Error("Oda şu an çok meşgul, tekrar dene");
+}
 async function startSession(res, u) {
   const t = randomBytes(32).toString("hex");
   await client().execute({ sql: "INSERT INTO lobby_sessions (h, u) VALUES (?, ?)", args: [hash(t), u] });
@@ -120,6 +141,13 @@ export default async function handler(req, res) {
   try {
     await setup();
     if (req.method === "GET") {
+      if (req.query?.ob) {   // an O mu? Bu mu? room, read every second or two by its players
+        const code = String(req.query.ob).toUpperCase(), id = String(req.query.me || "");
+        const out = await obChange(code, (rm, now) => { const p = rm.players.find(x => x.id === id); let ch = false;
+          if (p && now - p.seen > 5000) { p.seen = now; ch = true }   // "here" is written at most every 5 s
+          return OBR.tick(rm, now) || ch });
+        return out ? res.status(200).json(out) : res.status(404).json({ error: "Oda bulunamadı" });
+      }
       if (req.query?.check) {   // a reels link before it is saved in a room
         const c = String(req.query.check);
         if (!/^[A-Za-z0-9_-]{5,40}$/.test(c)) return res.status(400).json({ ok: false, why: "broken" });
@@ -149,6 +177,26 @@ export default async function handler(req, res) {
     }
     if (req.method !== "POST") return res.status(405).json({ error: "GET or POST" });
     const b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
+    if (b.ob && typeof b.ob === "object") {
+      const o = b.ob, me = OBR.cleanMe(o.me);
+      if (!me) return res.status(400).json({ error: "Önce bir ad ve avatar seç (2-20 karakter)" });
+      const now = Date.now();
+      if (o.op === "create") {
+        let rm;try { rm = OBR.create(me, o.t, o.n, o.size, now) } catch (e) { return res.status(400).json({ error: e.message }) }
+        await client().execute("DELETE FROM lobby_rooms WHERE updated < " + (now - 6 * 3600e3));   // old rooms go
+        for (let i = 0; i < 5; i++) {
+          const x = await client().execute({ sql: "INSERT OR IGNORE INTO lobby_rooms (code, game, data, v, updated) VALUES (?, 'ob', ?, 0, ?)", args: [rm.code, JSON.stringify(rm), now] });
+          if (x.rowsAffected) return res.status(200).json({ code: rm.code });
+          rm.code = OBR.newCode();
+        }
+        return res.status(500).json({ error: "Oda kurulamadı, tekrar dene" });
+      }
+      let err = "";
+      const out = await obChange(String(o.code || "").toUpperCase(), (rm, now) => { err = OBR.op(rm, me, o, now); OBR.tick(rm, now); return !err });
+      if (!out) return res.status(404).json({ error: "Oda bulunamadı" });
+      if (err) return res.status(400).json({ error: err, room: out });
+      return res.status(200).json(out);
+    }
     if (b.renameUser && typeof b.renameUser === "object") {
       const me = await signedIn(req), u = String(b.renameUser.u || "").trim().toLowerCase(), to = String(b.renameUser.to || "").trim(), nu = to.toLowerCase();
       if (!me || !me.admin) return res.status(403).json({ error: "Sadece admin" });
