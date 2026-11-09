@@ -13,7 +13,7 @@
   "rewrites": [
     { "source": "/123lobby/png/:f", "destination": "/api/lobby?f=:f" },
     { "source": "/123lobby/", "destination": "/api/lobby" },
-    { "source": "/123lobby/:path*", "destination": "/api/lobby" },
+    { "source": "/123lobby/:path*", "destination": "/api/lobby?p=:path*" },
     { "source": "/((?!api/|123lobby/)[^.]*)", "destination": "/index.html" }
   ]
 }

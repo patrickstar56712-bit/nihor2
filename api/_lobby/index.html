@@ -488,6 +488,7 @@ let USER=SRV?SRV.name:ss.g("user")??ld("user","");
 if(!SRV&&USER&&ACCOUNTS[USER.toLowerCase()]&&ss.g("acct")!==USER.toLowerCase())USER="";   // an account name only after its password, in this tab
 const uIco=ico('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>');
 function drawLogin(){
+  $("lg").hidden=!SRV;   // nobody signs in here; the admin signs in at /123lobby/giris
   $("lgB").innerHTML=uIco+`<span>${USER?esc(USER):"Giriş yap"}</span>`;$("lgB").title=USER?"Hesabım":"Giriş yap";
   $("lgF").hidden=!!USER;$("lgIn").hidden=!USER;$("lgN").textContent=USER;
   $("lgA").hidden=!isAdmin();$("lgAdm").hidden=!isAdmin();if(isAdmin())$("lgB").insertAdjacentHTML("beforeend",'<em class="adm">ADMIN</em>');
@@ -509,7 +510,7 @@ $("lgF").onsubmit=e=>{
   USER=acc?acc.name:u;ss.s("acct",acc?u.toLowerCase():"");ss.s("user",USER);rgTouch(USER);sv("user",USER);$("lgP").value="";$("lgM").textContent="";drawLogin();openLg(false);refreshView();
 };
 $("lgOut").onclick=async()=>{
-  if(SRV){try{await fetch("/api/lobby",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({logout:true})})}catch(e){}location.reload();return}   // back to the sign-in page
+  if(SRV){try{await fetch("/api/lobby",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({logout:true})})}catch(e){}location.href="/123lobby/";return}   // on as a visitor
   USER="";ss.s("user","");ss.s("acct","");sv("user","");drawLogin();openLg(false);refreshView()};
 if(USER){rgFollow();if(!USERS[USER.toLowerCase()])rgTouch(USER)}
 drawLogin();
@@ -826,7 +827,7 @@ addEventListener("storage",e=>{
 const fdt=t=>t?new Date(t).toLocaleString("tr-TR",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}):"–";
 function drawAdmin(){
   const b=$("admBody");
-  if(!isAdmin()){$("admQ").hidden=true;b.innerHTML=`<div class="rbox"><h1>Sadece admin</h1><p>Bu sayfayı görmek için admin hesabıyla giriş yap.</p><button class="rmgo" data-act="login">Giriş yap</button></div>`;return}
+  if(!isAdmin()){$("admQ").hidden=true;b.innerHTML=`<div class="rbox"><h1>Sadece admin</h1><p>Bu sayfayı görmek için admin hesabıyla giriş yap.</p><a class="rmgo" href="giris">Giriş yap</a></div>`;return}
   $("admQ").hidden=false;
   USERS=rgAll();
   if(SRV&&!SRVU){b.innerHTML=`<p class="rms">Hesaplar yükleniyor…</p>`;admLoad();return}

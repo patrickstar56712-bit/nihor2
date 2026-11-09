@@ -1,12 +1,13 @@
-/* 123 Lobby behind accounts (its files live in api/_lobby/, which Vercel does not serve by itself).
-   GET  /123lobby/<page>    (rewritten here)        -> the lobby with a valid lobby cookie, else the sign-in / sign-up page (every page of the lobby is a path, no #/)
-   GET  /123lobby/png/<f>   (rewritten here, ?f=<f>) -> a lobby picture, only with a valid lobby cookie (the wallpaper always, for the sign-in page)
+/* 123 Lobby (its files live in api/_lobby/, which Vercel does not serve by itself). Open to everyone: no sign-in is asked.
+   GET  /123lobby/<page>    (rewritten here, ?p=<page>) -> the lobby for everyone; a signed-in account (the admin) is told to the page
+   GET  /123lobby/giris     -> the sign-in page, linked from nowhere: for the admin (Kontrol paneli)
+   GET  /123lobby/png/<f>   (rewritten here, ?f=<f>) -> a lobby picture
    POST /api/lobby {register: {u, p}} -> makes an account and signs in
    POST /api/lobby {login: {u, p}}    -> signs in: lobby cookie (random token, HttpOnly, 30 days; only its hash is stored)
                                          5 wrong passwords from one address lock it for 15 minutes; 5 new accounts per address per hour
    POST /api/lobby {logout: true}     -> this browser's lobby cookie ends
    GET  /api/lobby?users=1            -> (lobby admin) every account: [{u, name, created, admin}]
-   GET  /api/lobby?check=<code>       -> (signed in) can this Instagram post be shown here: {ok} or {ok: false, why: "broken" | "photo"}
+   GET  /api/lobby?check=<code>       -> can this Instagram post be shown here: {ok} or {ok: false, why: "broken" | "photo"}
                                          (Instagram's own embed page tells it; when Instagram does not answer the link is let through)
    POST /api/lobby {deleteUser: u}    -> (lobby admin) removes that account and signs it out everywhere (admins can not be removed)
    POST /api/lobby {renameUser: {u, to}} -> (lobby admin) a new name for an account; it stays signed in (an admin's name can change only in its capitals)
@@ -44,8 +45,8 @@ async function signedIn(req) {
   return row ? { u: String(row.u), name: String(row.name), admin: ADMINS.has(String(row.u)) } : null;
 }
 /* the lobby page, told who is signed in (it then shows that user, not its own login box) */
-const lobbyPage = me => file("index.html").toString("utf8").replace("<head>",
-  "<head><script>window.LB_ME=" + JSON.stringify({ name: me.name, admin: me.admin }).replace(/</g, "\\u003c") + "</script>");
+const lobbyPage = me => me ? file("index.html").toString("utf8").replace("<head>",
+  "<head><script>window.LB_ME=" + JSON.stringify({ name: me.name, admin: me.admin }).replace(/</g, "\\u003c") + "</script>") : file("index.html");
 async function startSession(res, u) {
   const t = randomBytes(32).toString("hex");
   await client().execute({ sql: "INSERT INTO lobby_sessions (h, u) VALUES (?, ?)", args: [hash(t), u] });
@@ -54,7 +55,6 @@ async function startSession(res, u) {
 
 const file = p => readFileSync(new URL("./_lobby/" + p, import.meta.url));
 const TYPES = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif", svg: "image/svg+xml" };
-const PUBLIC = new Set(["bg.jpg", "favicon.png"]);   // the wallpaper and the tab icon of the sign-in page
 
 const SIGNIN = `<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex"><base href="/123lobby/"><title>123 Lobby · Giriş</title><link rel="icon" type="image/png" href="png/favicon.png">
@@ -105,7 +105,7 @@ async function send(f,kind){const b=f.querySelector(".go"),er=f.querySelector(".
   if(kind==="register"&&f.p.value!==f.p2.value){er.textContent="Şifreler aynı değil";return}
   b.disabled=true;
   try{const r=await fetch("/api/lobby",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({[kind]:{u:f.u.value.trim(),p:f.p.value}})});
-    const d=await r.json().catch(()=>({}));if(r.ok){location.reload();return}er.textContent=d.error||"Olmadı, tekrar dene";}
+    const d=await r.json().catch(()=>({}));if(r.ok){location.href="/123lobby/";return}er.textContent=d.error||"Olmadı, tekrar dene";}
   catch(x){er.textContent="Sunucuya ulaşılamadı"}
   b.disabled=false}
 fIn.onsubmit=e=>{e.preventDefault();send(fIn,"login")};
@@ -121,7 +121,6 @@ export default async function handler(req, res) {
     await setup();
     if (req.method === "GET") {
       if (req.query?.check) {   // a reels link before it is saved in a room
-        if (!await signedIn(req)) return res.status(401).json({ error: "Not signed in" });
         const c = String(req.query.check);
         if (!/^[A-Za-z0-9_-]{5,40}$/.test(c)) return res.status(400).json({ ok: false, why: "broken" });
         try {
@@ -142,12 +141,11 @@ export default async function handler(req, res) {
       if (f) {   // a picture of the lobby
         const m = /^[a-z0-9_-]+\.([a-z]+)$/i.exec(f), ty = m && TYPES[m[1].toLowerCase()];
         if (!ty) return res.status(404).send("Not found");
-        if (!PUBLIC.has(f) && !await signedIn(req)) return res.status(401).send("Not signed in");
         try { res.setHeader("Content-Type", ty); return res.status(200).send(file("png/" + f)) } catch (e) { return res.status(404).send("Not found") }
       }
       res.setHeader("Content-Type", "text/html; charset=utf-8");
-      const me = await signedIn(req);
-      return res.status(200).send(me ? lobbyPage(me) : SIGNIN);
+      const me = await signedIn(req), p = String(req.query?.p || "").replace(/\/$/, "");
+      return res.status(200).send(p === "giris" && !me ? SIGNIN : lobbyPage(me));
     }
     if (req.method !== "POST") return res.status(405).json({ error: "GET or POST" });
     const b = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
