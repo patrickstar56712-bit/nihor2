@@ -421,7 +421,8 @@ const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"
 const ico=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 const MENU=[
   ["instagram","Instagram",ico('<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>'),"Instagram açıklaması.",[]],
-  ["spotify","Spotify",ico('<circle cx="12" cy="12" r="9"/><path d="M7.5 9.5c3-1 6.5-.7 9 .8M8 12.5c2.5-.7 5.3-.4 7.4.8M8.6 15.4c2-.5 4-.3 5.6.6"/>'),"Spotify açıklaması.",[]]
+  ["spotify","Spotify",ico('<circle cx="12" cy="12" r="9"/><path d="M7.5 9.5c3-1 6.5-.7 9 .8M8 12.5c2.5-.7 5.3-.4 7.4.8M8.6 15.4c2-.5 4-.3 5.6.6"/>'),"Spotify açıklaması.",[]],
+  ["omubumu","O mu? Bu mu?",ico('<path d="M4 7h9M10 4l3 3-3 3M20 17h-9M14 14l-3 3 3 3"/>'),"İki seçenekten birini seç.",[]]
 ];
 const TITLES={};MENU.forEach(([k,t,,,kids])=>{TITLES[k]=t;kids.forEach(([kk,kt])=>TITLES[kk]=kt)});
 /* the page is the path after /123lobby/ (no #/ in the link); old #/ links move to the path once */
@@ -438,7 +439,8 @@ document.addEventListener("click",e=>{
 
 /* the brand marks on the home cards */
 const BRAND={instagram:'<svg viewBox="0 0 48 48" aria-hidden="true"><defs><radialGradient id="igG" cx="30%" cy="107%" r="150%"><stop offset="0" stop-color="#fdf497"/><stop offset=".05" stop-color="#fdf497"/><stop offset=".45" stop-color="#fd5949"/><stop offset=".6" stop-color="#d6249f"/><stop offset=".9" stop-color="#285AEB"/></radialGradient></defs><rect width="48" height="48" rx="12" fill="url(#igG)"/><rect x="11" y="11" width="26" height="26" rx="8" fill="none" stroke="#fff" stroke-width="3.2"/><circle cx="24" cy="24" r="6.4" fill="none" stroke="#fff" stroke-width="3.2"/><circle cx="31.6" cy="16.4" r="2" fill="#fff"/></svg>',
-  spotify:'<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="24" fill="#1ed760"/><path d="M12.5 18.6c7.6-2.3 16.3-1.6 23 2.2M13.8 25c6.3-1.8 13.4-1.2 18.9 1.9M15 31c5-1.3 10.3-.9 14.6 1.5" fill="none" stroke="#000" stroke-width="3.2" stroke-linecap="round"/></svg>'};
+  spotify:'<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="24" fill="#1ed760"/><path d="M12.5 18.6c7.6-2.3 16.3-1.6 23 2.2M13.8 25c6.3-1.8 13.4-1.2 18.9 1.9M15 31c5-1.3 10.3-.9 14.6 1.5" fill="none" stroke="#000" stroke-width="3.2" stroke-linecap="round"/></svg>',
+  omubumu:'<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="obG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b5cf6"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#obG)"/><path d="M24 9v30" stroke="rgba(255,255,255,.55)" stroke-width="2" stroke-dasharray="3 3"/><text x="14.5" y="30" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" font-weight="800" fill="#fff">O</text><text x="33.5" y="30" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" font-weight="800" fill="#fff">B</text></svg>'};
 $("homeCards").innerHTML=MENU.map(([k,t,,d],i)=>`<a class="card${BRAND[k]?" bc":""}" href="${k}" style="--i:${i}">${BRAND[k]?`<i class="bmark">${BRAND[k]}</i>`:""}<b>${esc(t)}</b><span>${esc(d)}</span></a>`).join("");
 
 let tnShut="";
