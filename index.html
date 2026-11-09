@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>123 Lobby Nihor2 Tracker</title>
-<meta name="site-updated" content="2026-11-09T15:50:47Z"><!-- the time of the last site change; bump it in every commit -->
+<meta name="site-updated" content="2026-11-09T19:28:53Z"><!-- the time of the last site change; bump it in every commit -->
 <meta name="description" content="Loot Tracker: turn game loot logs into drop values and hourly income.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1502,7 +1502,13 @@ button.itg-t:hover,button.itg-t:focus-visible{border-color:var(--gold)}
 <main id="v-upgrade" hidden>
   <p class="crumb"><a href="#/">← Main Page</a></p>
   <h1>Upgrade Cost</h1><p class="sub">Pick an item type.</p>
-  <div class="cards"><a class="card" href="#/upgrade/weapons" style="--i:0"><b>Weapons<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/jewellery" style="--i:1"><b>Jewellery<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/armour" style="--i:2"><b>Armour<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/helmets" style="--i:3"><b>Helmets<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/shields" style="--i:4"><b>Shields<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/progress" style="--i:6"><b>Progress</b><span>The items and skills you added, and everything they need together.</span></a><a class="card" href="#/upgrade/dews" style="--i:5"><b>Dew Upgrade<em class="beta">Soon</em></b><span>+0 to +9 and craft cost of every dew kind.</span></a></div>
+  <div class="cards"><a class="card" href="#/upgrade/weapons" style="--i:0"><b>Weapons<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/jewellery" style="--i:1"><b>Jewellery<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/armour" style="--i:2"><b>Armour<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/helmets" style="--i:3"><b>Helmets<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/shields" style="--i:4"><b>Shields<em class="beta">Soon</em></b><span>+0 to +9 upgrade cost, materials and stats.</span></a><a class="card" href="#/upgrade/progress" style="--i:6"><b>Progress</b><span>The items and skills you added, and everything they need together.</span></a><a class="card" href="#/upgrade/dews" style="--i:5"><b>Dew Upgrade<em class="beta">Soon</em></b><span>+0 to +9 and craft cost of every dew kind.</span></a><a class="card" href="#/upgrade/pet-artifact" style="--i:6"><b>Pet Artifact<em class="beta">Soon</em></b><span>Pet Artifact upgrade cost.</span></a></div>
+</main>
+
+<main id="v-petart" hidden>
+  <p class="crumb"><a href="#/upgrade">← Upgrade Cost</a></p>
+  <h1>Pet Artifact<em class="beta">Soon</em></h1>
+  <p class="sub">Coming soon.</p>
 </main>
 
 <main id="v-progress" hidden>
@@ -3619,8 +3625,8 @@ document.addEventListener("pointermove",e=>{
 });
 
 /* ---------- sidebar & routing ---------- */
-const V={"":"home",tools:"tools","tools/loot":"loot","tools/live":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons","upgrade/dews":"weapons","upgrade/progress":"progress",progress:"progress",skills:"skills",divine:"divine","tools/dloot":"dloot","tools/screen":"screen","upgrade/skills":"skills"};
-const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/live","Live Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"],["tools/screen","Screen Tracker"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"],["upgrade/dews","Dew Upgrade"]]]];   // the Control Panel adds its own group
+const V={"":"home",tools:"tools","tools/loot":"loot","tools/live":"loot",upgrade:"upgrade","upgrade/weapons":"weapons","upgrade/jewellery":"weapons","upgrade/armour":"weapons","upgrade/helmets":"weapons","upgrade/shields":"weapons","upgrade/dews":"weapons","upgrade/pet-artifact":"petart","upgrade/progress":"progress",progress:"progress",skills:"skills",divine:"divine","tools/dloot":"dloot","tools/screen":"screen","upgrade/skills":"skills"};
+const GROUPS=[["tools","Tools",[["tools/loot","Loot Tracker"],["tools/live","Live Loot Tracker"],["tools/dloot","Loot Tracker (Detailed)"],["tools/screen","Screen Tracker"]]],["upgrade","Upgrade Cost",[["upgrade/weapons","Weapons"],["upgrade/jewellery","Jewellery"],["upgrade/armour","Armour"],["upgrade/helmets","Helmets"],["upgrade/shields","Shields"],["upgrade/dews","Dew Upgrade"],["upgrade/pet-artifact","Pet Artifact"]]]];   // the Control Panel adds its own group
 /* addresses: on the website every page has a real path (/upgrade/weapons; vercel.json serves index.html
    for all of them), opened as a file the #/ addresses are used.
    The Control Panel is hidden: its pages live under /31/admin and open nowhere else; once opened,

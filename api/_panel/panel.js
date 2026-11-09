@@ -87,7 +87,7 @@ $("ltBody").addEventListener("click",e=>{
 });
 
 const PNAME={home:"Main Page",tools:"Tools",loot:"Loot Tracker",dloot:"Loot Tracker (Detailed)",screen:"Screen Tracker",upgrade:"Upgrade Cost",weapons:"Weapons",
-  jewellery:"Jewellery",armour:"Armour",helmets:"Helmets",shields:"Shields",dews:"Dew Upgrade",progress:"Progress",skills:"Skill Booster",divine:"Divine Simulator"};
+  jewellery:"Jewellery",armour:"Armour",helmets:"Helmets",shields:"Shields",dews:"Dew Upgrade",petart:"Pet Artifact",progress:"Progress",skills:"Skill Booster",divine:"Divine Simulator"};
 const stDay=d=>new Date(d+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short",timeZone:"UTC"});
 async function drawStats(){
   const b=$("stBody");
