@@ -11,6 +11,7 @@
     { "source": "/123lobby", "destination": "/123lobby/", "permanent": false }
   ],
   "rewrites": [
+    { "source": "/discord", "destination": "/api/discord" },
     { "source": "/123lobby/png/:f", "destination": "/api/lobby?f=:f" },
     { "source": "/123lobby/", "destination": "/api/lobby" },
     { "source": "/123lobby/:path*", "destination": "/api/lobby?p=:path*" },
