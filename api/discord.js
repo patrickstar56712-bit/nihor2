@@ -6,8 +6,10 @@
    GET  /api/discord?state=1         -> (panel) {config, seen, bot, logs}
    POST /api/discord {config}        -> (panel) saves the bot settings
    The bot (bot/ folder, runs on its own computer; header x-bot-key = DISCORD_BOT_KEY in Vercel, same value in the bot's .env):
-   GET  /api/discord?bot=1&tag=&guilds=                 -> {config}, and marks the bot online
+   POST /api/discord?bot=1 {beat: {tag, guilds: [{id, name, members}]}} -> {config}, and marks the bot online
    POST /api/discord?bot=1 {log: {user, channel, q, a}} -> keeps the last 100 answers
+   POST /api/discord?bot=1 {error: {where, msg}}       -> keeps the last 50 errors
+   POST /api/discord {clearErrors: true}             -> (panel) empties the error list
    Only the hash of "id\npassword" is kept here, never the password itself. */
 import { randomBytes, timingSafeEqual, createHash } from "node:crypto";
 import { client, missing, hash } from "./_db.js";
@@ -23,6 +25,7 @@ const setup = () => ready ??= client().batch([
   "CREATE TABLE IF NOT EXISTS discord_sessions (h TEXT PRIMARY KEY, created TEXT NOT NULL DEFAULT (datetime('now')))",
   "CREATE TABLE IF NOT EXISTS discord_kv (k TEXT PRIMARY KEY, v TEXT NOT NULL)",
   "CREATE TABLE IF NOT EXISTS discord_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, t TEXT NOT NULL DEFAULT (datetime('now')), user TEXT, channel TEXT, q TEXT, a TEXT)",
+  "CREATE TABLE IF NOT EXISTS discord_errors (id INTEGER PRIMARY KEY AUTOINCREMENT, t TEXT NOT NULL DEFAULT (datetime('now')), at TEXT, msg TEXT)",
   "CREATE TABLE IF NOT EXISTS discord_fails (ip TEXT PRIMARY KEY, n INTEGER NOT NULL DEFAULT 0, until INTEGER NOT NULL DEFAULT 0)"
 ], "write").catch(e => { ready = null; throw e });
 
@@ -64,7 +67,7 @@ button:disabled{opacity:.6}.err{color:var(--bad);min-height:1.5em;margin-top:10p
 .row{display:flex;gap:8px;align-items:center;color:var(--fg);font-size:15px}.row input{width:auto}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:520px){.two{grid-template-columns:1fr}.card{padding:20px}}
 .st{margin:10px 0 6px;font-weight:600}.on{color:#3ba55d}.off{color:var(--mut)}
-.log{border-top:1px solid var(--line);padding:10px 0}.meta{font-size:12px;color:var(--mut)}.q{font-weight:600;white-space:pre-wrap}.a{color:#c9cfdb;white-space:pre-wrap;overflow-wrap:anywhere}`;
+.log{border-top:1px solid var(--line);padding:10px 0}.meta{font-size:12px;color:var(--mut)}.q{font-weight:600;white-space:pre-wrap}.bad{color:var(--bad)!important}.a{color:#c9cfdb;white-space:pre-wrap;overflow-wrap:anywhere}`;
 
 const page = body => `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex"><title>Discord Bot Panel</title><style>${CSS}</style></head><body>${body}</body></html>`;
@@ -88,6 +91,8 @@ const PANEL = page(`<div class="card wide"><div class="top"><h1>Discord Bot Pane
 <div><label for="cooldown">Cooldown per user (seconds)</label><input id="cooldown" type="number" min="0" max="600"></div></div>
 <label for="channels">Only these channel IDs (comma separated, empty = all)</label><input id="channels">
 <button>Save</button><div class="err" id="e"></div></form>
+<h2>Servers</h2><div id="gs"></div>
+<div class="top"><h2>Errors</h2><button id="ce" class="ghost">Clear</button></div><div id="errs"></div>
 <h2>Last answers</h2><div id="logs"></div></div>
 <script>
 const $=id=>document.getElementById(id),F=["enabled","search","model","prompt","history","cooldown","channels"];
@@ -95,9 +100,13 @@ const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&g
 const post=b=>fetch("/api/discord",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});
 async function load(first){const r=await fetch("/api/discord?state=1");if(r.status==401)return location.reload();const d=await r.json();
  const ago=d.seen?Math.round((Date.now()-d.seen)/1000):null,on=ago!==null&&ago<90;
- $("st").className="st "+(on?"on":"off");$("st").textContent=on?"● Online · "+(d.bot&&d.bot.tag||"")+" · "+(d.bot?d.bot.guilds:"?")+" server(s)":"● Offline"+(ago!==null?" · last seen "+new Date(d.seen).toLocaleString():"");
+ $("st").className="st "+(on?"on":"off");$("st").textContent=on?"● Online · "+(d.bot&&d.bot.tag||"")+" · "+(d.bot&&d.bot.guilds?d.bot.guilds.length:"?")+" server(s)":"● Offline"+(ago!==null?" · last seen "+new Date(d.seen).toLocaleString():"");
  if(first)F.forEach(k=>{const el=$(k);if(el.type=="checkbox")el.checked=d.config[k];else el.value=d.config[k]});
- $("logs").innerHTML=d.logs.length?d.logs.map(l=>'<div class="log"><div class="meta">'+esc(l.t)+" UTC · "+esc(l.user)+" · #"+esc(l.channel)+'</div><div class="q">'+esc(l.q)+'</div><div class="a">'+esc(l.a)+"</div></div>").join(""):"<p>No answers yet.</p>"}
+ $("logs").innerHTML=d.logs.length?d.logs.map(l=>'<div class="log"><div class="meta">'+esc(l.t)+" UTC · "+esc(l.user)+" · #"+esc(l.channel)+'</div><div class="q">'+esc(l.q)+'</div><div class="a">'+esc(l.a)+"</div></div>").join(""):"<p>No answers yet.</p>";
+const gl=d.bot&&Array.isArray(d.bot.guilds)?d.bot.guilds:[];
+ $("gs").innerHTML=gl.length?gl.map(g=>'<div class="log"><span class="q">'+esc(g.name)+'</span> <span class="meta">· '+g.members+' members · '+esc(g.id)+(on?'':' · bot offline')+'</span></div>').join(""):"<p>No servers reported yet.</p>";
+ $("errs").innerHTML=d.errors.length?d.errors.map(x=>'<div class="log"><div class="meta">'+esc(x.t)+" UTC · "+esc(x.at)+'</div><div class="a bad">'+esc(x.msg)+"</div></div>").join(""):'<p class="on">No errors.</p>'}
+ce.onclick=async()=>{await post({clearErrors:true});load()};
 cf.onsubmit=async ev=>{ev.preventDefault();const c={};F.forEach(k=>{const el=$(k);c[k]=el.type=="checkbox"?el.checked:el.value});
  const r=await post({config:c});$("e").style.color=r.ok?"#3ba55d":"";$("e").textContent=r.ok?"Saved · the bot picks it up within 30 s":(await r.json()).error}
 o.onclick=async()=>{await post({logout:true});location.reload()};load(true);setInterval(load,15000);
@@ -135,11 +144,20 @@ export default async function handler(req, res) {
     const q = req.query || {};
     if (q.bot) {
       if (!isBot(req)) return res.status(401).json({ error: process.env.DISCORD_BOT_KEY ? "Wrong bot key" : "Missing in Vercel Environment Variables: DISCORD_BOT_KEY" });
-      if (req.method === "GET") {
-        await setKv("seen", { at: Date.now(), tag: String(q.tag || "").slice(0, 80), guilds: Number(q.guilds) || 0 });
+      const bb = body(req), cut = (v, n) => String(v ?? "").slice(0, n);
+      if (bb.beat) {
+        const g = Array.isArray(bb.beat.guilds) ? bb.beat.guilds.slice(0, 100).map(x => ({ id: cut(x.id, 30), name: cut(x.name, 100), members: Number(x.members) || 0 })) : [];
+        await setKv("seen", { at: Date.now(), tag: cut(bb.beat.tag, 80), guilds: g });
         return res.status(200).json({ config: await getConfig() });
       }
-      const l = body(req).log || {}, cut = (v, n) => String(v ?? "").slice(0, n);
+      if (bb.error) {
+        await client().batch([
+          { sql: "INSERT INTO discord_errors (at, msg) VALUES (?, ?)", args: [cut(bb.error.where, 80), cut(bb.error.msg, 1500)] },
+          "DELETE FROM discord_errors WHERE id NOT IN (SELECT id FROM discord_errors ORDER BY id DESC LIMIT 50)"
+        ], "write");
+        return res.status(200).json({ ok: true });
+      }
+      const l = bb.log || {};
       await client().batch([
         { sql: "INSERT INTO discord_logs (user, channel, q, a) VALUES (?, ?, ?, ?)", args: [cut(l.user, 80), cut(l.channel, 80), cut(l.q, 1000), cut(l.a, 2000)] },
         "DELETE FROM discord_logs WHERE id NOT IN (SELECT id FROM discord_logs ORDER BY id DESC LIMIT 100)"
@@ -151,7 +169,9 @@ export default async function handler(req, res) {
       const seen = await getKv("seen");
       const logs = (await client().execute("SELECT t, user, channel, q, a FROM discord_logs ORDER BY id DESC LIMIT 30")).rows
         .map(r => ({ t: r.t, user: r.user, channel: r.channel, q: r.q, a: r.a }));
-      return res.status(200).json({ config: await getConfig(), seen: seen?.at || 0, bot: seen, logs });
+      const errors = (await client().execute("SELECT t, at, msg FROM discord_errors ORDER BY id DESC LIMIT 50")).rows
+        .map(r => ({ t: r.t, at: r.at, msg: r.msg }));
+      return res.status(200).json({ config: await getConfig(), seen: seen?.at || 0, bot: seen, logs, errors });
     }
     if (req.method === "GET") {
       res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -163,6 +183,11 @@ export default async function handler(req, res) {
       const t = tokenOf(req);
       if (t) await client().execute({ sql: "DELETE FROM discord_sessions WHERE h = ?", args: [hash(t)] });
       res.setHeader("Set-Cookie", cookie("", 0));
+      return res.status(200).json({ ok: true });
+    }
+    if (b.clearErrors) {
+      if (!await signedIn(req)) return res.status(401).json({ error: "Not signed in" });
+      await client().execute("DELETE FROM discord_errors");
       return res.status(200).json({ ok: true });
     }
     if (b.config) {

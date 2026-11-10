@@ -23,10 +23,23 @@ const api = (path, init = {}) => fetch(SITE + "/api/discord?bot=1" + path, { ...
 
 async function sync() {
   try {
-    const r = await api(`&tag=${encodeURIComponent(bot.user?.tag || "")}&guilds=${bot.guilds.cache.size}`);
+    const guilds = bot.guilds.cache.map(g => ({ id: g.id, name: g.name, members: g.memberCount }));
+    const r = await api("", { method: "POST", body: JSON.stringify({ beat: { tag: bot.user?.tag || "", guilds } }) });
     cfg = { ...cfg, ...r.config };
   } catch (e) { console.error("Site sync:", e.message); }
 }
+
+/* errors also go to the panel's Errors list */
+function report(where, e) {
+  console.error(where, e);
+  api("", { method: "POST", body: JSON.stringify({ error: { where, msg: String(e?.stack || e?.message || e) } }) }).catch(() => {});
+}
+process.on("unhandledRejection", e => report("unhandledRejection", e));
+process.on("uncaughtException", e => report("uncaughtException", e));
+bot.on("error", e => report("discord", e));
+bot.on("shardDisconnect", (ev, id) => report("discord", "Disconnected (code " + ev.code + "), reconnecting…"));
+bot.on("guildCreate", () => sync());
+bot.on("guildDelete", () => sync());
 
 const nameOf = m => m.member?.displayName || m.author.globalName || m.author.username;
 const lastUse = new Map();
@@ -77,7 +90,7 @@ bot.on("messageCreate", async m => {
 
     api("", { method: "POST", body: JSON.stringify({ log: { user: m.author.username, channel: m.channel.name, q: question, a: answer } }) }).catch(() => {});
   } catch (e) {
-    console.error(e);
+    report(`answer in #${m.channel.name} (${m.guild.name})`, e);
     m.reply({ content: "Something went wrong: " + String(e.message).slice(0, 300), allowedMentions: { parse: [] } }).catch(() => {});
   }
 });
